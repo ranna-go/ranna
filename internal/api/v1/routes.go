@@ -2,6 +2,7 @@ package v1
 
 import (
 	"path"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/sarulabs/di/v2"
@@ -10,10 +11,12 @@ import (
 	"github.com/zekroTJA/ranna/internal/sandbox"
 	"github.com/zekroTJA/ranna/internal/spec"
 	"github.com/zekroTJA/ranna/internal/static"
+	"github.com/zekroTJA/ranna/internal/util"
 )
 
 var (
 	errUnsupportredLanguage = fiber.NewError(fiber.StatusBadRequest, "unsupported language")
+	errTimedOut             = fiber.NewError(fiber.StatusRequestTimeout, "code execution timed out")
 )
 
 type Router struct {
@@ -63,7 +66,16 @@ func (r *Router) postExec(ctx *fiber.Ctx) (err error) {
 	}
 
 	res := new(executionResponse)
-	if res.StdOut, res.StdErr, err = sbx.Run(); err != nil {
+	timedOut := util.RunBlockingWithTimeout(func() {
+		res.StdOut, res.StdErr, err = sbx.Run()
+	}, time.Duration(r.cfg.Config().ExecutionTimeoutSeconds)*time.Second)
+	if timedOut {
+		if err = sbx.Kill(); err != nil {
+			return
+		}
+		return errTimedOut
+	}
+	if err != nil {
 		return
 	}
 

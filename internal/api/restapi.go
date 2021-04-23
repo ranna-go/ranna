@@ -23,9 +23,7 @@ func NewRestAPI(ctn di.Container) (r *RestAPI, err error) {
 	r.app = fiber.New(fiber.Config{
 		DisableStartupMessage: !cfg.Config().Debug,
 		ServerHeader:          "ranna",
-		ErrorHandler: func(c *fiber.Ctx, e error) error {
-			return fiber.DefaultErrorHandler(c, e)
-		},
+		ErrorHandler:          errorHandler,
 	})
 
 	new(v1.Router).Setup(r.app.Group("/v1"), ctn)
@@ -35,4 +33,23 @@ func NewRestAPI(ctn di.Container) (r *RestAPI, err error) {
 
 func (r *RestAPI) ListenAndServeBlocking() error {
 	return r.app.Listen(r.bindAddress)
+}
+
+type errorModel struct {
+	Error   string `json:"error"`
+	Code    int    `json:"code"`
+	Context string `json:"context,omitempty"`
+}
+
+func errorHandler(ctx *fiber.Ctx, err error) error {
+	if fErr, ok := err.(*fiber.Error); ok {
+		ctx.Status(fErr.Code)
+		return ctx.JSON(&errorModel{
+			Error: fErr.Message,
+			Code:  fErr.Code,
+		})
+	}
+
+	return errorHandler(ctx,
+		fiber.NewError(fiber.StatusInternalServerError, err.Error()))
 }

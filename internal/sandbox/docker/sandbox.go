@@ -2,7 +2,6 @@ package docker
 
 import (
 	"bytes"
-	"fmt"
 
 	dockerclient "github.com/fsouza/go-dockerclient"
 )
@@ -26,7 +25,6 @@ func (s *DockerSandbox) Run() (stdout, stderr string, err error) {
 		return
 	}
 
-	fmt.Println(s.container.ID)
 	err = s.client.StartContainer(s.container.ID, nil)
 	if err != nil {
 		return
@@ -36,6 +34,12 @@ func (s *DockerSandbox) Run() (stdout, stderr string, err error) {
 	stdout = buffStdout.String()
 	stderr = buffStderr.String()
 	return
+}
+
+func (s *DockerSandbox) Kill() error {
+	return s.client.KillContainer(dockerclient.KillContainerOptions{
+		ID: s.container.ID,
+	})
 }
 
 func (s *DockerSandbox) Delete() error {

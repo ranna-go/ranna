@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/joho/godotenv"
-	"github.com/zekroTJA/ranna/internal/sandbox"
+	"github.com/zekroTJA/ranna/internal/models"
 	"github.com/zekroTJA/ranna/internal/sandbox/docker"
 )
 
@@ -25,7 +25,7 @@ func main() {
 		return
 	}
 
-	sbx, err := dsp.CreateSandbox(sandbox.Spec{
+	sbx, err := dsp.CreateSandbox(models.Spec{
 		Image:      "golang:alpine",
 		Entrypoint: "go run",
 		Cmd:        "main.go",

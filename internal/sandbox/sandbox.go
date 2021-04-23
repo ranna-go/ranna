@@ -4,6 +4,7 @@ import "github.com/zekroTJA/ranna/internal/models"
 
 type Sandbox interface {
 	Run() (stdout, stderr string, err error)
+	Kill() error
 	Delete() error
 }
 

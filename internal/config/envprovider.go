@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -27,6 +28,11 @@ func (ep *EnvProvider) Load() (err error) {
 	ep.c.SpecFile = ep.getString("SPECFILE", "spec/spec.yaml")
 	ep.c.HostRootDir = ep.getString("HOSTROOTDIR", "")
 	ep.c.API.BindAddress = ep.getString("API_BINDADDRESS", ":8080")
+
+	ep.c.ExecutionTimeoutSeconds, err = ep.getInt("EXECUTIONTIMEOUTSECONDS", 20)
+	if err != nil {
+		return
+	}
 
 	if ep.c.HostRootDir == "" {
 		return errors.New("no value specified for HOSTROOTDIR")
@@ -55,4 +61,15 @@ func (ep *EnvProvider) getBool(key string, def bool) (v bool) {
 
 	vStr := strings.ToLower(ep.getString(key, defStr))
 	return vStr == "true" || vStr == "1"
+}
+
+func (ep *EnvProvider) getInt(key string, def int) (v int, err error) {
+	vStr := ep.getString(key, "")
+	if vStr == "" {
+		v = def
+		return
+	}
+
+	v, err = strconv.Atoi(vStr)
+	return
 }
