@@ -42,8 +42,14 @@ func main() {
 
 	diBuilder.Add(di.Def{
 		Name: static.DiFileProvider,
-		Build: func(ctn di.Container) (interface{}, error) {
-			return file.NewLocalFileProvider(), nil
+		Build: func(ctn di.Container) (v interface{}, err error) {
+			cfg := ctn.Get(static.DiConfigProvider).(config.Provider)
+			if cfg.Config().Debug {
+				v = file.NewDummyFileProvider()
+			} else {
+				v = file.NewLocalFileProvider()
+			}
+			return
 		},
 	})
 

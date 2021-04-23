@@ -21,7 +21,8 @@ func NewRestAPI(ctn di.Container) (r *RestAPI, err error) {
 	}
 
 	r.app = fiber.New(fiber.Config{
-		ServerHeader: "ranna",
+		DisableStartupMessage: !cfg.Config().Debug,
+		ServerHeader:          "ranna",
 		ErrorHandler: func(c *fiber.Ctx, e error) error {
 			return fiber.DefaultErrorHandler(c, e)
 		},
