@@ -9,6 +9,10 @@ import (
 	"github.com/zekroTJA/ranna/internal/sandbox"
 )
 
+const (
+	containerRootPath = "/var/tmp/exec"
+)
+
 type DockerSandboxProvider struct {
 	client *dockerclient.Client
 }
@@ -35,7 +39,7 @@ func (dsp *DockerSandboxProvider) CreateSandbox(spec models.Spec) (sbx sandbox.S
 		return
 	}
 
-	workingDir := path.Join("/var/tmp/exec", spec.Subdir)
+	workingDir := path.Join(containerRootPath, spec.Subdir)
 	hostDir := spec.GetAssambledHostDir()
 	container, err := dsp.client.CreateContainer(dockerclient.CreateContainerOptions{
 		Config: &dockerclient.Config{
