@@ -6,6 +6,7 @@ import (
 
 	dockerclient "github.com/fsouza/go-dockerclient"
 	"github.com/zekroTJA/ranna/internal/models"
+	"github.com/zekroTJA/ranna/internal/sandbox"
 )
 
 type DockerSandboxProvider struct {
@@ -23,7 +24,7 @@ func NewDockerSandboxProvider() (dsp *DockerSandboxProvider, err error) {
 	return
 }
 
-func (dsp *DockerSandboxProvider) CreateSandbox(spec models.Spec) (sandbox *DockerSandbox, err error) {
+func (dsp *DockerSandboxProvider) CreateSandbox(spec models.Spec) (sbx sandbox.Sandbox, err error) {
 	repo, tag := getImage(spec.Image)
 
 	err = dsp.client.PullImage(dockerclient.PullImageOptions{
@@ -35,7 +36,7 @@ func (dsp *DockerSandboxProvider) CreateSandbox(spec models.Spec) (sandbox *Dock
 	}
 
 	workingDir := path.Join("/var/tmp/exec", spec.Subdir)
-	hostDir := path.Join(spec.HostDir, spec.Subdir)
+	hostDir := spec.GetAssambledHostDir()
 	container, err := dsp.client.CreateContainer(dockerclient.CreateContainerOptions{
 		Config: &dockerclient.Config{
 			Image:           repo + ":" + tag,
@@ -49,7 +50,7 @@ func (dsp *DockerSandboxProvider) CreateSandbox(spec models.Spec) (sandbox *Dock
 		},
 	})
 
-	sandbox = &DockerSandbox{
+	sbx = &DockerSandbox{
 		client:    dsp.client,
 		container: container,
 	}

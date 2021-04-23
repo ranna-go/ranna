@@ -1,3 +1,4 @@
 go:
-  image:      'go:alpine'
+  image:      'golang:alpine'
   entrypoint: 'go run'
+  filename:   'main.go'

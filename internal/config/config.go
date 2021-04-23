@@ -5,6 +5,7 @@ type API struct {
 }
 
 type Config struct {
-	SpecFile string `json:"specfile" yaml:"specfile"`
-	API      *API   `json:"api" yaml:"api"`
+	SpecFile    string `json:"specfile" yaml:"specfile"`
+	HostRootDir string `json:"hostrootdir" yaml:"hostrootdir"`
+	API         *API   `json:"api" yaml:"api"`
 }

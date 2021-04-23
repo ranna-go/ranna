@@ -13,13 +13,14 @@ import (
 
 type FileProvider struct {
 	fileName string
+	m        models.SpecMap
 }
 
 func NewFileProvider(fileName string) *FileProvider {
-	return &FileProvider{fileName}
+	return &FileProvider{fileName: fileName, m: nil}
 }
 
-func (fp *FileProvider) Load() (m models.SpecMap, err error) {
+func (fp *FileProvider) Load() (err error) {
 	var unmarshaller func([]byte, interface{}) error
 
 	switch strings.ToLower(path.Ext(fp.fileName)) {
@@ -37,7 +38,10 @@ func (fp *FileProvider) Load() (m models.SpecMap, err error) {
 		return
 	}
 
-	// m = make(map[string]*sandbox.Spec)
-	err = unmarshaller(data, &m)
+	err = unmarshaller(data, &fp.m)
 	return
+}
+
+func (fp *FileProvider) Spec() models.SpecMap {
+	return fp.m
 }

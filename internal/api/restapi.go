@@ -17,7 +17,7 @@ func NewRestAPI(ctn di.Container) (r *RestAPI, err error) {
 	cfg := ctn.Get(static.DiConfigProvider).(config.Provider)
 
 	r = &RestAPI{
-		bindAddress: cfg.Get().API.BindAddress,
+		bindAddress: cfg.Config().API.BindAddress,
 	}
 
 	r.app = fiber.New(fiber.Config{

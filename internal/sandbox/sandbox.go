@@ -7,6 +7,6 @@ type Sandbox interface {
 	Delete() error
 }
 
-type SandboxProvider interface {
+type Provider interface {
 	CreateSandbox(spec models.Spec) (Sandbox, error)
 }

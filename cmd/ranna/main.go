@@ -5,6 +5,7 @@ import (
 	"github.com/sarulabs/di/v2"
 	"github.com/zekroTJA/ranna/internal/api"
 	"github.com/zekroTJA/ranna/internal/config"
+	"github.com/zekroTJA/ranna/internal/file"
 	"github.com/zekroTJA/ranna/internal/sandbox/docker"
 	"github.com/zekroTJA/ranna/internal/spec"
 	"github.com/zekroTJA/ranna/internal/static"
@@ -19,8 +20,7 @@ func main() {
 		Name: static.DiConfigProvider,
 		Build: func(ctn di.Container) (interface{}, error) {
 			p := config.NewEnvProvider("RANNA_")
-			err := p.Load()
-			return p, err
+			return p, p.Load()
 		},
 	})
 
@@ -28,15 +28,8 @@ func main() {
 		Name: static.DiSpecProvider,
 		Build: func(ctn di.Container) (interface{}, error) {
 			cfg := ctn.Get(static.DiConfigProvider).(config.Provider)
-			return spec.NewFileProvider(cfg.Get().SpecFile), nil
-		},
-	})
-
-	diBuilder.Add(di.Def{
-		Name: static.DiSpec,
-		Build: func(ctn di.Container) (interface{}, error) {
-			provider := ctn.Get(static.DiSpecProvider).(spec.Provider)
-			return provider.Load()
+			p := spec.NewFileProvider(cfg.Config().SpecFile)
+			return p, p.Load()
 		},
 	})
 
@@ -44,6 +37,13 @@ func main() {
 		Name: static.DiSandboxProvider,
 		Build: func(ctn di.Container) (interface{}, error) {
 			return docker.NewDockerSandboxProvider()
+		},
+	})
+
+	diBuilder.Add(di.Def{
+		Name: static.DiFileProvider,
+		Build: func(ctn di.Container) (interface{}, error) {
+			return file.NewLocalFileProvider(), nil
 		},
 	})
 

@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"os"
 )
 
@@ -22,12 +23,17 @@ func NewEnvProvider(prefix string) *EnvProvider {
 func (ep *EnvProvider) Load() (err error) {
 
 	ep.c.SpecFile = ep.getString("SPECFILE", "spec/spec.yaml")
+	ep.c.HostRootDir = ep.getString("HOSTROOTDIR", "")
 	ep.c.API.BindAddress = ep.getString("API_BINDADDRESS", ":8080")
+
+	if ep.c.HostRootDir == "" {
+		return errors.New("no value specified for HOSTROOTDIR")
+	}
 
 	return
 }
 
-func (ep *EnvProvider) Get() *Config {
+func (ep *EnvProvider) Config() *Config {
 	return ep.c
 }
 
