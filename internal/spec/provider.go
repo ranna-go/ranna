@@ -1,9 +1,7 @@
 package spec
 
-import "github.com/zekroTJA/ranna/internal/sandbox"
-
-type SpecMap map[string]*sandbox.Spec
+import "github.com/zekroTJA/ranna/internal/models"
 
 type Provider interface {
-	Load() (SpecMap, error)
+	Load() (models.SpecMap, error)
 }

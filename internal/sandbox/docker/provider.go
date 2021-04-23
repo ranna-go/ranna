@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	dockerclient "github.com/fsouza/go-dockerclient"
-	"github.com/zekroTJA/ranna/internal/sandbox"
+	"github.com/zekroTJA/ranna/internal/models"
 )
 
 type DockerSandboxProvider struct {
@@ -23,7 +23,7 @@ func NewDockerSandboxProvider() (dsp *DockerSandboxProvider, err error) {
 	return
 }
 
-func (dsp *DockerSandboxProvider) CreateSandbox(spec sandbox.Spec) (sandbox *DockerSandbox, err error) {
+func (dsp *DockerSandboxProvider) CreateSandbox(spec models.Spec) (sandbox *DockerSandbox, err error) {
 	repo, tag := getImage(spec.Image)
 
 	err = dsp.client.PullImage(dockerclient.PullImageOptions{
@@ -38,10 +38,11 @@ func (dsp *DockerSandboxProvider) CreateSandbox(spec sandbox.Spec) (sandbox *Doc
 	hostDir := path.Join(spec.HostDir, spec.Subdir)
 	container, err := dsp.client.CreateContainer(dockerclient.CreateContainerOptions{
 		Config: &dockerclient.Config{
-			Image:      repo + ":" + tag,
-			WorkingDir: workingDir,
-			Entrypoint: strings.Split(spec.Entrypoint, " "),
-			Cmd:        strings.Split(spec.Cmd, " "),
+			Image:           repo + ":" + tag,
+			WorkingDir:      workingDir,
+			Entrypoint:      strings.Split(spec.Entrypoint, " "),
+			Cmd:             strings.Split(spec.Cmd, " "),
+			NetworkDisabled: true,
 		},
 		HostConfig: &dockerclient.HostConfig{
 			Binds: []string{hostDir + ":" + workingDir},

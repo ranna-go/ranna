@@ -1,11 +1,10 @@
 package main
 
 import (
-	"fmt"
-	"os"
-
 	"github.com/joho/godotenv"
 	"github.com/sarulabs/di/v2"
+	"github.com/zekroTJA/ranna/internal/api"
+	"github.com/zekroTJA/ranna/internal/config"
 	"github.com/zekroTJA/ranna/internal/sandbox/docker"
 	"github.com/zekroTJA/ranna/internal/spec"
 	"github.com/zekroTJA/ranna/internal/static"
@@ -14,17 +13,22 @@ import (
 func main() {
 	godotenv.Load()
 
-	specFile, ok := os.LookupEnv("RANA_SPECFILE")
-	if !ok {
-		specFile = "spec/spec.yaml"
-	}
-
 	diBuilder, _ := di.NewBuilder()
+
+	diBuilder.Add(di.Def{
+		Name: static.DiConfigProvider,
+		Build: func(ctn di.Container) (interface{}, error) {
+			p := config.NewEnvProvider("RANNA_")
+			err := p.Load()
+			return p, err
+		},
+	})
 
 	diBuilder.Add(di.Def{
 		Name: static.DiSpecProvider,
 		Build: func(ctn di.Container) (interface{}, error) {
-			return spec.NewFileProvider(specFile), nil
+			cfg := ctn.Get(static.DiConfigProvider).(config.Provider)
+			return spec.NewFileProvider(cfg.Get().SpecFile), nil
 		},
 	})
 
@@ -43,8 +47,15 @@ func main() {
 		},
 	})
 
+	diBuilder.Add(di.Def{
+		Name: static.DiAPI,
+		Build: func(ctn di.Container) (interface{}, error) {
+			return api.NewRestAPI(ctn)
+		},
+	})
+
 	ctn := diBuilder.Build()
 
-	specInst := ctn.Get(static.DiSpec).(spec.SpecMap)
-	fmt.Printf("%+v\n", specInst["go"])
+	api := ctn.Get(static.DiAPI).(api.API)
+	api.ListenAndServeBlocking()
 }

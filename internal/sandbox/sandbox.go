@@ -1,10 +1,12 @@
 package sandbox
 
+import "github.com/zekroTJA/ranna/internal/models"
+
 type Sandbox interface {
 	Run() (stdout, stderr string, err error)
 	Delete() error
 }
 
 type SandboxProvider interface {
-	CreateSandbox(spec Spec) (Sandbox, error)
+	CreateSandbox(spec models.Spec) (Sandbox, error)
 }

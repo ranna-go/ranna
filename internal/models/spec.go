@@ -1,4 +1,6 @@
-package sandbox
+package models
+
+type SpecMap map[string]*Spec
 
 type Spec struct {
 	Image      string `json:"image" yaml:"image"`

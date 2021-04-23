@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/ghodss/yaml"
+	"github.com/zekroTJA/ranna/internal/models"
 )
 
 type FileProvider struct {
@@ -18,7 +19,7 @@ func NewFileProvider(fileName string) *FileProvider {
 	return &FileProvider{fileName}
 }
 
-func (fp *FileProvider) Load() (m SpecMap, err error) {
+func (fp *FileProvider) Load() (m models.SpecMap, err error) {
 	var unmarshaller func([]byte, interface{}) error
 
 	switch strings.ToLower(path.Ext(fp.fileName)) {
