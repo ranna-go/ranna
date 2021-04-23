@@ -2,3 +2,8 @@ go:
   image:      'golang:alpine'
   entrypoint: 'go run'
   filename:   'main.go'
+
+python3:
+  image:      'python:alpine'
+  entrypoint: 'python3'
+  filename:   'main.py'
