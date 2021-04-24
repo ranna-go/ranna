@@ -8,6 +8,7 @@ import (
 	"github.com/sarulabs/di/v2"
 	"github.com/zekroTJA/ranna/internal/config"
 	"github.com/zekroTJA/ranna/internal/file"
+	"github.com/zekroTJA/ranna/internal/namespace"
 	"github.com/zekroTJA/ranna/internal/sandbox"
 	"github.com/zekroTJA/ranna/internal/spec"
 	"github.com/zekroTJA/ranna/internal/static"
@@ -24,6 +25,7 @@ type Router struct {
 	spec    spec.Provider
 	file    file.Provider
 	cfg     config.Provider
+	ns      namespace.Provider
 }
 
 func (r *Router) Setup(route fiber.Router, ctn di.Container) {
@@ -31,6 +33,7 @@ func (r *Router) Setup(route fiber.Router, ctn di.Container) {
 	r.spec = ctn.Get(static.DiSpecProvider).(spec.Provider)
 	r.file = ctn.Get(static.DiFileProvider).(file.Provider)
 	r.cfg = ctn.Get(static.DiConfigProvider).(config.Provider)
+	r.ns = ctn.Get(static.DiNamespaceProvider).(namespace.Provider)
 
 	route.Post("/exec", r.postExec)
 }
@@ -46,7 +49,10 @@ func (r *Router) postExec(ctx *fiber.Ctx) (err error) {
 		return errUnsupportredLanguage
 	}
 
-	spc.Subdir = "test1"
+	if spc.Subdir, err = r.ns.Get(); err != nil {
+		return
+	}
+
 	spc.HostDir = r.cfg.Config().HostRootDir
 	spc.Cmd = spc.FileName
 

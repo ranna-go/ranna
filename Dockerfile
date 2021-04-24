@@ -2,7 +2,7 @@ FROM golang:1.16-alpine AS build
 WORKDIR /build
 COPY cmd/ cmd/
 COPY internal/ internal/
-# COPY pkg/ pkg/
+COPY pkg/ pkg/
 COPY go.mod .
 COPY go.sum .
 RUN go build -o ranna cmd/ranna/main.go

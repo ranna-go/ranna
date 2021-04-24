@@ -6,6 +6,7 @@ import (
 	"github.com/zekroTJA/ranna/internal/api"
 	"github.com/zekroTJA/ranna/internal/config"
 	"github.com/zekroTJA/ranna/internal/file"
+	"github.com/zekroTJA/ranna/internal/namespace"
 	"github.com/zekroTJA/ranna/internal/sandbox/docker"
 	"github.com/zekroTJA/ranna/internal/spec"
 	"github.com/zekroTJA/ranna/internal/static"
@@ -57,6 +58,19 @@ func main() {
 		Name: static.DiAPI,
 		Build: func(ctn di.Container) (interface{}, error) {
 			return api.NewRestAPI(ctn)
+		},
+	})
+
+	diBuilder.Add(di.Def{
+		Name: static.DiNamespaceProvider,
+		Build: func(ctn di.Container) (v interface{}, err error) {
+			cfg := ctn.Get(static.DiConfigProvider).(config.Provider)
+			if cfg.Config().Debug {
+				v = namespace.NewDummyProvider("test1")
+			} else {
+				v = namespace.NewRandomProvider()
+			}
+			return
 		},
 	})
 

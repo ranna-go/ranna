@@ -1,9 +1,10 @@
 package static
 
 const (
-	DiConfigProvider  = "configprovider"
-	DiSpecProvider    = "specprovider"
-	DiSandboxProvider = "sandboxprovider"
-	DiAPI             = "apiservice"
-	DiFileProvider    = "fileprovider"
+	DiConfigProvider    = "configprovider"
+	DiSpecProvider      = "specprovider"
+	DiSandboxProvider   = "sandboxprovider"
+	DiAPI               = "apiservice"
+	DiFileProvider      = "fileprovider"
+	DiNamespaceProvider = "namespaceprovider"
 )
