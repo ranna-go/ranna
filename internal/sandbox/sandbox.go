@@ -1,7 +1,5 @@
 package sandbox
 
-import "github.com/zekroTJA/ranna/pkg/models"
-
 type Sandbox interface {
 	Run() (stdout, stderr string, err error)
 	Kill() error
@@ -9,5 +7,5 @@ type Sandbox interface {
 }
 
 type Provider interface {
-	CreateSandbox(spec models.Spec) (Sandbox, error)
+	CreateSandbox(spec RunSpec) (Sandbox, error)
 }

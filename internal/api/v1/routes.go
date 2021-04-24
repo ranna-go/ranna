@@ -79,7 +79,7 @@ func (r *Router) postExec(ctx *fiber.Ctx) (err error) {
 		return
 	}
 
-	sbx, err := r.sandbox.CreateSandbox(spc)
+	sbx, err := r.sandbox.CreateSandbox(runSpc)
 	if err != nil {
 		return
 	}
