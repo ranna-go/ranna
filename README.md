@@ -9,7 +9,7 @@ Also, this service allows **arbitrary code execution in Docker containers**. Thi
 
 ## 🛠 Architecture
 
-Maybe, to make my thought behind the project more clear, here is a little introduction into the project's architecture.
+Maybe, to make my thoughts behind the project more clear, here is a little introduction into the project's architecture.
 
 ![](https://i.imgur.com/kJyAmso.png)
 
