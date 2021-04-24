@@ -88,7 +88,7 @@ func (r *Router) postExec(ctx *fiber.Ctx) (err error) {
 	if err = sbx.Delete(); err != nil {
 		return
 	}
-	if err = r.file.DeleteDirectory(fileDir); err != nil {
+	if err = r.file.DeleteDirectory(hostDir); err != nil {
 		return
 	}
 

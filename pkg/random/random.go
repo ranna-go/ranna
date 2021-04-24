@@ -23,7 +23,7 @@ func GetRandBase64Str(len int) (string, error) {
 		return "", err
 	}
 
-	return base64.StdEncoding.EncodeToString(data)[:len], nil
+	return base64.URLEncoding.EncodeToString(data)[:len], nil
 }
 
 // GetRandByteArray creates a cryptographically randomly
