@@ -8,11 +8,6 @@ python3:
   entrypoint: 'python3'
   filename:   'main.py'
 
-node:
-  image:      'node:alpine'
-  entrypoint: 'node'
-  filename:   'index.js'
-
 rust:
   image:      'rust:alpine'
   entrypoint: 'rustc main.rs && ./main'
