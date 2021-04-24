@@ -6,6 +6,7 @@ import (
 	v1 "github.com/zekroTJA/ranna/internal/api/v1"
 	"github.com/zekroTJA/ranna/internal/config"
 	"github.com/zekroTJA/ranna/internal/static"
+	"github.com/zekroTJA/ranna/pkg/models"
 )
 
 type RestAPI struct {
@@ -35,16 +36,10 @@ func (r *RestAPI) ListenAndServeBlocking() error {
 	return r.app.Listen(r.bindAddress)
 }
 
-type errorModel struct {
-	Error   string `json:"error"`
-	Code    int    `json:"code"`
-	Context string `json:"context,omitempty"`
-}
-
 func errorHandler(ctx *fiber.Ctx, err error) error {
 	if fErr, ok := err.(*fiber.Error); ok {
 		ctx.Status(fErr.Code)
-		return ctx.JSON(&errorModel{
+		return ctx.JSON(&models.ErrorModel{
 			Error: fErr.Message,
 			Code:  fErr.Code,
 		})
