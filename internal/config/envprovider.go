@@ -1,7 +1,6 @@
 package config
 
 import (
-	"errors"
 	"os"
 	"strconv"
 	"strings"
@@ -26,16 +25,12 @@ func (ep *EnvProvider) Load() (err error) {
 
 	ep.c.Debug = ep.getBool("DEBUG", false)
 	ep.c.SpecFile = ep.getString("SPECFILE", "spec/spec.yaml")
-	ep.c.HostRootDir = ep.getString("HOSTROOTDIR", "")
+	ep.c.HostRootDir = ep.getString("HOSTROOTDIR", "/var/opt/ranna")
 	ep.c.API.BindAddress = ep.getString("API_BINDADDRESS", ":8080")
 
 	ep.c.ExecutionTimeoutSeconds, err = ep.getInt("EXECUTIONTIMEOUTSECONDS", 20)
 	if err != nil {
 		return
-	}
-
-	if ep.c.HostRootDir == "" {
-		return errors.New("no value specified for HOSTROOTDIR")
 	}
 
 	return
