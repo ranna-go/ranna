@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"path"
 	"strings"
 )
@@ -40,4 +41,17 @@ func (s Spec) GetEntrypoint() []string {
 func (s Spec) GetCommandWithArgs() []string {
 	cmd := strings.Split(s.Cmd, " ")
 	return append(cmd, s.Arguments...)
+}
+
+func (s Spec) GetEnv() (env []string) {
+	if s.Environment != nil {
+		env = make([]string, len(s.Environment))
+		i := 0
+		for k, v := range s.Environment {
+			env[i] = fmt.Sprintf(`%s=%s`, k, v)
+			i++
+		}
+	}
+
+	return
 }

@@ -47,6 +47,7 @@ func (dsp *DockerSandboxProvider) CreateSandbox(spec models.Spec) (sbx sandbox.S
 			WorkingDir:      workingDir,
 			Entrypoint:      spec.GetEntrypoint(),
 			Cmd:             spec.GetCommandWithArgs(),
+			Env:             spec.GetEnv(),
 			NetworkDisabled: true,
 		},
 		HostConfig: &dockerclient.HostConfig{
