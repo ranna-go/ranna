@@ -12,7 +12,7 @@ import (
 	"github.com/zekroTJA/ranna/internal/sandbox"
 	"github.com/zekroTJA/ranna/internal/spec"
 	"github.com/zekroTJA/ranna/internal/static"
-	"github.com/zekroTJA/ranna/internal/util"
+	"github.com/zekroTJA/ranna/pkg/timeout"
 )
 
 var (
@@ -79,7 +79,7 @@ func (r *Router) postExec(ctx *fiber.Ctx) (err error) {
 	}
 
 	res := new(executionResponse)
-	timedOut := util.RunBlockingWithTimeout(func() {
+	timedOut := timeout.RunBlockingWithTimeout(func() {
 		res.StdOut, res.StdErr, err = sbx.Run()
 	}, time.Duration(r.cfg.Config().ExecutionTimeoutSeconds)*time.Second)
 	if timedOut {
