@@ -11,7 +11,7 @@ python3:
 rust:
   image:      'rust:alpine'
   entrypoint: 'rustc main.rs && ./main'
-  filename:
+  filename:   'main.rs'
 
 openjdk-11:
   image:      'openjdk:11'
