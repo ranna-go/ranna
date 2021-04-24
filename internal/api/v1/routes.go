@@ -12,6 +12,7 @@ import (
 	"github.com/zekroTJA/ranna/internal/sandbox"
 	"github.com/zekroTJA/ranna/internal/spec"
 	"github.com/zekroTJA/ranna/internal/static"
+	"github.com/zekroTJA/ranna/pkg/models"
 	"github.com/zekroTJA/ranna/pkg/timeout"
 )
 
@@ -44,7 +45,7 @@ func (r *Router) getSpec(ctx *fiber.Ctx) (err error) {
 }
 
 func (r *Router) postExec(ctx *fiber.Ctx) (err error) {
-	req := new(executionRequest)
+	req := new(models.ExecutionRequest)
 	if err = ctx.BodyParser(req); err != nil {
 		return
 	}
@@ -54,16 +55,18 @@ func (r *Router) postExec(ctx *fiber.Ctx) (err error) {
 		return errUnsupportredLanguage
 	}
 
-	if spc.Subdir, err = r.ns.Get(); err != nil {
+	runSpc := sandbox.RunSpec{Spec: spc}
+
+	if runSpc.Subdir, err = r.ns.Get(); err != nil {
 		return
 	}
 
-	spc.HostDir = r.cfg.Config().HostRootDir
-	spc.Cmd = spc.FileName
-	spc.Arguments = req.Arguments
-	spc.Environment = req.Environment
+	runSpc.HostDir = r.cfg.Config().HostRootDir
+	runSpc.Cmd = spc.FileName
+	runSpc.Arguments = req.Arguments
+	runSpc.Environment = req.Environment
 
-	hostDir := spc.GetAssambledHostDir()
+	hostDir := runSpc.GetAssambledHostDir()
 	if err = r.file.CreateDirectory(hostDir); err != nil {
 		return
 	}
@@ -78,7 +81,7 @@ func (r *Router) postExec(ctx *fiber.Ctx) (err error) {
 		return
 	}
 
-	res := new(executionResponse)
+	res := new(models.ExecutionResponse)
 	timedOut := timeout.RunBlockingWithTimeout(func() {
 		res.StdOut, res.StdErr, err = sbx.Run()
 	}, time.Duration(r.cfg.Config().ExecutionTimeoutSeconds)*time.Second)

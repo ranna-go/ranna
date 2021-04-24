@@ -1,27 +1,15 @@
-package models
+package sandbox
 
 import (
 	"fmt"
 	"path"
 	"strings"
+
+	"github.com/zekroTJA/ranna/pkg/models"
 )
 
-type SpecMap map[string]*Spec
-
-func (m SpecMap) Get(key string) (s Spec, ok bool) {
-	sp, ok := m[key]
-	if !ok {
-		return
-	}
-
-	s = *sp
-	return
-}
-
-type Spec struct {
-	Image      string `json:"image" yaml:"image"`
-	Entrypoint string `json:"entrypoint" yaml:"entrypoint"`
-	FileName   string `json:"filename" yaml:"filename"`
+type RunSpec struct {
+	models.Spec
 
 	Cmd         string            `json:"cmd,omitempty" yaml:"cmd,omitempty"`
 	Arguments   []string          `json:"arguments,omitempty" yaml:"arguments,omitempty"`
@@ -30,20 +18,20 @@ type Spec struct {
 	HostDir     string            `json:"hostdir,omitempty" yaml:"hostdir,omitempty"`
 }
 
-func (s Spec) GetAssambledHostDir() string {
+func (s RunSpec) GetAssambledHostDir() string {
 	return path.Join(s.HostDir, s.Subdir)
 }
 
-func (s Spec) GetEntrypoint() []string {
+func (s RunSpec) GetEntrypoint() []string {
 	return strings.Split(s.Entrypoint, " ")
 }
 
-func (s Spec) GetCommandWithArgs() []string {
+func (s RunSpec) GetCommandWithArgs() []string {
 	cmd := strings.Split(s.Cmd, " ")
 	return append(cmd, s.Arguments...)
 }
 
-func (s Spec) GetEnv() (env []string) {
+func (s RunSpec) GetEnv() (env []string) {
 	if s.Environment != nil {
 		env = make([]string, len(s.Environment))
 		i := 0

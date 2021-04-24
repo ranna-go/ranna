@@ -6,8 +6,8 @@ import (
 	"fmt"
 
 	"github.com/joho/godotenv"
-	"github.com/zekroTJA/ranna/internal/models"
 	"github.com/zekroTJA/ranna/internal/sandbox/docker"
+	"github.com/zekroTJA/ranna/pkg/models"
 )
 
 func must(err error) {

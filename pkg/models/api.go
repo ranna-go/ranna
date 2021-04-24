@@ -1,13 +1,13 @@
-package v1
+package models
 
-type executionRequest struct {
+type ExecutionRequest struct {
 	Language    string            `json:"language"`
 	Code        string            `json:"code"`
 	Arguments   []string          `json:"arguments"`
 	Environment map[string]string `json:"environment"`
 }
 
-type executionResponse struct {
+type ExecutionResponse struct {
 	StdOut string `json:"stdout"`
 	StdErr string `json:"stderr"`
 }

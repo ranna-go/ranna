@@ -1,6 +1,6 @@
 package sandbox
 
-import "github.com/zekroTJA/ranna/internal/models"
+import "github.com/zekroTJA/ranna/pkg/models"
 
 type Sandbox interface {
 	Run() (stdout, stderr string, err error)

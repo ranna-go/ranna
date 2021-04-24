@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	dockerclient "github.com/fsouza/go-dockerclient"
-	"github.com/zekroTJA/ranna/internal/models"
 	"github.com/zekroTJA/ranna/internal/sandbox"
 )
 
@@ -28,7 +27,7 @@ func NewDockerSandboxProvider() (dsp *DockerSandboxProvider, err error) {
 	return
 }
 
-func (dsp *DockerSandboxProvider) CreateSandbox(spec models.Spec) (sbx sandbox.Sandbox, err error) {
+func (dsp *DockerSandboxProvider) CreateSandbox(spec sandbox.RunSpec) (sbx sandbox.Sandbox, err error) {
 	repo, tag := getImage(spec.Image)
 
 	err = dsp.client.PullImage(dockerclient.PullImageOptions{
