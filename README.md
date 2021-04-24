@@ -25,7 +25,8 @@ $ docker build . -t ranna
 But keep in mind, when you are using the Docker image, you need to pass the host's docker socket as volume to the container.
 ```
 $ docker run --name ranna \
-    -e RANNA_HOSTROOTDIR=/var/opt \
+    -e RANNA_HOSTROOTDIR=/var/opt/ranna \
+    -v /var/opt/ranna:/var/opt/ranna \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -p 8080:8080
     ranna
