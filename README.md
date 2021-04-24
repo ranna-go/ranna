@@ -32,25 +32,63 @@ $ docker run --name ranna \
     ranna
 ```
 
-# 📡 REST API
+## 📡 REST API
 
-When the service is up, you can send an execution request as following:
+### `GET /v1/spec`
+
+Returns a map of runner environment specifications where the key is
+the `language` specifier and the value is the `spec`.
 
 ```
-> POST /v1/exec HTTP/
+> GET /v1/spec HTTP/2
+```
+
+The response of this request will look like following:
+
+```
+< HTTP/2 200 OK
+< Server: ranna
+< Content-Type: application/json
+< Content-Length: 155
+```
+```json
+{
+  "go": {
+    "image": "golang:alpine",
+    "entrypoint": "go run",
+    "filename": "main.go"
+  },
+  "python3": {
+    "image": "python:alpine",
+    "entrypoint": "python3",
+    "filename": "main.py"
+  }
+}
+```
+
+### `POST /v1/exec`
+
+Execute code.
+
+```
+> POST /v1/exec HTTP/2
 > Content-Type: application/json
 ```
 ```json
 {
   "language": "python3",
-  "code": "print('Hello world!')"
+  "code": "print('Hello world!')",
+  "arguments": ["some", "crazy", "arguments"],
+  "environment": {
+    "MYVAR": "my value"
+  }
 }
 ```
 
-And the response will look like following:
+The response of this request will look like following:
 
 ```
-< HTTP/1.1 200 OK
+< HTTP/2 200 OK
 < Server: ranna
 < Content-Type: application/json
 < Content-Length: 39
@@ -61,3 +99,16 @@ And the response will look like following:
   "stderr": ""
 }
 ```
+
+### 📦 Client Package
+
+ranna also provides a Go client package available in [`pkg/client`](https://github.com/zekroTJA/ranna/tree/master/pkg/client).
+
+See the simple [example implementation](https://github.com/zekroTJA/ranna/blob/master/examples/client/main.go) how to use the client package.
+
+[Here](https://pkg.go.dev/github.com/zekroTJA/ranna#section-directories) you can find some handy documentation for the provided packages.
+
+---
+
+© 2021 Ringo Hoffmann (zekro Development).  
+Covered by the MIT License.
