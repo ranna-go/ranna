@@ -45,8 +45,8 @@ func (dsp *DockerSandboxProvider) CreateSandbox(spec models.Spec) (sbx sandbox.S
 		Config: &dockerclient.Config{
 			Image:           repo + ":" + tag,
 			WorkingDir:      workingDir,
-			Entrypoint:      strings.Split(spec.Entrypoint, " "),
-			Cmd:             strings.Split(spec.Cmd, " "),
+			Entrypoint:      spec.GetEntrypoint(),
+			Cmd:             spec.GetCommandWithArgs(),
 			NetworkDisabled: true,
 		},
 		HostConfig: &dockerclient.HostConfig{
