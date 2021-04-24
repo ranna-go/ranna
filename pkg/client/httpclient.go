@@ -18,6 +18,7 @@ const (
 	defaultUserAgent = "ranna/pkg/client"
 )
 
+// Options for the HTTP client.
 type Options struct {
 	Endpoint      string `json:"endpoint"`
 	Version       string `json:"version"`
@@ -30,6 +31,10 @@ type httpClient struct {
 	client  *http.Client
 }
 
+// New returns a new HTTP API Client.
+//
+// An error is returned when the passed options
+// are invalid.
 func New(options Options) (c Client, err error) {
 	if err = checkAndDefaultOptions(&options); err != nil {
 		return
