@@ -5,6 +5,7 @@ type Spec struct {
 	Image      string `json:"image" yaml:"image"`
 	Entrypoint string `json:"entrypoint" yaml:"entrypoint"`
 	FileName   string `json:"filename" yaml:"filename"`
+	Cmd        string `json:"cmd,omitempty" yaml:"cmd,omitempty"`
 }
 
 // SpecMap wraps a map[string]*Spec.

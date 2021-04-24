@@ -17,3 +17,8 @@ openjdk-11:
   image:      'openjdk:11'
   entrypoint: 'java'
   filename:   'Main.java'
+  
+javascript:
+  image:      'node:lts-alpine3.13'
+  entrypoint: 'node'
+  filename:   'index.js'

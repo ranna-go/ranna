@@ -11,7 +11,6 @@ import (
 type RunSpec struct {
 	models.Spec
 
-	Cmd         string            `json:"cmd,omitempty" yaml:"cmd,omitempty"`
 	Arguments   []string          `json:"arguments,omitempty" yaml:"arguments,omitempty"`
 	Environment map[string]string `json:"environment,omitempty" yaml:"environment,omitempty"`
 	Subdir      string            `json:"subdir,omitempty" yaml:"subdir,omitempty"`
