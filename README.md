@@ -7,6 +7,23 @@
 First of all, this project is currently **work in progress** and not fully finished.  
 Also, this service allows **arbitrary code execution in Docker containers**. This will be a high security risk! If you want to use this service, only use this on a separate, encapsulated server environment!
 
+## 📃 Todo
+
+- [ ] Add more details to execution response like execution time, resources used, ...
+
+- [ ] Add aliases to spec in form of `spec pointers`. This would look like following in the spec configuration:  
+  ```yaml
+  openjdk-11:
+    image:      'openjdk:11'
+    entrypoint: 'java'
+    filename:   'Main.java'
+  
+  java:
+    use:        'openjdk-11'
+  ```
+
+- [ ] Add a `docker-compose.yml` for a setup using traefik as reverse proxy in combination with authentication and rate limit middleware.
+
 ## 🛠 Architecture
 
 Maybe, to make my thoughts behind the project more clear, here is a little introduction into the project's architecture.
