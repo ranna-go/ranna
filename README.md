@@ -9,6 +9,8 @@ Also, this service allows **arbitrary code execution in Docker containers**. Thi
 
 ## 📃 Todo
 
+- [ ] Pre-pulling images in spec to reduce time used on first execution using a spec which was not used before.
+
 - [ ] Add more details to execution response like execution time, resources used, ...
 
 - [ ] Add aliases to spec in form of `spec pointers`. This would look like following in the spec configuration:  
