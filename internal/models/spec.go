@@ -23,9 +23,9 @@ type Spec struct {
 	Entrypoint string `json:"entrypoint" yaml:"entrypoint"`
 	FileName   string `json:"filename" yaml:"filename"`
 
-	Cmd         string            `json:"cmd" yaml:"cmd"`
-	Arguments   []string          `json:"arguments" yaml:"arguments"`
-	Environment map[string]string `json:"environment" yaml:"environment"`
+	Cmd         string            `json:"cmd,omitempty" yaml:"cmd,omitempty"`
+	Arguments   []string          `json:"arguments,omitempty" yaml:"arguments,omitempty"`
+	Environment map[string]string `json:"environment,omitempty" yaml:"environment,omitempty"`
 	Subdir      string            `json:"subdir,omitempty" yaml:"subdir,omitempty"`
 	HostDir     string            `json:"hostdir,omitempty" yaml:"hostdir,omitempty"`
 }

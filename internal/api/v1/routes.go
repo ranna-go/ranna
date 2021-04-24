@@ -35,7 +35,12 @@ func (r *Router) Setup(route fiber.Router, ctn di.Container) {
 	r.cfg = ctn.Get(static.DiConfigProvider).(config.Provider)
 	r.ns = ctn.Get(static.DiNamespaceProvider).(namespace.Provider)
 
+	route.Get("/spec", r.getSpec)
 	route.Post("/exec", r.postExec)
+}
+
+func (r *Router) getSpec(ctx *fiber.Ctx) (err error) {
+	return ctx.JSON(r.spec.Spec())
 }
 
 func (r *Router) postExec(ctx *fiber.Ctx) (err error) {
