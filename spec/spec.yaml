@@ -7,3 +7,18 @@ python3:
   image:      'python:alpine'
   entrypoint: 'python3'
   filename:   'main.py'
+
+node:
+  image:      'node:alpine'
+  entrypoint: 'node'
+  filename:   'index.js'
+
+rust:
+  image:      'rust:alpine'
+  entrypoint: 'rustc main.rs && ./main'
+  filename:
+
+openjdk-11:
+  image:      'openjdk:11'
+  entrypoint: 'java'
+  filename:   'Main.java'
