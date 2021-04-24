@@ -10,7 +10,7 @@ python3:
 
 rust:
   image:      'rust:alpine'
-  entrypoint: 'rustc main.rs && ./main'
+  cmd:        'rustc main.rs && ./main'
   filename:   'main.rs'
 
 openjdk-11:
