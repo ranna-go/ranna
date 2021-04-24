@@ -8,6 +8,16 @@ python3:
   entrypoint: 'python3'
   filename:   'main.py'
 
+rust:
+  image:      'rust:alpine'
+  cmd:        'rustc main.rs && ./main'
+  filename:   'main.rs'
+
+openjdk-11:
+  image:      'openjdk:11'
+  entrypoint: 'java'
+  filename:   'Main.java'
+  
 javascript:
   image:      'node:lts-alpine3.13'
   entrypoint: 'node'
