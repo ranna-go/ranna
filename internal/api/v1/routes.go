@@ -62,9 +62,12 @@ func (r *Router) postExec(ctx *fiber.Ctx) (err error) {
 	}
 
 	runSpc.HostDir = r.cfg.Config().HostRootDir
-	runSpc.Cmd = spc.FileName
 	runSpc.Arguments = req.Arguments
 	runSpc.Environment = req.Environment
+
+	if runSpc.Cmd == "" {
+		runSpc.Cmd = spc.FileName
+	}
 
 	hostDir := runSpc.GetAssambledHostDir()
 	if err = r.file.CreateDirectory(hostDir); err != nil {
