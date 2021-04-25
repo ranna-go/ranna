@@ -20,11 +20,12 @@ import (
 
 var (
 	errUnsupportredLanguage = errors.New("unsupported language spec")
-	errTimedOut             = errors.New("code executuion timed out")
+	errTimedOut             = errors.New("code execution timed out")
 )
 
 type Manager interface {
 	RunInSandbox(req *models.ExecutionRequest) (res *models.ExecutionResponse, err error)
+	PrepareEnvironments() []error
 	TryCleanup() []error
 }
 
@@ -69,6 +70,22 @@ func NewManager(ctn di.Container) (m *managerImpl, err error) {
 		return
 	}
 	m.streamBufferCap = int(sbc)
+
+	return
+}
+
+func (m *managerImpl) PrepareEnvironments() (errs []error) {
+	errs = []error{}
+
+	for _, spec := range m.spec.Spec() {
+		if spec.Image == "" {
+			continue
+		}
+		if err := m.sandbox.Prepare(*spec); err != nil {
+			logrus.WithField("image", spec.Image).WithError(err).Error("failed preparing env")
+			errs = append(errs, err)
+		}
+	}
 
 	return
 }

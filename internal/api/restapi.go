@@ -34,7 +34,7 @@ func NewRestAPI(ctn di.Container) (r *RestAPI, err error) {
 }
 
 func (r *RestAPI) ListenAndServeBlocking() error {
-	logrus.WithFields(logrus.Fields{"addr": r.bindAddress}).Info("Starting REST API")
+	logrus.WithFields(logrus.Fields{"addr": r.bindAddress}).Info("Starting REST API ...")
 	return r.app.Listen(r.bindAddress)
 }
 

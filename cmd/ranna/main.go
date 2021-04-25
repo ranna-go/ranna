@@ -53,7 +53,7 @@ func main() {
 			return sandbox.NewManager(ctn)
 		},
 		Close: func(obj interface{}) error {
-			logrus.Info("cleaning up running sandboxes...")
+			logrus.Info("cleaning up running sandboxes ...")
 			m := obj.(sandbox.Manager)
 			m.TryCleanup()
 			return nil
@@ -100,6 +100,10 @@ func main() {
 	logrus.SetFormatter(&logrus.TextFormatter{
 		ForceColors: cfg.Config().Debug,
 	})
+
+	mgr := ctn.Get(static.DiSandboxManager).(sandbox.Manager)
+	logrus.Info("prepare environments ...")
+	mgr.PrepareEnvironments()
 
 	api := ctn.Get(static.DiAPI).(api.API)
 	go api.ListenAndServeBlocking()

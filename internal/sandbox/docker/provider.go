@@ -6,10 +6,12 @@ import (
 
 	dockerclient "github.com/fsouza/go-dockerclient"
 	"github.com/sarulabs/di/v2"
+	"github.com/sirupsen/logrus"
 	"github.com/zekroTJA/ranna/internal/config"
 	"github.com/zekroTJA/ranna/internal/sandbox"
 	"github.com/zekroTJA/ranna/internal/static"
 	"github.com/zekroTJA/ranna/internal/util"
+	"github.com/zekroTJA/ranna/pkg/models"
 )
 
 const (
@@ -34,14 +36,29 @@ func NewDockerSandboxProvider(ctn di.Container) (dsp *DockerSandboxProvider, err
 	return
 }
 
+func (dsp DockerSandboxProvider) Prepare(spec models.Spec) (err error) {
+	repo, tag := getImage(spec.Image)
+
+	_, err = dsp.client.InspectImage(repo + ":" + tag)
+	if err == dockerclient.ErrNoSuchImage {
+		logrus.WithFields(logrus.Fields{
+			"repo": repo,
+			"tag":  tag,
+		}).Info("pull image")
+		err = dsp.client.PullImage(dockerclient.PullImageOptions{
+			Repository: repo,
+			Tag:        tag,
+			Registry:   spec.Registry,
+		}, dockerclient.AuthConfiguration{})
+	}
+
+	return
+}
+
 func (dsp *DockerSandboxProvider) CreateSandbox(spec sandbox.RunSpec) (sbx sandbox.Sandbox, err error) {
 	repo, tag := getImage(spec.Image)
 
-	err = dsp.client.PullImage(dockerclient.PullImageOptions{
-		Repository: repo,
-		Tag:        tag,
-		Registry:   spec.Registry,
-	}, dockerclient.AuthConfiguration{})
+	err = dsp.Prepare(spec.Spec)
 	if err != nil {
 		return
 	}
