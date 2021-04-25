@@ -87,7 +87,7 @@ func (r *Router) postExec(ctx *fiber.Ctx) (err error) {
 	res := new(models.ExecutionResponse)
 	timedOut := timeout.RunBlockingWithTimeout(func() {
 		res.StdOut, res.StdErr, err = sbx.Run()
-	}, time.Duration(r.cfg.Config().ExecutionTimeoutSeconds)*time.Second)
+	}, time.Duration(r.cfg.Config().Sandbox.TimeoutSeconds)*time.Second)
 	if timedOut {
 		if err = sbx.Kill(); err != nil {
 			return

@@ -12,6 +12,7 @@ require (
 	github.com/gofiber/fiber/v2 v2.8.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/heetch/confita v0.10.0 // indirect
 	github.com/joho/godotenv v1.3.0
 	github.com/klauspost/compress v1.12.1 // indirect
 	github.com/sarulabs/di/v2 v2.4.2 // indirect
