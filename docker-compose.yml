@@ -25,8 +25,9 @@ services:
   ranna:
     image: "ghcr.io/zekrotja/ranna:latest"
     environment:
-      RANNA_HOSTROOTDIR:      "/var/opt/ranna"
-      RANNA_RESOURCES_MEMORY: "50M"
+      HOSTROOTDIR:            "/var/opt/ranna"
+      SANDBOX.MEMORY:         "50M"
+      SANDBOX.TIMEOUTSECONDS: "20"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
       - "/var/opt/ranna:/var/opt/ranna"
