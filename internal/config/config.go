@@ -1,7 +1,8 @@
 package config
 
 type API struct {
-	BindAddress string `config:"api.bindaddress,required" json:"bindaddress" yaml:"api"`
+	BindAddress  string `config:"api.bindaddress,required" json:"bindaddress" yaml:"api"`
+	MaxOutputLen string `config:"api.maxoutputlen" json:"maxoutputlen" yaml:"maxoutputlen"`
 }
 
 type Sandbox struct {
@@ -22,7 +23,8 @@ var defaults = Config{
 	SpecFile:    "spec/spec.yaml",
 	HostRootDir: "/var/opt/ranna",
 	API: API{
-		BindAddress: ":8080",
+		BindAddress:  ":8080",
+		MaxOutputLen: "1M",
 	},
 	Sandbox: Sandbox{
 		Memory:         "100M",

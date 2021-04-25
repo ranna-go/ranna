@@ -12,6 +12,7 @@ import (
 	"github.com/zekroTJA/ranna/internal/sandbox"
 	"github.com/zekroTJA/ranna/internal/spec"
 	"github.com/zekroTJA/ranna/internal/static"
+	"github.com/zekroTJA/ranna/internal/util"
 	"github.com/zekroTJA/ranna/pkg/models"
 	"github.com/zekroTJA/ranna/pkg/timeout"
 )
@@ -19,6 +20,7 @@ import (
 var (
 	errUnsupportredLanguage = fiber.NewError(fiber.StatusBadRequest, "unsupported language")
 	errTimedOut             = fiber.NewError(fiber.StatusRequestTimeout, "code execution timed out")
+	errOutputLenExceeded    = fiber.NewError(fiber.StatusBadRequest, "output len exceeded")
 )
 
 type Router struct {
@@ -105,5 +107,20 @@ func (r *Router) postExec(ctx *fiber.Ctx) (err error) {
 		return
 	}
 
+	if err = r.checkOutputLen(res.StdOut, res.StdErr); err != nil {
+		return
+	}
+
 	return ctx.JSON(res)
+}
+
+func (r *Router) checkOutputLen(stdout, stderr string) (err error) {
+	max, err := util.ParseMemoryStr(r.cfg.Config().API.MaxOutputLen)
+	if err != nil {
+		return
+	}
+	if int64(len(stdout))+int64(len(stderr)) > max {
+		err = errOutputLenExceeded
+	}
+	return
 }
