@@ -11,6 +11,10 @@ type DockerSandbox struct {
 	container *dockerclient.Container
 }
 
+func (s *DockerSandbox) ID() string {
+	return s.container.ID
+}
+
 func (s *DockerSandbox) Run() (stdout, stderr string, err error) {
 	var buffStdout, buffStderr bytes.Buffer
 	waiter, err := s.client.AttachToContainerNonBlocking(dockerclient.AttachToContainerOptions{
@@ -33,6 +37,16 @@ func (s *DockerSandbox) Run() (stdout, stderr string, err error) {
 	waiter.Wait()
 	stdout = buffStdout.String()
 	stderr = buffStderr.String()
+	return
+}
+
+func (s *DockerSandbox) IsRunning() (ok bool, err error) {
+	ctn, err := s.client.InspectContainer(s.container.ID)
+	if err != nil {
+		return
+	}
+
+	ok = ctn.State.Running
 	return
 }
 

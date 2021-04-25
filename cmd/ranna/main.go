@@ -1,6 +1,10 @@
 package main
 
 import (
+	"os"
+	"os/signal"
+	"syscall"
+
 	"github.com/joho/godotenv"
 	"github.com/sarulabs/di/v2"
 	"github.com/sirupsen/logrus"
@@ -8,6 +12,7 @@ import (
 	"github.com/zekroTJA/ranna/internal/config"
 	"github.com/zekroTJA/ranna/internal/file"
 	"github.com/zekroTJA/ranna/internal/namespace"
+	"github.com/zekroTJA/ranna/internal/sandbox"
 	"github.com/zekroTJA/ranna/internal/sandbox/docker"
 	"github.com/zekroTJA/ranna/internal/spec"
 	"github.com/zekroTJA/ranna/internal/static"
@@ -39,6 +44,19 @@ func main() {
 		Name: static.DiSandboxProvider,
 		Build: func(ctn di.Container) (interface{}, error) {
 			return docker.NewDockerSandboxProvider(ctn)
+		},
+	})
+
+	diBuilder.Add(di.Def{
+		Name: static.DiSandboxManager,
+		Build: func(ctn di.Container) (interface{}, error) {
+			return sandbox.NewManager(ctn), nil
+		},
+		Close: func(obj interface{}) error {
+			logrus.Info("cleaning up running sandboxes...")
+			m := obj.(sandbox.Manager)
+			m.TryCleanup()
+			return nil
 		},
 	})
 
@@ -84,5 +102,12 @@ func main() {
 	})
 
 	api := ctn.Get(static.DiAPI).(api.API)
-	api.ListenAndServeBlocking()
+	go api.ListenAndServeBlocking()
+
+	sc := make(chan os.Signal, 1)
+	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
+	<-sc
+
+	// Tear down dependency instances
+	ctn.DeleteWithSubContainers()
 }
