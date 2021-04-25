@@ -46,7 +46,7 @@ func (dsp *DockerSandboxProvider) CreateSandbox(spec sandbox.RunSpec) (sbx sandb
 	}
 
 	workingDir := path.Join(containerRootPath, spec.Subdir)
-	cfg := &dockerclient.Config{
+	ctnCfg := &dockerclient.Config{
 		Image:           repo + ":" + tag,
 		WorkingDir:      workingDir,
 		Entrypoint:      spec.GetEntrypoint(),
@@ -55,21 +55,23 @@ func (dsp *DockerSandboxProvider) CreateSandbox(spec sandbox.RunSpec) (sbx sandb
 		NetworkDisabled: true,
 	}
 
+	hostDir := spec.GetAssambledHostDir()
+	hostCfg := &dockerclient.HostConfig{
+		Binds: []string{hostDir + ":" + workingDir},
+	}
+
 	resources := dsp.cfg.Config().Resources
 	if resources != nil {
-		cfg.Memory, err = util.ParseMemoryStr(resources.Memory)
-		cfg.MemorySwap = cfg.Memory
+		hostCfg.Memory, err = util.ParseMemoryStr(resources.Memory)
+		hostCfg.MemorySwap = hostCfg.Memory
 		if err != nil {
 			return
 		}
 	}
 
-	hostDir := spec.GetAssambledHostDir()
 	container, err := dsp.client.CreateContainer(dockerclient.CreateContainerOptions{
-		Config: cfg,
-		HostConfig: &dockerclient.HostConfig{
-			Binds: []string{hostDir + ":" + workingDir},
-		},
+		Config:     ctnCfg,
+		HostConfig: hostCfg,
 	})
 
 	sbx = &DockerSandbox{
