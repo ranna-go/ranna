@@ -2,7 +2,7 @@ package sandbox
 
 type Sandbox interface {
 	ID() string
-	Run() (stdout, stderr string, err error)
+	Run(bufferCap int) (stdout, stderr string, err error)
 	IsRunning() (bool, error)
 	Kill() error
 	Delete() error

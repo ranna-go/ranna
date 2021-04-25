@@ -13,6 +13,7 @@ import (
 	"github.com/zekroTJA/ranna/internal/namespace"
 	"github.com/zekroTJA/ranna/internal/spec"
 	"github.com/zekroTJA/ranna/internal/static"
+	"github.com/zekroTJA/ranna/internal/util"
 	"github.com/zekroTJA/ranna/pkg/models"
 	"github.com/zekroTJA/ranna/pkg/timeout"
 )
@@ -34,6 +35,7 @@ type managerImpl struct {
 	cfg     config.Provider
 	ns      namespace.Provider
 
+	streamBufferCap  int
 	runningSandboxes *sync.Map
 	isCleanup        bool
 }
@@ -52,7 +54,7 @@ func IsSystemError(err error) (ok bool) {
 	return
 }
 
-func NewManager(ctn di.Container) (m *managerImpl) {
+func NewManager(ctn di.Container) (m *managerImpl, err error) {
 	m = &managerImpl{}
 
 	m.sandbox = ctn.Get(static.DiSandboxProvider).(Provider)
@@ -62,6 +64,11 @@ func NewManager(ctn di.Container) (m *managerImpl) {
 	m.ns = ctn.Get(static.DiNamespaceProvider).(namespace.Provider)
 
 	m.runningSandboxes = &sync.Map{}
+	sbc, err := util.ParseMemoryStr(m.cfg.Config().Sandbox.StreamBufferCap)
+	if err != nil {
+		return
+	}
+	m.streamBufferCap = int(sbc)
 
 	return
 }
@@ -126,7 +133,7 @@ func (m *managerImpl) RunInSandbox(req *models.ExecutionRequest) (res *models.Ex
 
 	res = new(models.ExecutionResponse)
 	timedOut := timeout.RunBlockingWithTimeout(func() {
-		res.StdOut, res.StdErr, err = sbx.Run()
+		res.StdOut, res.StdErr, err = sbx.Run(m.streamBufferCap)
 	}, time.Duration(m.cfg.Config().Sandbox.TimeoutSeconds)*time.Second)
 
 	if err != nil {

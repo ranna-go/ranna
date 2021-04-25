@@ -1,9 +1,8 @@
 package docker
 
 import (
-	"bytes"
-
 	dockerclient "github.com/fsouza/go-dockerclient"
+	"github.com/zekroTJA/ranna/pkg/cappedbuffer"
 )
 
 type DockerSandbox struct {
@@ -15,15 +14,16 @@ func (s *DockerSandbox) ID() string {
 	return s.container.ID
 }
 
-func (s *DockerSandbox) Run() (stdout, stderr string, err error) {
-	var buffStdout, buffStderr bytes.Buffer
+func (s *DockerSandbox) Run(bufferCap int) (stdout, stderr string, err error) {
+	buffStdout := cappedbuffer.New([]byte{}, bufferCap)
+	buffStderr := cappedbuffer.New([]byte{}, bufferCap)
 	waiter, err := s.client.AttachToContainerNonBlocking(dockerclient.AttachToContainerOptions{
 		Container:    s.container.ID,
 		Stdout:       true,
 		Stderr:       true,
 		Stream:       true,
-		OutputStream: &buffStdout,
-		ErrorStream:  &buffStderr,
+		OutputStream: buffStdout,
+		ErrorStream:  buffStderr,
 	})
 	if err != nil {
 		return

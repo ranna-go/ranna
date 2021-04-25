@@ -50,7 +50,7 @@ func main() {
 	diBuilder.Add(di.Def{
 		Name: static.DiSandboxManager,
 		Build: func(ctn di.Container) (interface{}, error) {
-			return sandbox.NewManager(ctn), nil
+			return sandbox.NewManager(ctn)
 		},
 		Close: func(obj interface{}) error {
 			logrus.Info("cleaning up running sandboxes...")
