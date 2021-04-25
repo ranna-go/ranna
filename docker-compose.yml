@@ -25,10 +25,11 @@ services:
   ranna:
     image: "ghcr.io/zekrotja/ranna:latest"
     environment:
-      HOSTROOTDIR:            "/var/opt/ranna"
-      API.MAXOUTPUTLEN:       "1M"
-      SANDBOX.MEMORY:         "50M"
-      SANDBOX.TIMEOUTSECONDS: "20"
+      HOSTROOTDIR:             "/var/opt/ranna"
+      API.MAXOUTPUTLEN:        "1M"
+      SANDBOX.MEMORY:          "50M"
+      SANDBOX.TIMEOUTSECONDS:  "20"
+      SANDBOX.STREAMBUFFERCAP: "1M"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
       - "/var/opt/ranna:/var/opt/ranna"
@@ -40,7 +41,7 @@ services:
       traefik.http.routers.ranna.entrypoints:               "https"
       traefik.http.routers.ranna.tls:                       "true"
       traefik.http.routers.ranna.tls.certresolver:          "le"
-      traefik.http.routers.ranna.rule:                      "Host(`api.ranna.zekro.de`)"
+      traefik.http.routers.ranna.rule:                      "Host(`example.com`)"
       traefik.http.routers.ranna.middlewares:               "ranna-rl"
       traefik.http.middlewares.ranna-rl.ratelimit.average:  "5"
       traefik.http.middlewares.ranna-rl.ratelimit.period:   "1m"
