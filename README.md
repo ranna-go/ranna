@@ -9,34 +9,20 @@ Also, this service allows **arbitrary code execution in Docker containers**. Thi
 
 ## 📃 Todo
 
-- [ ] Pre-pulling images in spec to reduce time used on first execution using a spec which was not used before.
-
-- [ ] Add more details to execution response like execution time, resources used, ...
-
-- [ ] Add aliases to spec in form of `spec pointers`. This would look like following in the spec configuration:  
-  ```yaml
-  openjdk-11:
-    image:      'openjdk:11'
-    entrypoint: 'java'
-    filename:   'Main.java'
-  
-  java:
-    use:        'openjdk-11'
-  ```
-
-- [ ] Add a `docker-compose.yml` for a setup using traefik as reverse proxy in combination with authentication and rate limit middleware.
+👉 Take a look in the [**issue tracker**](https://github.com/zekroTJA/ranna/issues).
 
 ## 🛠 Architecture
 
 Maybe, to make my thoughts behind the project more clear, here is a little introduction into the project's architecture.
 
-![](https://i.imgur.com/kJyAmso.png)
+![](https://i.imgur.com/lW0CNPe.png)
 
 As you can see, the project is split up in different services.
 
 - **REST API**: The REST API service is the main entrypoint for code execution.
 - **Config Provider**: All services need specific configuration. These are obtained by this service.
 - **Spec Provider**: ranna works with `specs`, which describe the runner environments for the `Sandbox Provider`. It provides a map of `language` specifiers *(like `go`, or `python3`)* with their specific runner `specs`.
+- **Sandbox Manager**: A higher levbel abstraction to execute code in sandboxes. Also keeps track of running containers to clean them up after teardown.
 - **Sandbox Provider**: This is the high level API to create a sandbox environment where the passed code can be run inside and the output can be obtained from.
 - **Namespace Provider**: This service is responsible for generating unique namespace identifiers which can be used to pass the provided code as file into the sandbox.
 - **File Provider**: This service is responsible for creating the nessecary directory structure and the file, containing the code, which is then passed to the sandbox to be executed.
