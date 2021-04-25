@@ -26,6 +26,7 @@ services:
     image: "ghcr.io/zekrotja/ranna:latest"
     environment:
       HOSTROOTDIR:            "/var/opt/ranna"
+      API.MAXOUTPUTLEN:       "1M"
       SANDBOX.MEMORY:         "50M"
       SANDBOX.TIMEOUTSECONDS: "20"
     volumes:
