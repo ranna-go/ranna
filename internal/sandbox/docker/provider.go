@@ -40,6 +40,7 @@ func (dsp *DockerSandboxProvider) CreateSandbox(spec sandbox.RunSpec) (sbx sandb
 	err = dsp.client.PullImage(dockerclient.PullImageOptions{
 		Repository: repo,
 		Tag:        tag,
+		Registry:   spec.Registry,
 	}, dockerclient.AuthConfiguration{})
 	if err != nil {
 		return
