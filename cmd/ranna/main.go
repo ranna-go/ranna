@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/joho/godotenv"
 	"github.com/sarulabs/di/v2"
+	"github.com/sirupsen/logrus"
 	"github.com/zekroTJA/ranna/internal/api"
 	"github.com/zekroTJA/ranna/internal/config"
 	"github.com/zekroTJA/ranna/internal/file"
@@ -75,6 +76,12 @@ func main() {
 	})
 
 	ctn := diBuilder.Build()
+
+	cfg := ctn.Get(static.DiConfigProvider).(config.Provider)
+	logrus.SetLevel(logrus.Level(cfg.Config().Log.Level))
+	logrus.SetFormatter(&logrus.TextFormatter{
+		ForceColors: cfg.Config().Debug,
+	})
 
 	api := ctn.Get(static.DiAPI).(api.API)
 	api.ListenAndServeBlocking()

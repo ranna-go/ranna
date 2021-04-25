@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/sarulabs/di/v2"
+	"github.com/sirupsen/logrus"
 	v1 "github.com/zekroTJA/ranna/internal/api/v1"
 	"github.com/zekroTJA/ranna/internal/config"
 	"github.com/zekroTJA/ranna/internal/static"
@@ -33,6 +34,7 @@ func NewRestAPI(ctn di.Container) (r *RestAPI, err error) {
 }
 
 func (r *RestAPI) ListenAndServeBlocking() error {
+	logrus.WithFields(logrus.Fields{"addr": r.bindAddress}).Info("Starting REST API")
 	return r.app.Listen(r.bindAddress)
 }
 
