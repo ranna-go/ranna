@@ -16,7 +16,8 @@ func NewEnvProvider(prefix string) *EnvProvider {
 	return &EnvProvider{
 		prefix: prefix,
 		c: &Config{
-			API: &API{},
+			API:       &API{},
+			Resources: &Resources{},
 		},
 	}
 }
@@ -26,12 +27,14 @@ func (ep *EnvProvider) Load() (err error) {
 	ep.c.Debug = ep.getBool("DEBUG", false)
 	ep.c.SpecFile = ep.getString("SPECFILE", "spec/spec.yaml")
 	ep.c.HostRootDir = ep.getString("HOSTROOTDIR", "/var/opt/ranna")
-	ep.c.API.BindAddress = ep.getString("API_BINDADDRESS", ":8080")
-
 	ep.c.ExecutionTimeoutSeconds, err = ep.getInt("EXECUTIONTIMEOUTSECONDS", 20)
 	if err != nil {
 		return
 	}
+
+	ep.c.API.BindAddress = ep.getString("API_BINDADDRESS", ":8080")
+
+	ep.c.Resources.Memory = ep.getString("RESOURCES_MEMORY", "100M")
 
 	return
 }

@@ -5,7 +5,11 @@ import (
 	"strings"
 
 	dockerclient "github.com/fsouza/go-dockerclient"
+	"github.com/sarulabs/di/v2"
+	"github.com/zekroTJA/ranna/internal/config"
 	"github.com/zekroTJA/ranna/internal/sandbox"
+	"github.com/zekroTJA/ranna/internal/static"
+	"github.com/zekroTJA/ranna/internal/util"
 )
 
 const (
@@ -13,11 +17,14 @@ const (
 )
 
 type DockerSandboxProvider struct {
+	cfg    config.Provider
 	client *dockerclient.Client
 }
 
-func NewDockerSandboxProvider() (dsp *DockerSandboxProvider, err error) {
-	dsp = new(DockerSandboxProvider)
+func NewDockerSandboxProvider(ctn di.Container) (dsp *DockerSandboxProvider, err error) {
+	dsp = &DockerSandboxProvider{}
+
+	dsp.cfg = ctn.Get(static.DiConfigProvider).(config.Provider)
 
 	dsp.client, err = dockerclient.NewClientFromEnv()
 	if err != nil {
@@ -39,16 +46,26 @@ func (dsp *DockerSandboxProvider) CreateSandbox(spec sandbox.RunSpec) (sbx sandb
 	}
 
 	workingDir := path.Join(containerRootPath, spec.Subdir)
+	cfg := &dockerclient.Config{
+		Image:           repo + ":" + tag,
+		WorkingDir:      workingDir,
+		Entrypoint:      spec.GetEntrypoint(),
+		Cmd:             spec.GetCommandWithArgs(),
+		Env:             spec.GetEnv(),
+		NetworkDisabled: true,
+	}
+
+	resources := dsp.cfg.Config().Resources
+	if resources != nil {
+		cfg.Memory, err = util.ParseMemoryStr(resources.Memory)
+		if err != nil {
+			return
+		}
+	}
+
 	hostDir := spec.GetAssambledHostDir()
 	container, err := dsp.client.CreateContainer(dockerclient.CreateContainerOptions{
-		Config: &dockerclient.Config{
-			Image:           repo + ":" + tag,
-			WorkingDir:      workingDir,
-			Entrypoint:      spec.GetEntrypoint(),
-			Cmd:             spec.GetCommandWithArgs(),
-			Env:             spec.GetEnv(),
-			NetworkDisabled: true,
-		},
+		Config: cfg,
 		HostConfig: &dockerclient.HostConfig{
 			Binds: []string{hostDir + ":" + workingDir},
 		},

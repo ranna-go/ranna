@@ -37,7 +37,7 @@ func main() {
 	diBuilder.Add(di.Def{
 		Name: static.DiSandboxProvider,
 		Build: func(ctn di.Container) (interface{}, error) {
-			return docker.NewDockerSandboxProvider()
+			return docker.NewDockerSandboxProvider(ctn)
 		},
 	})
 
