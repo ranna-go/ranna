@@ -1,7 +1,9 @@
-go:
+golang:
   image:      'golang:alpine'
   entrypoint: 'go run'
   filename:   'main.go'
+go:
+  use:        'golang'
 
 python3:
   image:      'python:alpine'
@@ -17,6 +19,8 @@ openjdk-11:
   image:      'openjdk:11'
   entrypoint: 'java'
   filename:   'Main.java'
+java:
+  use:        'openjdk-11'
   
 javascript:
   image:      'node:lts-alpine3.13'
