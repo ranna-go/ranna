@@ -63,10 +63,10 @@ func (dsp *DockerSandboxProvider) CreateSandbox(spec sandbox.RunSpec) (sbx sandb
 	resources := dsp.cfg.Config().Resources
 	if resources != nil {
 		hostCfg.Memory, err = util.ParseMemoryStr(resources.Memory)
-		hostCfg.MemorySwap = hostCfg.Memory
 		if err != nil {
 			return
 		}
+		hostCfg.MemorySwap = hostCfg.Memory
 	}
 
 	container, err := dsp.client.CreateContainer(dockerclient.CreateContainerOptions{
