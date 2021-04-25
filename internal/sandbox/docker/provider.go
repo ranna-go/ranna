@@ -58,6 +58,7 @@ func (dsp *DockerSandboxProvider) CreateSandbox(spec sandbox.RunSpec) (sbx sandb
 	resources := dsp.cfg.Config().Resources
 	if resources != nil {
 		cfg.Memory, err = util.ParseMemoryStr(resources.Memory)
+		cfg.MemorySwap = cfg.Memory
 		if err != nil {
 			return
 		}
