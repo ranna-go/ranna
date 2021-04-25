@@ -22,3 +22,8 @@ javascript:
   image:      'node:lts-alpine3.13'
   entrypoint: 'node'
   filename:   'index.js'
+
+elixir:
+  image:      'elixir:alpine'
+  entrypoint: 'elixir'
+  filename:   'main.exs'
