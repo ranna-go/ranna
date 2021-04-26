@@ -9,6 +9,10 @@ python3:
   image:      'python:alpine'
   entrypoint: 'python3'
   filename:   'main.py'
+python:
+  use:        'python3'
+py:
+  use:        'python3'
 
 rust:
   image:      'rust:alpine'
@@ -31,3 +35,12 @@ elixir:
   image:      'elixir:alpine'
   entrypoint: 'elixir'
   filename:   'main.exs'
+
+ash:
+  image:      'alpine:latest'
+  entrypoint: 'ash'
+  filename:   'main.ash'
+bash:
+  use:        'ash'
+sh:
+  use:        'ash'
