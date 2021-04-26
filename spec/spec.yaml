@@ -44,3 +44,8 @@ bash:
   use:        'ash'
 sh:
   use:        'ash'
+
+brainfuck:
+  image:      'esolang/brainfuck-esotope'
+  entrypoint: 'brainfuck-esotope'
+  filename:   'main.bf'
