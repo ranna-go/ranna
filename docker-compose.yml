@@ -23,7 +23,7 @@ services:
     restart: "on-failure"
 
   ranna:
-    image: "ghcr.io/zekrotja/ranna:latest"
+    image: "ghcr.io/ranna-go/ranna:latest"
     environment:
       HOSTROOTDIR:             "/var/opt/ranna"
       API.MAXOUTPUTLEN:        "1M"
