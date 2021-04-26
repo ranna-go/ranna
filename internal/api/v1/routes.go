@@ -26,8 +26,17 @@ func (r *Router) Setup(route fiber.Router, ctn di.Container) {
 	r.spec = ctn.Get(static.DiSpecProvider).(spec.Provider)
 	r.manager = ctn.Get(static.DiSandboxManager).(sandbox.Manager)
 
+	route.Use(r.optionsBypass)
+
 	route.Get("/spec", r.getSpec)
 	route.Post("/exec", r.postExec)
+}
+
+func (r *Router) optionsBypass(ctx *fiber.Ctx) error {
+	if ctx.Method() == "OPTIONS" {
+		return ctx.SendStatus(fiber.StatusOK)
+	}
+	return ctx.Next()
 }
 
 func (r *Router) getSpec(ctx *fiber.Ctx) (err error) {
