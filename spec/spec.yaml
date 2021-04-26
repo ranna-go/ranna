@@ -9,6 +9,10 @@ python3:
   image:      'python:alpine'
   entrypoint: 'python3'
   filename:   'main.py'
+python:
+  use:        'python3'
+py:
+  use:        'python3'
 
 rust:
   image:      'rust:alpine'
@@ -22,12 +26,42 @@ openjdk-11:
 java:
   use:        'openjdk-11'
   
-javascript:
+node:
   image:      'node:lts-alpine3.13'
   entrypoint: 'node'
   filename:   'index.js'
+javascript:
+  use:        'node'
+js:
+  use:        'javascript'
 
 elixir:
   image:      'elixir:alpine'
   entrypoint: 'elixir'
   filename:   'main.exs'
+
+ash:
+  image:      'alpine:latest'
+  entrypoint: 'ash'
+  filename:   'main.ash'
+bash:
+  use:        'ash'
+sh:
+  use:        'ash'
+
+brainfuck:
+  image:      'esolang/brainfuck-esotope:latest'
+  entrypoint: 'brainfuck-esotope'
+  filename:   'main.bf'
+
+cpp:
+  image:      'frolvlad/alpine-gxx:latest'
+  cmd:        '/bin/ash -c "c++ --static main.cpp -o main && ./main"'
+  filename:   'main.cpp'
+c++:
+  use:        'cpp'
+
+c:
+  image:      'frolvlad/alpine-gxx:latest'
+  cmd:        '/bin/ash -c "c++ --static main.c -o main && ./main"'
+  filename:   'main.c'
