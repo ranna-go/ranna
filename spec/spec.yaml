@@ -12,7 +12,7 @@ python3:
 
 rust:
   image:      'rust:alpine'
-  cmd:        'rustc main.rs && ./main'
+  cmd:        '/bin/ash -c "rustc main.rs && ./main"'
   filename:   'main.rs'
 
 openjdk-11:

@@ -3,10 +3,13 @@ package sandbox
 import (
 	"fmt"
 	"path"
+	"regexp"
 	"strings"
 
 	"github.com/zekroTJA/ranna/pkg/models"
 )
+
+var argRx = regexp.MustCompile(`(?:[^\s"]+|"[^"]*")+`)
 
 type RunSpec struct {
 	models.Spec
@@ -22,11 +25,11 @@ func (s RunSpec) GetAssambledHostDir() string {
 }
 
 func (s RunSpec) GetEntrypoint() []string {
-	return strings.Split(s.Entrypoint, " ")
+	return split(s.Entrypoint)
 }
 
 func (s RunSpec) GetCommandWithArgs() []string {
-	cmd := strings.Split(s.Cmd, " ")
+	cmd := split(s.Cmd)
 	return append(cmd, s.Arguments...)
 }
 
@@ -40,5 +43,13 @@ func (s RunSpec) GetEnv() (env []string) {
 		}
 	}
 
+	return
+}
+
+func split(v string) (res []string) {
+	res = argRx.FindAllString(v, -1)
+	for i, v := range res {
+		res[i] = strings.Replace(v, "\"", "", -1)
+	}
 	return
 }
