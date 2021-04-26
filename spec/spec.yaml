@@ -26,10 +26,14 @@ openjdk-11:
 java:
   use:        'openjdk-11'
   
-javascript:
+node:
   image:      'node:lts-alpine3.13'
   entrypoint: 'node'
   filename:   'index.js'
+javascript:
+  use:        'node'
+js:
+  use:        'javascript'
 
 elixir:
   image:      'elixir:alpine'
