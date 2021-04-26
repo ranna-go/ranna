@@ -46,6 +46,18 @@ sh:
   use:        'ash'
 
 brainfuck:
-  image:      'esolang/brainfuck-esotope'
+  image:      'esolang/brainfuck-esotope:latest'
   entrypoint: 'brainfuck-esotope'
   filename:   'main.bf'
+
+cpp:
+  image:      'frolvlad/alpine-gxx:latest'
+  cmd:        '/bin/ash -c "c++ --static main.cpp -o main && ./main"'
+  filename:   'main.cpp'
+c++:
+  use:        'cpp'
+
+c:
+  image:      'frolvlad/alpine-gxx:latest'
+  cmd:        '/bin/ash -c "c++ --static main.c -o main && ./main"'
+  filename:   'main.c'
