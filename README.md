@@ -29,98 +29,11 @@ As you can see, the project is split up in different services.
 
 ## 🚀 Setup
 
-First of all, you need to know that ranna needs access to the docker socket. 
-> This can be done over network, but currently, there is no network file provider implementation to push the source code files to the docker host system.
-
-You can get the binary directly by compiling the source code.
-```
-$ go build -o ranna cmd/ranna/main.go
-```
-
-Or build tzhe provided Docker image.
-```
-$ docker build . -t ranna
-```
-
-But keep in mind, when you are using the Docker image, you need to pass the host's docker socket as volume to the container.
-```
-$ docker run --name ranna \
-    -e RANNA_HOSTROOTDIR=/var/opt/ranna \
-    -v /var/opt/ranna:/var/opt/ranna \
-    -v /var/run/docker.sock:/var/run/docker.sock \
-    -p 8080:8080
-    ranna
-```
-
-The current solution does not use `docker-in-docker`, so, if you use ranna in a Docker container, the specified `RANNA_HOSTROOTDIR` must match the same directory on the host machine. That's why the command above specifies `/var/opt/ranna:/var/opt/ranna` as rootdir volume bind.
+👉 Take a look in the [**wiki**](https://github.com/zekroTJA/ranna/wiki/%F0%9F%9A%80-Setup).
 
 ## 📡 REST API
 
-### `GET /v1/spec`
-
-Returns a map of runner environment specifications where the key is
-the `language` specifier and the value is the `spec`.
-
-```
-> GET /v1/spec HTTP/2
-```
-
-The response of this request will look like following:
-
-```
-< HTTP/2 200 OK
-< Server: ranna
-< Content-Type: application/json
-< Content-Length: 155
-```
-```json
-{
-  "go": {
-    "image": "golang:alpine",
-    "entrypoint": "go run",
-    "filename": "main.go"
-  },
-  "python3": {
-    "image": "python:alpine",
-    "entrypoint": "python3",
-    "filename": "main.py"
-  }
-}
-```
-
-### `POST /v1/exec`
-
-Execute code.
-
-```
-> POST /v1/exec HTTP/2
-> Content-Type: application/json
-```
-```json
-{
-  "language": "python3",
-  "code": "print('Hello world!')",
-  "arguments": ["some", "crazy", "arguments"],
-  "environment": {
-    "MYVAR": "my value"
-  }
-}
-```
-
-The response of this request will look like following:
-
-```
-< HTTP/2 200 OK
-< Server: ranna
-< Content-Type: application/json
-< Content-Length: 39
-```
-```json
-{
-  "stdout": "Hello world!\n",
-  "stderr": ""
-}
-```
+👉 Take a look in the [**wiki**](https://github.com/zekroTJA/ranna/wiki/%F0%9F%93%A1-API).
 
 ### 📦 Client Package
 
