@@ -2,7 +2,9 @@ package docker
 
 import (
 	dockerclient "github.com/fsouza/go-dockerclient"
+	"github.com/zekroTJA/ranna/internal/util"
 	"github.com/zekroTJA/ranna/pkg/cappedbuffer"
+	"github.com/zekroTJA/ranna/pkg/models"
 )
 
 type DockerSandbox struct {
@@ -14,7 +16,7 @@ func (s *DockerSandbox) ID() string {
 	return s.container.ID
 }
 
-func (s *DockerSandbox) Run(bufferCap int) (stdout, stderr string, err error) {
+func (s *DockerSandbox) Run(bufferCap int) (res *models.ExecutionResponse, err error) {
 	buffStdout := cappedbuffer.New([]byte{}, bufferCap)
 	buffStderr := cappedbuffer.New([]byte{}, bufferCap)
 	waiter, err := s.client.AttachToContainerNonBlocking(dockerclient.AttachToContainerOptions{
@@ -34,9 +36,15 @@ func (s *DockerSandbox) Run(bufferCap int) (stdout, stderr string, err error) {
 		return
 	}
 
-	waiter.Wait()
-	stdout = buffStdout.String()
-	stderr = buffStderr.String()
+	execTime := util.MeasureExecTime(func() {
+		waiter.Wait()
+	})
+
+	res = &models.ExecutionResponse{
+		StdOut:     buffStdout.String(),
+		StdErr:     buffStderr.String(),
+		ExecTimeMS: int(execTime.Milliseconds()),
+	}
 	return
 }
 

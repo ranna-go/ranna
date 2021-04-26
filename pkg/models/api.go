@@ -12,6 +12,7 @@ type ExecutionRequest struct {
 // ExecutionResponse is the response
 // model received on execution request.
 type ExecutionResponse struct {
-	StdOut string `json:"stdout"`
-	StdErr string `json:"stderr"`
+	StdOut     string `json:"stdout"`
+	StdErr     string `json:"stderr"`
+	ExecTimeMS int    `json:"exectimems"`
 }

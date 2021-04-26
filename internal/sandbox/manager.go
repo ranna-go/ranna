@@ -150,7 +150,7 @@ func (m *managerImpl) RunInSandbox(req *models.ExecutionRequest) (res *models.Ex
 
 	res = new(models.ExecutionResponse)
 	timedOut := timeout.RunBlockingWithTimeout(func() {
-		res.StdOut, res.StdErr, err = sbx.Run(m.streamBufferCap)
+		res, err = sbx.Run(m.streamBufferCap)
 	}, time.Duration(m.cfg.Config().Sandbox.TimeoutSeconds)*time.Second)
 
 	if err != nil {

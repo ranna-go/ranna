@@ -4,7 +4,7 @@ import "github.com/zekroTJA/ranna/pkg/models"
 
 type Sandbox interface {
 	ID() string
-	Run(bufferCap int) (stdout, stderr string, err error)
+	Run(bufferCap int) (res *models.ExecutionResponse, err error)
 	IsRunning() (bool, error)
 	Kill() error
 	Delete() error

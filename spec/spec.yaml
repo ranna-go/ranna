@@ -36,15 +36,15 @@ js:
   use:        'javascript'
   
 deno:
-  image: 'hayd/alpine-deno:1.5.2'
+  image:      'hayd/alpine-deno:1.5.2'
   entrypoint: 'deno'
-  filename: 'index.ts'
+  filename:   'index.ts'
 
 typescript:
-  use: 'deno'
+  use:        'deno'
 
 ts:
-  use: 'deno'
+  use:        'deno'
 
 elixir:
   image:      'elixir:alpine'
