@@ -13,6 +13,7 @@ import (
 
 var (
 	errOutputLenExceeded = fiber.NewError(fiber.StatusBadRequest, "output len exceeded")
+	errEmptyCode         = fiber.NewError(fiber.StatusBadRequest, "code is empty")
 )
 
 type Router struct {
@@ -47,6 +48,10 @@ func (r *Router) postExec(ctx *fiber.Ctx) (err error) {
 	req := new(models.ExecutionRequest)
 	if err = ctx.BodyParser(req); err != nil {
 		return
+	}
+
+	if req.Code == "" {
+		return errEmptyCode
 	}
 
 	res, err := r.manager.RunInSandbox(req)

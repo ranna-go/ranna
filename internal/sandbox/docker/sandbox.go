@@ -36,7 +36,7 @@ func (s *DockerSandbox) Run(bufferCap int) (res *models.ExecutionResponse, err e
 		return
 	}
 
-	execTime := util.MeasureExecTime(func() {
+	execTime := util.MeasureTime(func() {
 		waiter.Wait()
 	})
 

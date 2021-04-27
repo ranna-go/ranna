@@ -34,7 +34,7 @@ func ParseMemoryStr(s string) (int64, error) {
 	return v * mult, err
 }
 
-func MeasureExecTime(fn func()) time.Duration {
+func MeasureTime(fn func()) time.Duration {
 	start := time.Now()
 	fn()
 	return time.Since(start)

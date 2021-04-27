@@ -76,3 +76,12 @@ c:
   image:      'frolvlad/alpine-gxx:latest'
   cmd:        '/bin/ash -c "c++ --static main.c -o main && ./main"'
   filename:   'main.c'
+
+dotnet:
+  image:      'ghcr.io/ranna-go/dotnet-script:latest'
+  entrypoint: 'dotnet script'
+  filename:   'main.cs'
+c#:
+  use:        'dotnet'
+csharp:
+  use:        'dotnet'
