@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/zekroTJA/ranna/pkg/models"
+	"github.com/ranna-go/ranna/pkg/models"
 )
 
 var argRx = regexp.MustCompile(`(?:[^\s"]+|"[^"]*")+`)

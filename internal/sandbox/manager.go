@@ -6,16 +6,16 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ranna-go/ranna/internal/config"
+	"github.com/ranna-go/ranna/internal/file"
+	"github.com/ranna-go/ranna/internal/namespace"
+	"github.com/ranna-go/ranna/internal/spec"
+	"github.com/ranna-go/ranna/internal/static"
+	"github.com/ranna-go/ranna/internal/util"
+	"github.com/ranna-go/ranna/pkg/models"
+	"github.com/ranna-go/ranna/pkg/timeout"
 	"github.com/sarulabs/di/v2"
 	"github.com/sirupsen/logrus"
-	"github.com/zekroTJA/ranna/internal/config"
-	"github.com/zekroTJA/ranna/internal/file"
-	"github.com/zekroTJA/ranna/internal/namespace"
-	"github.com/zekroTJA/ranna/internal/spec"
-	"github.com/zekroTJA/ranna/internal/static"
-	"github.com/zekroTJA/ranna/internal/util"
-	"github.com/zekroTJA/ranna/pkg/models"
-	"github.com/zekroTJA/ranna/pkg/timeout"
 )
 
 var (

@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/ghodss/yaml"
-	"github.com/zekroTJA/ranna/pkg/models"
+	"github.com/ranna-go/ranna/pkg/models"
 )
 
 type FileProvider struct {

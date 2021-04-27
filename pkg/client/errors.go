@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/zekroTJA/ranna/pkg/models"
+	"github.com/ranna-go/ranna/pkg/models"
 )
 
 // ResponseError is an error which wraps

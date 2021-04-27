@@ -9,7 +9,7 @@ Also, this service allows **arbitrary code execution in Docker containers**. Thi
 
 ## 📃 Todo
 
-👉 Take a look in the [**issue tracker**](https://github.com/zekroTJA/ranna/issues).
+👉 Take a look in the [**issue tracker**](https://github.com/ranna-go/ranna/issues).
 
 ## 🛠 Architecture
 
@@ -29,19 +29,19 @@ As you can see, the project is split up in different services.
 
 ## 🚀 Setup
 
-👉 Take a look in the [**wiki**](https://github.com/zekroTJA/ranna/wiki/%F0%9F%9A%80-Setup).
+👉 Take a look in the [**wiki**](https://github.com/ranna-go/ranna/wiki/%F0%9F%9A%80-Setup).
 
 ## 📡 REST API
 
-👉 Take a look in the [**wiki**](https://github.com/zekroTJA/ranna/wiki/%F0%9F%93%A1-API).
+👉 Take a look in the [**wiki**](https://github.com/ranna-go/ranna/wiki/%F0%9F%93%A1-API).
 
 ### 📦 Client Package
 
-ranna also provides a Go client package available in [`pkg/client`](https://github.com/zekroTJA/ranna/tree/master/pkg/client).
+ranna also provides a Go client package available in [`pkg/client`](https://github.com/ranna-go/ranna/tree/master/pkg/client).
 
-See the simple [example implementation](https://github.com/zekroTJA/ranna/blob/master/examples/client/main.go) how to use the client package.
+See the simple [example implementation](https://github.com/ranna-go/ranna/blob/master/examples/client/main.go) how to use the client package.
 
-[Here](https://pkg.go.dev/github.com/zekroTJA/ranna#section-directories) you can find some handy documentation for the provided packages.
+[Here](https://pkg.go.dev/github.com/ranna-go/ranna#section-directories) you can find some handy documentation for the provided packages.
 
 ---
 

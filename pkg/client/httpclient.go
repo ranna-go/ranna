@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/zekroTJA/ranna/pkg/models"
+	"github.com/ranna-go/ranna/pkg/models"
 )
 
 const (

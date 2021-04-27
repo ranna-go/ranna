@@ -5,13 +5,13 @@ import (
 	"strings"
 
 	dockerclient "github.com/fsouza/go-dockerclient"
+	"github.com/ranna-go/ranna/internal/config"
+	"github.com/ranna-go/ranna/internal/sandbox"
+	"github.com/ranna-go/ranna/internal/static"
+	"github.com/ranna-go/ranna/internal/util"
+	"github.com/ranna-go/ranna/pkg/models"
 	"github.com/sarulabs/di/v2"
 	"github.com/sirupsen/logrus"
-	"github.com/zekroTJA/ranna/internal/config"
-	"github.com/zekroTJA/ranna/internal/sandbox"
-	"github.com/zekroTJA/ranna/internal/static"
-	"github.com/zekroTJA/ranna/internal/util"
-	"github.com/zekroTJA/ranna/pkg/models"
 )
 
 const (

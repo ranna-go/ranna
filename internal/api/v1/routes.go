@@ -2,13 +2,13 @@ package v1
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/ranna-go/ranna/internal/config"
+	"github.com/ranna-go/ranna/internal/sandbox"
+	"github.com/ranna-go/ranna/internal/spec"
+	"github.com/ranna-go/ranna/internal/static"
+	"github.com/ranna-go/ranna/internal/util"
+	"github.com/ranna-go/ranna/pkg/models"
 	"github.com/sarulabs/di/v2"
-	"github.com/zekroTJA/ranna/internal/config"
-	"github.com/zekroTJA/ranna/internal/sandbox"
-	"github.com/zekroTJA/ranna/internal/spec"
-	"github.com/zekroTJA/ranna/internal/static"
-	"github.com/zekroTJA/ranna/internal/util"
-	"github.com/zekroTJA/ranna/pkg/models"
 )
 
 var (
