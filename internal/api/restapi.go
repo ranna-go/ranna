@@ -2,12 +2,12 @@ package api
 
 import (
 	"github.com/gofiber/fiber/v2"
+	v1 "github.com/ranna-go/ranna/internal/api/v1"
+	"github.com/ranna-go/ranna/internal/config"
+	"github.com/ranna-go/ranna/internal/static"
+	"github.com/ranna-go/ranna/pkg/models"
 	"github.com/sarulabs/di/v2"
 	"github.com/sirupsen/logrus"
-	v1 "github.com/zekroTJA/ranna/internal/api/v1"
-	"github.com/zekroTJA/ranna/internal/config"
-	"github.com/zekroTJA/ranna/internal/static"
-	"github.com/zekroTJA/ranna/pkg/models"
 )
 
 type RestAPI struct {

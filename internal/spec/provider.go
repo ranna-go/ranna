@@ -1,6 +1,6 @@
 package spec
 
-import "github.com/zekroTJA/ranna/pkg/models"
+import "github.com/ranna-go/ranna/pkg/models"
 
 type Provider interface {
 	Load() error

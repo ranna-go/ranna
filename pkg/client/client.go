@@ -1,6 +1,6 @@
 package client
 
-import "github.com/zekroTJA/ranna/pkg/models"
+import "github.com/ranna-go/ranna/pkg/models"
 
 // Client provides an API endpoint wrapper
 // for the ranna API.

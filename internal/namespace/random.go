@@ -1,6 +1,6 @@
 package namespace
 
-import "github.com/zekroTJA/ranna/pkg/random"
+import "github.com/ranna-go/ranna/pkg/random"
 
 type RandomProvider struct{}
 

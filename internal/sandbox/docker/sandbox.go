@@ -2,9 +2,9 @@ package docker
 
 import (
 	dockerclient "github.com/fsouza/go-dockerclient"
-	"github.com/zekroTJA/ranna/internal/util"
-	"github.com/zekroTJA/ranna/pkg/cappedbuffer"
-	"github.com/zekroTJA/ranna/pkg/models"
+	"github.com/ranna-go/ranna/internal/util"
+	"github.com/ranna-go/ranna/pkg/cappedbuffer"
+	"github.com/ranna-go/ranna/pkg/models"
 )
 
 type DockerSandbox struct {

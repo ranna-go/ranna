@@ -1,4 +1,4 @@
-module github.com/zekroTJA/ranna
+module github.com/ranna-go/ranna
 
 go 1.16
 

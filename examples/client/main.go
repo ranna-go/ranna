@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 
-	ranna "github.com/zekroTJA/ranna/pkg/client"
-	"github.com/zekroTJA/ranna/pkg/models"
+	ranna "github.com/ranna-go/ranna/pkg/client"
+	"github.com/ranna-go/ranna/pkg/models"
 )
 
 const (
