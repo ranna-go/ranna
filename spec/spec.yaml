@@ -87,6 +87,16 @@ csharp:
   use:        'dotnet'
 
 php:
-  use:        'php:cli-alpine'
+  image:      'php:cli-alpine'
   entrypoint: 'php'
   filename:   'main.php'
+
+ruby:
+  image:      'ruby:alpine'
+  entrypoint: 'ruby'
+  filename:   'main.rb'
+
+haskell:
+  image:      'haskell:buster'
+  cmd:        '/bin/bash -c "ghc -o main main.hs >> /dev/null && ./main"'
+  filename:   'main.hs'
