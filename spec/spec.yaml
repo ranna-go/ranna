@@ -95,3 +95,8 @@ ruby:
   image:      'ruby:alpine'
   entrypoint: 'ruby'
   filename:   'main.rb'
+
+haskell:
+  image:      'haskell:buster'
+  cmd:        '/bin/bash -c "ghc -o main main.hs >> /dev/null && ./main"'
+  filename:   'main.hs'
