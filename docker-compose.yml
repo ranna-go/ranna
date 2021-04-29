@@ -42,7 +42,12 @@ services:
       traefik.http.routers.ranna.tls:                       "true"
       traefik.http.routers.ranna.tls.certresolver:          "le"
       traefik.http.routers.ranna.rule:                      "Host(`example.com`)"
-      traefik.http.routers.ranna.middlewares:               "ranna-rl"
+
+      traefik.http.routers.ranna-limited.entrypoints:       "https"
+      traefik.http.routers.ranna-limited.tls:               "true"
+      traefik.http.routers.ranna-limited.tls.certresolver:  "le"
+      traefik.http.routers.ranna-limited.rule:              "Host(`example.com`) && PathPrefix(`/v1/exec`)"
+      traefik.http.routers.ranna-limited.middlewares:       "ranna-rl"
       traefik.http.middlewares.ranna-rl.ratelimit.average:  "5"
       traefik.http.middlewares.ranna-rl.ratelimit.period:   "1m"
       traefik.http.middlewares.ranna-rl.ratelimit.burst:    "5"
