@@ -10,5 +10,13 @@ DATE="$(TZ='UTC' date) UTC"
     VERSION="c${COMMIT:0:8}"
 }
 
-printf "$VERSION" > "$FILE_LOCATION/version.txt"
-printf "$DATE" > "$FILE_LOCATION/builddate.txt"
+echo "$FILE_LOCATION/version.txt"
+printf "$VERSION" | tee "$FILE_LOCATION/version.txt"
+echo ""
+echo "CHECK: $(cat $FILE_LOCATION/version.txt)"
+
+echo ""
+echo "$FILE_LOCATION/builddate.txt"
+printf "$DATE" | tee "$FILE_LOCATION/builddate.txt"
+echo ""
+echo "CHECK: $(cat $FILE_LOCATION/builddate.txt)"
