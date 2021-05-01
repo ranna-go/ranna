@@ -36,6 +36,18 @@ func NewDockerSandboxProvider(ctn di.Container) (dsp *DockerSandboxProvider, err
 	return
 }
 
+func (dsp DockerSandboxProvider) Info() (v *models.SandboxInfo, err error) {
+	info, err := dsp.client.Info()
+	if err != nil {
+		return
+	}
+	v = &models.SandboxInfo{
+		Type:    "docker",
+		Version: info.ServerVersion,
+	}
+	return
+}
+
 func (dsp DockerSandboxProvider) Prepare(spec models.Spec) (err error) {
 	repo, tag := getImage(spec.Image)
 

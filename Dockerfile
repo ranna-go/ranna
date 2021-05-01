@@ -5,6 +5,10 @@ COPY internal/ internal/
 COPY pkg/ pkg/
 COPY go.mod .
 COPY go.sum .
+COPY scripts/ scripts/
+COPY .git/ .git/
+RUN apk add git
+RUN sh ./scripts/populateinfo.sh
 RUN go build -o ranna cmd/ranna/main.go
 
 FROM alpine:latest AS final

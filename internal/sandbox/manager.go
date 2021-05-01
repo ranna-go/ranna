@@ -27,6 +27,7 @@ type Manager interface {
 	RunInSandbox(req *models.ExecutionRequest) (res *models.ExecutionResponse, err error)
 	PrepareEnvironments() []error
 	TryCleanup() []error
+	GetProvider() Provider
 }
 
 type managerImpl struct {
@@ -190,6 +191,10 @@ func (m *managerImpl) TryCleanup() (errs []error) {
 	})
 
 	return
+}
+
+func (m *managerImpl) GetProvider() Provider {
+	return m.sandbox
 }
 
 func (m *managerImpl) killAndCleanUp(w *sandboxWrapper) (err error) {

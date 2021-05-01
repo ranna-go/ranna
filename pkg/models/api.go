@@ -16,3 +16,15 @@ type ExecutionResponse struct {
 	StdErr     string `json:"stderr"`
 	ExecTimeMS int    `json:"exectimems"`
 }
+
+type SandboxInfo struct {
+	Type    string `json:"type"`
+	Version string `json:"version"`
+}
+
+type SystemInfo struct {
+	Version     string       `json:"version"`
+	BuildDate   string       `json:"builddate"`
+	GoVersion   string       `json:"go_version"`
+	SandboxInfo *SandboxInfo `json:"sandbox"`
+}

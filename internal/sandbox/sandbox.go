@@ -13,4 +13,5 @@ type Sandbox interface {
 type Provider interface {
 	Prepare(spec models.Spec) error
 	CreateSandbox(spec RunSpec) (Sandbox, error)
+	Info() (*models.SandboxInfo, error)
 }

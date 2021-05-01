@@ -1,6 +1,8 @@
 package v1
 
 import (
+	"runtime"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/ranna-go/ranna/internal/config"
 	"github.com/ranna-go/ranna/internal/sandbox"
@@ -31,6 +33,7 @@ func (r *Router) Setup(route fiber.Router, ctn di.Container) {
 
 	route.Get("/spec", r.getSpec)
 	route.Post("/exec", r.postExec)
+	route.Get("/info", r.getInfo)
 }
 
 func (r *Router) optionsBypass(ctx *fiber.Ctx) error {
@@ -38,6 +41,20 @@ func (r *Router) optionsBypass(ctx *fiber.Ctx) error {
 		return ctx.SendStatus(fiber.StatusOK)
 	}
 	return ctx.Next()
+}
+
+func (r *Router) getInfo(ctx *fiber.Ctx) (err error) {
+	sandboxInfo, err := r.manager.GetProvider().Info()
+	if err != nil {
+		return
+	}
+	info := &models.SystemInfo{
+		SandboxInfo: sandboxInfo,
+		Version:     static.Version,
+		BuildDate:   static.BuildDate,
+		GoVersion:   runtime.Version(),
+	}
+	return ctx.JSON(info)
 }
 
 func (r *Router) getSpec(ctx *fiber.Ctx) (err error) {
