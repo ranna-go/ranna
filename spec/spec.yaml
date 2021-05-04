@@ -53,7 +53,7 @@ elixir:
 
 ash:
   image:      'alpine:latest'
-  entrypoint: 'ash'
+  cmd:        '/bin/ash -c "sleep 0.05; /bin/ash main.ash"'
   filename:   'main.ash'
 bash:
   use:        'ash'
