@@ -150,20 +150,33 @@ func scheduleTasks(ctn di.Container) (err error) {
 	cfg := ctn.Get(static.DiConfigProvider).(config.Provider)
 	sched := ctn.Get(static.DiScheduler).(scheduler.Scheduler)
 	mgr := ctn.Get(static.DiSandboxManager).(sandbox.Manager)
+	specProvider := ctn.Get(static.DiSpecProvider).(spec.Provider)
 
-	schedule := func(name, spec string) (err error) {
+	schedule := func(name, spec string, job func()) (err error) {
 		if spec != "" {
 			logrus.WithField("name", name).WithField("spec", spec).Info("Scheduling job")
-			_, err = sched.Schedule(spec, func() {
-				logrus.Info("Updating spec environments ...")
-				mgr.PrepareEnvironments(true)
-			})
+			_, err = sched.Schedule(spec, job)
 		}
 		return
 	}
 
 	spec := cfg.Config().Scheduler.UpdateImages
-	if err = schedule("update spec environments", spec); err != nil {
+	if err = schedule("update spec environments", spec, func() {
+		logrus.Info("Updating spec environments ...")
+		defer logrus.Info("Updating spec finished")
+		mgr.PrepareEnvironments(true)
+	}); err != nil {
+		return
+	}
+
+	spec = cfg.Config().Scheduler.UpdateSpecs
+	if err = schedule("update specs", spec, func() {
+		if err = specProvider.Load(); err != nil {
+			logrus.WithError(err).Error("Failed loading specs")
+		} else {
+			logrus.Info("Specs updated")
+		}
+	}); err != nil {
 		return
 	}
 

@@ -19,6 +19,7 @@ type Sandbox struct {
 
 type Scheduler struct {
 	UpdateImages string `config:"scheduler.updateimages" json:"updateimages" yaml:"updateimages"`
+	UpdateSpecs  string `config:"scheduler.updatespecs" json:"updatespecs" yaml:"updatespecs"`
 }
 
 type Config struct {
@@ -53,5 +54,6 @@ var defaults = Config{
 	},
 	Scheduler: Scheduler{
 		UpdateImages: "0 3 * * *",
+		UpdateSpecs:  "",
 	},
 }
