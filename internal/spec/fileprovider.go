@@ -1,47 +1,26 @@
 package spec
 
 import (
-	"encoding/json"
-	"errors"
 	"os"
 	"path"
 	"strings"
-
-	"github.com/ghodss/yaml"
-	"github.com/ranna-go/ranna/pkg/models"
 )
 
 type FileProvider struct {
+	*baseProvider
 	fileName string
-	m        models.SpecMap
 }
 
 func NewFileProvider(fileName string) *FileProvider {
-	return &FileProvider{fileName: fileName, m: nil}
+	return &FileProvider{baseProvider: newBaseProvider(), fileName: fileName}
 }
 
 func (fp *FileProvider) Load() (err error) {
-	var unmarshaller func([]byte, interface{}) error
-
-	switch strings.ToLower(path.Ext(fp.fileName)) {
-	case ".yml", ".yaml":
-		unmarshaller = yaml.Unmarshal
-	case ".json":
-		unmarshaller = json.Unmarshal
-	default:
-		err = errors.New("unsupported file type")
-		return
-	}
-
 	data, err := os.ReadFile(fp.fileName)
 	if err != nil {
 		return
 	}
 
-	err = unmarshaller(data, &fp.m)
+	err = fp.parseAndSet(data, strings.ToLower(path.Ext(fp.fileName)))
 	return
-}
-
-func (fp *FileProvider) Spec() models.SpecMap {
-	return fp.m
 }

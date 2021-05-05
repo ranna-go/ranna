@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"github.com/joho/godotenv"
@@ -36,7 +37,13 @@ func main() {
 		Name: static.DiSpecProvider,
 		Build: func(ctn di.Container) (interface{}, error) {
 			cfg := ctn.Get(static.DiConfigProvider).(config.Provider)
-			p := spec.NewFileProvider(cfg.Config().SpecFile)
+			specFile := cfg.Config().SpecFile
+			var p spec.Provider
+			if strings.HasPrefix(specFile, "https://") || strings.HasPrefix(specFile, "http://") {
+				p = spec.NewHttpProvider(specFile)
+			} else {
+				p = spec.NewFileProvider(specFile)
+			}
 			return p, p.Load()
 		},
 	})
