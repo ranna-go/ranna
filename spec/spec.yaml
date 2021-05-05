@@ -100,3 +100,8 @@ haskell:
   image:      'haskell:buster'
   cmd:        '/bin/bash -c "ghc -o main main.hs >> /dev/null && ./main"'
   filename:   'main.hs'
+
+dart:
+  image:      'google/dart:latest'
+  entrypoint: 'dart'
+  filename:   'main.dart'
