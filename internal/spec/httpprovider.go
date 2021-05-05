@@ -2,6 +2,7 @@ package spec
 
 import (
 	"fmt"
+	"io"
 	"mime"
 	"net/http"
 	"path"
@@ -26,8 +27,8 @@ func (hp *HttpProvider) Load() (err error) {
 		return fmt.Errorf("request failed: %d", res.StatusCode)
 	}
 
-	var buf []byte
-	if _, err = res.Body.Read(buf); err != nil {
+	buf, err := io.ReadAll(res.Body)
+	if err != nil {
 		return
 	}
 
