@@ -17,20 +17,28 @@ type Sandbox struct {
 	StreamBufferCap string `config:"sandbox.streambuffercap" json:"streambuffercap" yaml:"streambuffercap"`
 }
 
-type Config struct {
-	Debug       bool   `config:"debug" json:"debug" yaml:"debug"`
-	SpecFile    string `config:"specfile" json:"specfile" yaml:"specfile"`
-	HostRootDir string `config:"hostrootdir" json:"hostrootdir" yaml:"hostrootdir"`
+type Scheduler struct {
+	UpdateImages string `config:"scheduler.updateimages" json:"updateimages" yaml:"updateimages"`
+}
 
-	Log     Log     `json:"log" yaml:"log"`
-	API     API     `json:"api" yaml:"api"`
-	Sandbox Sandbox `json:"sandbox" yaml:"sandbox"`
+type Config struct {
+	Debug           bool   `config:"debug" json:"debug" yaml:"debug"`
+	SpecFile        string `config:"specfile" json:"specfile" yaml:"specfile"`
+	HostRootDir     string `config:"hostrootdir" json:"hostrootdir" yaml:"hostrootdir"`
+	SkipStartupPrep bool   `config:"skipstartupprep" json:"skipstartupprep" yaml:"skipstartupprep"`
+
+	Log       Log       `json:"log" yaml:"log"`
+	API       API       `json:"api" yaml:"api"`
+	Sandbox   Sandbox   `json:"sandbox" yaml:"sandbox"`
+	Scheduler Scheduler `json:"scheduler" yaml:"scheduler"`
 }
 
 var defaults = Config{
-	Debug:       false,
-	SpecFile:    "spec/spec.yaml",
-	HostRootDir: "/var/opt/ranna",
+	Debug:           false,
+	SpecFile:        "spec/spec.yaml",
+	HostRootDir:     "/var/opt/ranna",
+	SkipStartupPrep: false,
+
 	Log: Log{
 		Level: int(logrus.InfoLevel),
 	},
@@ -42,5 +50,8 @@ var defaults = Config{
 		Memory:          "100M",
 		TimeoutSeconds:  20,
 		StreamBufferCap: "50M",
+	},
+	Scheduler: Scheduler{
+		UpdateImages: "0 3 * * *",
 	},
 }

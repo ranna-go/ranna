@@ -12,6 +12,7 @@ import (
 	"github.com/ranna-go/ranna/internal/namespace"
 	"github.com/ranna-go/ranna/internal/sandbox"
 	"github.com/ranna-go/ranna/internal/sandbox/docker"
+	"github.com/ranna-go/ranna/internal/scheduler"
 	"github.com/ranna-go/ranna/internal/spec"
 	"github.com/ranna-go/ranna/internal/static"
 	"github.com/sarulabs/di/v2"
@@ -93,6 +94,20 @@ func main() {
 		},
 	})
 
+	diBuilder.Add(di.Def{
+		Name: static.DiScheduler,
+		Build: func(ctn di.Container) (interface{}, error) {
+			sched := scheduler.NewCronScheduler()
+			sched.Start()
+			return sched, nil
+		},
+		Close: func(obj interface{}) error {
+			sched := obj.(scheduler.Scheduler)
+			sched.Stop()
+			return nil
+		},
+	})
+
 	ctn := diBuilder.Build()
 
 	cfg := ctn.Get(static.DiConfigProvider).(config.Provider)
@@ -101,9 +116,17 @@ func main() {
 		ForceColors: cfg.Config().Debug,
 	})
 
-	mgr := ctn.Get(static.DiSandboxManager).(sandbox.Manager)
-	logrus.Info("prepare environments ...")
-	mgr.PrepareEnvironments()
+	if !cfg.Config().SkipStartupPrep {
+		mgr := ctn.Get(static.DiSandboxManager).(sandbox.Manager)
+		logrus.Info("Prepare spec environments ...")
+		mgr.PrepareEnvironments(true)
+	} else {
+		logrus.Warn("Skipping spec preparation on startup")
+	}
+
+	if err := scheduleTasks(ctn); err != nil {
+		logrus.WithError(err).Fatal("failed scheduling job")
+	}
 
 	api := ctn.Get(static.DiAPI).(api.API)
 	go api.ListenAndServeBlocking()
@@ -114,4 +137,28 @@ func main() {
 
 	// Tear down dependency instances
 	ctn.DeleteWithSubContainers()
+}
+
+func scheduleTasks(ctn di.Container) (err error) {
+	cfg := ctn.Get(static.DiConfigProvider).(config.Provider)
+	sched := ctn.Get(static.DiScheduler).(scheduler.Scheduler)
+	mgr := ctn.Get(static.DiSandboxManager).(sandbox.Manager)
+
+	schedule := func(name, spec string) (err error) {
+		if spec != "" {
+			logrus.WithField("name", name).WithField("spec", spec).Info("Scheduling job")
+			_, err = sched.Schedule(spec, func() {
+				logrus.Info("Updating spec environments ...")
+				mgr.PrepareEnvironments(true)
+			})
+		}
+		return
+	}
+
+	spec := cfg.Config().Scheduler.UpdateImages
+	if err = schedule("update spec environments", spec); err != nil {
+		return
+	}
+
+	return
 }

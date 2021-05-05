@@ -25,7 +25,7 @@ var (
 
 type Manager interface {
 	RunInSandbox(req *models.ExecutionRequest) (res *models.ExecutionResponse, err error)
-	PrepareEnvironments() []error
+	PrepareEnvironments(force bool) []error
 	TryCleanup() []error
 	GetProvider() Provider
 }
@@ -75,14 +75,14 @@ func NewManager(ctn di.Container) (m *managerImpl, err error) {
 	return
 }
 
-func (m *managerImpl) PrepareEnvironments() (errs []error) {
+func (m *managerImpl) PrepareEnvironments(force bool) (errs []error) {
 	errs = []error{}
 
 	for _, spec := range m.spec.Spec() {
 		if spec.Image == "" {
 			continue
 		}
-		if err := m.sandbox.Prepare(*spec); err != nil {
+		if err := m.sandbox.Prepare(*spec, force); err != nil {
 			logrus.WithField("image", spec.Image).WithError(err).Error("failed preparing env")
 			errs = append(errs, err)
 		}

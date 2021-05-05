@@ -48,10 +48,14 @@ func (dsp DockerSandboxProvider) Info() (v *models.SandboxInfo, err error) {
 	return
 }
 
-func (dsp DockerSandboxProvider) Prepare(spec models.Spec) (err error) {
+func (dsp DockerSandboxProvider) Prepare(spec models.Spec, force bool) (err error) {
 	repo, tag := getImage(spec.Image)
 
-	_, err = dsp.client.InspectImage(repo + ":" + tag)
+	if force {
+		err = dockerclient.ErrNoSuchImage
+	} else {
+		_, err = dsp.client.InspectImage(repo + ":" + tag)
+	}
 	if err == dockerclient.ErrNoSuchImage {
 		logrus.WithFields(logrus.Fields{
 			"repo": repo,
@@ -70,7 +74,7 @@ func (dsp DockerSandboxProvider) Prepare(spec models.Spec) (err error) {
 func (dsp *DockerSandboxProvider) CreateSandbox(spec sandbox.RunSpec) (sbx sandbox.Sandbox, err error) {
 	repo, tag := getImage(spec.Image)
 
-	err = dsp.Prepare(spec.Spec)
+	err = dsp.Prepare(spec.Spec, false)
 	if err != nil {
 		return
 	}

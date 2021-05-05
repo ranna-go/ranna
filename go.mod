@@ -15,6 +15,7 @@ require (
 	github.com/heetch/confita v0.10.0
 	github.com/joho/godotenv v1.3.0
 	github.com/klauspost/compress v1.12.1 // indirect
+	github.com/robfig/cron/v3 v3.0.1
 	github.com/sarulabs/di/v2 v2.4.2
 	github.com/sirupsen/logrus v1.8.1
 	github.com/valyala/tcplisten v1.0.0 // indirect

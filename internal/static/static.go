@@ -8,4 +8,5 @@ const (
 	DiAPI               = "apiservice"
 	DiFileProvider      = "fileprovider"
 	DiNamespaceProvider = "namespaceprovider"
+	DiScheduler         = "scheduler"
 )
