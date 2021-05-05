@@ -36,7 +36,7 @@ func TestSpec(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	recSpec, ok := recSpecMap.Get("go")
+	recSpec, ok := recSpecMap["go"]
 	if !ok {
 		t.Error("could not recover spec map entry")
 	}

@@ -58,7 +58,7 @@ func (r *Router) getInfo(ctx *fiber.Ctx) (err error) {
 }
 
 func (r *Router) getSpec(ctx *fiber.Ctx) (err error) {
-	return ctx.JSON(r.spec.Spec())
+	return ctx.JSON(r.spec.Spec().GetSnapshot())
 }
 
 func (r *Router) postExec(ctx *fiber.Ctx) (err error) {

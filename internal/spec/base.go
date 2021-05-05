@@ -10,11 +10,11 @@ import (
 )
 
 type baseProvider struct {
-	m models.SpecMap
+	m *SafeSpecMap
 }
 
 func newBaseProvider() *baseProvider {
-	return &baseProvider{m: make(models.SpecMap)}
+	return &baseProvider{m: nil}
 }
 
 func (p *baseProvider) parseAndSet(data []byte, format string) (err error) {
@@ -34,10 +34,12 @@ func (p *baseProvider) parseAndSet(data []byte, format string) (err error) {
 		return
 	}
 
-	err = unmarshaller(data, &p.m)
+	m := make(models.SpecMap)
+	err = unmarshaller(data, &m)
+	p.m = NewSafeSpecMap(m)
 	return
 }
 
-func (p *baseProvider) Spec() models.SpecMap {
+func (p *baseProvider) Spec() *SafeSpecMap {
 	return p.m
 }

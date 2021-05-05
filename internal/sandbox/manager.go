@@ -78,7 +78,7 @@ func NewManager(ctn di.Container) (m *managerImpl, err error) {
 func (m *managerImpl) PrepareEnvironments(force bool) (errs []error) {
 	errs = []error{}
 
-	for _, spec := range m.spec.Spec() {
+	for _, spec := range m.spec.Spec().GetSnapshot() {
 		if spec.Image == "" {
 			continue
 		}

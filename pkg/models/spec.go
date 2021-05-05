@@ -12,25 +12,3 @@ type Spec struct {
 
 // SpecMap wraps a map[string]*Spec.
 type SpecMap map[string]*Spec
-
-func (m SpecMap) get(key string, isAlias bool) (s Spec, ok bool) {
-	sp, ok := m[key]
-	if !ok {
-		return
-	}
-
-	if sp.Use != "" {
-		if isAlias {
-			ok = false
-			return
-		}
-		return m.get(sp.Use, true)
-	}
-
-	s = *sp
-	return
-}
-
-func (m SpecMap) Get(key string) (Spec, bool) {
-	return m.get(key, false)
-}
