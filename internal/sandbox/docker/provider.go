@@ -86,7 +86,7 @@ func (dsp *DockerSandboxProvider) CreateSandbox(spec sandbox.RunSpec) (sbx sandb
 		Entrypoint:      spec.GetEntrypoint(),
 		Cmd:             spec.GetCommandWithArgs(),
 		Env:             spec.GetEnv(),
-		NetworkDisabled: true,
+		NetworkDisabled: !dsp.cfg.Config().Sandbox.EnableNetworking,
 	}
 
 	hostDir := spec.GetAssambledHostDir()

@@ -123,6 +123,10 @@ func main() {
 		ForceColors: cfg.Config().Debug,
 	})
 
+	if cfg.Config().Sandbox.EnableNetworking {
+		logrus.Warn("ATTENTION: Sandbox Networking is enabled by config! This is a high security risk!")
+	}
+
 	if !cfg.Config().SkipStartupPrep {
 		mgr := ctn.Get(static.DiSandboxManager).(sandbox.Manager)
 		logrus.Info("Prepare spec environments ...")
