@@ -91,7 +91,8 @@ func (dsp *DockerSandboxProvider) CreateSandbox(spec sandbox.RunSpec) (sbx sandb
 
 	hostDir := spec.GetAssambledHostDir()
 	hostCfg := &dockerclient.HostConfig{
-		Binds: []string{hostDir + ":" + workingDir},
+		Binds:   []string{hostDir + ":" + workingDir},
+		Runtime: dsp.cfg.Config().Sandbox.Runtime,
 	}
 
 	hostCfg.Memory, err = util.ParseMemoryStr(dsp.cfg.Config().Sandbox.Memory)

@@ -12,6 +12,7 @@ type API struct {
 }
 
 type Sandbox struct {
+	Runtime         string `config:"sandbox.runtime" json:"runtime" yaml:"runtime"`
 	Memory          string `config:"sandbox.memory" json:"memory" yaml:"memory"`
 	TimeoutSeconds  int    `config:"sandbox.timeoutseconds" json:"executiontimeoutseconds" yaml:"executiontimeoutseconds"`
 	StreamBufferCap string `config:"sandbox.streambuffercap" json:"streambuffercap" yaml:"streambuffercap"`
@@ -48,6 +49,7 @@ var defaults = Config{
 		MaxOutputLen: "1M",
 	},
 	Sandbox: Sandbox{
+		Runtime:         "",
 		Memory:          "100M",
 		TimeoutSeconds:  20,
 		StreamBufferCap: "50M",
