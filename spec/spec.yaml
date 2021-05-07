@@ -77,7 +77,7 @@ c:
   cmd:        '/bin/ash -c "c++ --static main.c -o main && ./main"'
   filename:   'main.c'
 
-dotnet:
+mono:
   image:      'mono'
   cmd:        '/bin/sh -c "mcs main.cs && mono main.exe"'
   filename:   'main.cs'
@@ -85,6 +85,13 @@ c#:
   use:        'dotnet'
 csharp:
   use:        'dotnet'
+
+dotnet-script:
+  image:      'ghcr.io/ranna-go/dotnet-script:latest'
+  entrypoint: 'dotnet script'
+  filename:   'main.csx'
+csx:
+  use:        'dotnet-script'
 
 php:
   image:      'php:cli-alpine'
