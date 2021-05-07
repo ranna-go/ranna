@@ -34,13 +34,17 @@ func (s RunSpec) GetCommandWithArgs() []string {
 }
 
 func (s RunSpec) GetEnv() (env []string) {
-	if s.Environment != nil {
-		env = make([]string, len(s.Environment))
-		i := 0
-		for k, v := range s.Environment {
-			env[i] = fmt.Sprintf(`%s=%s`, k, v)
-			i++
-		}
+	if s.Environment == nil {
+		s.Environment = make(map[string]string)
+	}
+
+	s.Environment["RANNA_HOSTDIR"] = s.HostDir
+
+	env = make([]string, len(s.Environment))
+	i := 0
+	for k, v := range s.Environment {
+		env[i] = fmt.Sprintf(`%s=%s`, k, v)
+		i++
 	}
 
 	return
