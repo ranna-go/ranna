@@ -82,9 +82,9 @@ mono:
   cmd:        '/bin/sh -c "mcs main.cs && mono main.exe"'
   filename:   'main.cs'
 c#:
-  use:        'dotnet'
+  use:        'mono'
 csharp:
-  use:        'dotnet'
+  use:        'mono'
 
 dotnet-script:
   image:      'ghcr.io/ranna-go/dotnet-script:latest'
