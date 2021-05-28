@@ -112,3 +112,10 @@ dart:
   image:      'google/dart:latest'
   entrypoint: 'dart'
   filename:   'main.dart'
+
+pascal:
+  image:      'frolvlad/alpine-fpc:latest'
+  cmd:        '/bin/ash -c "fpc main.pas >> /dev/null && ./main"'
+  filename:   'main.pas'
+fpc:
+  use:        'pascal'
