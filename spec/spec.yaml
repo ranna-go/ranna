@@ -25,6 +25,15 @@ openjdk-11:
   filename:   'Main.java'
 java:
   use:        'openjdk-11'
+
+kotlin:
+  image: 'schlaubiboy/kotlin:1.5.10'
+  filename: 'main.kt'
+  entrypoint: 'kotlinc main.kt && java MainKt'
+kotlin-script:
+  image: 'schlaubiboy/kotlin:1.5.10'
+  filename: 'main.kts'
+  entrypoint: 'kotlinc -script main.kts'
   
 node:
   image:      'node:lts-alpine3.13'
