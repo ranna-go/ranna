@@ -71,12 +71,7 @@ func main() {
 	diBuilder.Add(di.Def{
 		Name: static.DiFileProvider,
 		Build: func(ctn di.Container) (v interface{}, err error) {
-			cfg := ctn.Get(static.DiConfigProvider).(config.Provider)
-			if cfg.Config().Debug {
-				v = file.NewDummyFileProvider()
-			} else {
-				v = file.NewLocalFileProvider()
-			}
+			v = file.NewLocalFileProvider()
 			return
 		},
 	})
@@ -91,12 +86,7 @@ func main() {
 	diBuilder.Add(di.Def{
 		Name: static.DiNamespaceProvider,
 		Build: func(ctn di.Container) (v interface{}, err error) {
-			cfg := ctn.Get(static.DiConfigProvider).(config.Provider)
-			if cfg.Config().Debug {
-				v = namespace.NewDummyProvider("test1")
-			} else {
-				v = namespace.NewRandomProvider()
-			}
+			v = namespace.NewRandomProvider()
 			return
 		},
 	})
