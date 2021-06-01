@@ -27,13 +27,13 @@ java:
   use:        'openjdk-11'
 
 kotlin:
-  image: 'schlaubiboy/kotlin:1.5.10'
+  image: 'schlaubiboy/kotlin:1.5.10-alpine'
   filename: 'main.kt'
-  entrypoint: 'kotlinc main.kt && java MainKt'
+  cmd: '/bin/ash -c "kotlinc main.kt -include-runtime -d main.jar && java -jar main.jar"'
 kotlin-script:
   image: 'schlaubiboy/kotlin:1.5.10'
   filename: 'main.kts'
-  entrypoint: 'kotlinc -script main.kts'
+  entrypoint: 'kotlinc -script'
   
 node:
   image:      'node:lts-alpine3.13'
