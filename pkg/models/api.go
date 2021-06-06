@@ -17,11 +17,15 @@ type ExecutionResponse struct {
 	ExecTimeMS int    `json:"exectimems"`
 }
 
+// SandboxInfo wraps information about the
+// used sandbox driver.
 type SandboxInfo struct {
 	Type    string `json:"type"`
 	Version string `json:"version"`
 }
 
+// SystemInfo wraps general information about
+// the ranna deployment.
 type SystemInfo struct {
 	Version     string       `json:"version"`
 	BuildDate   string       `json:"builddate"`

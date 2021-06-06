@@ -33,6 +33,10 @@ func New(buf []byte, cap int) *CappedBuffer {
 	}
 }
 
+// Write writes p to the internal buffer if the length
+// of the internal buffer + len(p) is not larger than
+// the specified cap. Otherwise, ErrBufferOverflow is
+// returned.
 func (cb *CappedBuffer) Write(p []byte) (n int, err error) {
 	if cb.cap > 0 && cb.Len()+len(p) > cb.cap {
 		return 0, ErrBufferOverflow

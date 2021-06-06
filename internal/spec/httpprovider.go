@@ -9,11 +9,15 @@ import (
 	"strings"
 )
 
+// HttpProviders implements Provider for fetching
+// spec definitions over an HTTP endpoint.
 type HttpProvider struct {
 	*baseProvider
 	url string
 }
 
+// NewHttpProvider initializes a new HttpProvider
+// fetching from the given resource url.
 func NewHttpProvider(url string) *HttpProvider {
 	return &HttpProvider{baseProvider: newBaseProvider(), url: url}
 }
