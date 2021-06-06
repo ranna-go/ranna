@@ -6,10 +6,13 @@ import (
 	"github.com/robfig/cron/v3"
 )
 
+// CronScheduler implements scheduler using
+// a cron-like schedule spec syntax.
 type CronScheduler struct {
 	c *cron.Cron
 }
 
+// NewCronScheduler returns a new CronScheduler instance.
 func NewCronScheduler() *CronScheduler {
 	return &CronScheduler{
 		c: cron.New(),
