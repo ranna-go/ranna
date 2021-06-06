@@ -63,7 +63,7 @@ func main() {
 		Close: func(obj interface{}) error {
 			logrus.Info("cleaning up running sandboxes ...")
 			m := obj.(sandbox.Manager)
-			m.TryCleanup()
+			m.Cleanup()
 			return nil
 		},
 	})

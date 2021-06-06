@@ -66,7 +66,7 @@ func TestParseMemoryStr(t *testing.T) {
 
 func TestMeasureTime(t *testing.T) {
 	d := MeasureTime(func() {})
-	if d != 0 {
+	if d > 10*time.Millisecond {
 		t.Errorf("%s delay measured, expected: 0", d)
 	}
 

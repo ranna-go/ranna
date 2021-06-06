@@ -11,6 +11,11 @@ import (
 
 var argRx = regexp.MustCompile(`(?:[^\s"]+|"[^"]*")+`)
 
+// RunSpec wraps a spec and extends runtime
+// information like arguments and environment variables
+// passed to the sandbox as well as the subdir and
+// host dir used to inject the code snippet into
+// the sandbox.
 type RunSpec struct {
 	models.Spec
 
@@ -20,19 +25,29 @@ type RunSpec struct {
 	HostDir     string            `json:"hostdir,omitempty" yaml:"hostdir,omitempty"`
 }
 
+// GetAssambledHostDir returns the joined directory
+// of host dir and sub dir.
 func (s RunSpec) GetAssambledHostDir() string {
 	return path.Join(s.HostDir, s.Subdir)
 }
 
+// GetEntrypoint splits the entrypoint specification
+// to a string array and returns it.
 func (s RunSpec) GetEntrypoint() []string {
 	return split(s.Entrypoint)
 }
 
+// GetCommandWithArgs splits the cmd specification
+// (if passed) and appends given arguments.
 func (s RunSpec) GetCommandWithArgs() []string {
 	cmd := split(s.Cmd)
 	return append(cmd, s.Arguments...)
 }
 
+// GetEnv assembles the environment variable map to
+// a key-value string array.
+//
+// Also, the RANNA_HOSTDIR env variable is added here.
 func (s RunSpec) GetEnv() (env []string) {
 	if s.Environment == nil {
 		s.Environment = make(map[string]string)

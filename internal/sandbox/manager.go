@@ -23,10 +23,34 @@ var (
 	errTimedOut             = errors.New("code execution timed out")
 )
 
+// Manager is a higher level abstraction used to create and
+// run sandboxes, prepare the environment for given specs and
+// cleaning up running containers on teardown.
 type Manager interface {
+
+	// RunInSandbox tries to extract the desired spec
+	// to be used defined by the req. Then, a new sandbox
+	// is created with this spec and given runtime variables.
+	// The sandbox is then started and the current go routine is
+	// blocked until the execution is finished or timed out.
+	//
+	// On success, an execution response is returned.
 	RunInSandbox(req *models.ExecutionRequest) (res *models.ExecutionResponse, err error)
+
+	// PrepareEnvironment prepares the sandbox environment for
+	// faster first time creation of sandboxes.
+	//
+	// This pulls required images, for example.
+	//
+	// If force is true, the environment is being prepared even
+	// though it has been already prepared before. This is useful
+	// to perform image updates, for example.
 	PrepareEnvironments(force bool) []error
-	TryCleanup() []error
+
+	// Cleanup tries to kill and delete all running sandboxes.
+	Cleanup() []error
+
+	// GetProvider returns the utilized sandbox provider instance.
 	GetProvider() Provider
 }
 
@@ -175,7 +199,7 @@ func (m *managerImpl) RunInSandbox(req *models.ExecutionRequest) (res *models.Ex
 	return
 }
 
-func (m *managerImpl) TryCleanup() (errs []error) {
+func (m *managerImpl) Cleanup() (errs []error) {
 	m.isCleanup = true
 	errs = []error{}
 
