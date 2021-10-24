@@ -23,8 +23,14 @@ openjdk-11:
   image:      'openjdk:11'
   entrypoint: 'java'
   filename:   'Main.java'
+
+openjdk-17:
+  image:      'openjdk:17'
+  entrypoint: 'java'
+  filename:   'Main.java'
+
 java:
-  use:        'openjdk-11'
+  use:        'openjdk-17'
 
 kotlin:
   image: 'schlaubiboy/kotlin:1.5.10-alpine'
