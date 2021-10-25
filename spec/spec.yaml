@@ -1,23 +1,102 @@
+ash:
+  image:      'alpine:latest'
+  cmd:        '/bin/ash -c "sleep 0.05; /bin/ash main.ash"'
+  filename:   'main.ash'
+
+bash:
+  use:        'ash'
+
+brainfuck:
+  image:      'esolang/brainfuck-esotope:latest'
+  entrypoint: 'brainfuck-esotope'
+  filename:   'main.bf'
+
+c:
+  image:      'frolvlad/alpine-gxx:latest'
+  cmd:        '/bin/ash -c "c++ --static main.c -o main && ./main"'
+  filename:   'main.c'
+
+c#:
+  use:        'mono'
+
+c++:
+  use:        'cpp'
+
+cpp:
+  image:      'frolvlad/alpine-gxx:latest'
+  cmd:        '/bin/ash -c "c++ --static main.cpp -o main && ./main"'
+  filename:   'main.cpp'
+
+csharp:
+  use:        'mono'
+
+csx:
+  use:        'dotnet-script'
+
+dart:
+  image:      'google/dart:latest'
+  entrypoint: 'dart'
+  filename:   'main.dart'
+
+deno:
+  image:      'hayd/alpine-deno:1.5.2'
+  entrypoint: 'deno run'
+  filename:   'main.ts'
+
+dotnet-script:
+  image:      'ghcr.io/ranna-go/dotnet-script:latest'
+  entrypoint: 'dotnet script'
+  filename:   'main.csx'
+
+elixir:
+  image:      'elixir:alpine'
+  entrypoint: 'elixir'
+  filename:   'main.exs'
+
+fpc:
+  use:        'pascal'
+
+go:
+  use:        'golang'
+
 golang:
   image:      'golang:alpine'
   entrypoint: 'go run'
   filename:   'main.go'
-go:
-  use:        'golang'
 
-python3:
-  image:      'python:alpine'
-  entrypoint: 'python3'
-  filename:   'main.py'
-python:
-  use:        'python3'
-py:
-  use:        'python3'
+haskell:
+  image:      'haskell:buster'
+  cmd:        '/bin/bash -c "ghc -o main main.hs >> /dev/null && ./main"'
+  filename:   'main.hs'
 
-rust:
-  image:      'rust:alpine'
-  cmd:        '/bin/ash -c "rustc main.rs && ./main"'
-  filename:   'main.rs'
+java:
+  use:        'openjdk-17'
+
+javascript:
+  use:        'node'
+
+js:
+  use:        'javascript'
+
+kotlin:
+  image: 'schlaubiboy/kotlin:1.5.10-alpine'
+  filename: 'main.kt'
+  cmd: '/bin/ash -c "kotlinc main.kt -include-runtime -d main.jar && java -jar main.jar"'
+
+kotlin-script:
+  image: 'schlaubiboy/kotlin:1.5.10'
+  filename: 'main.kts'
+  entrypoint: 'kotlinc -script'
+
+mono:
+  image:      'mono'
+  cmd:        '/bin/sh -c "mcs main.cs && mono main.exe"'
+  filename:   'main.cs'
+
+node:
+  image:      'node:lts-alpine3.13'
+  entrypoint: 'node'
+  filename:   'index.js'
 
 openjdk-11:
   image:      'openjdk:11'
@@ -29,121 +108,55 @@ openjdk-17:
   entrypoint: 'java'
   filename:   'Main.java'
 
-java:
-  use:        'openjdk-17'
-
-kotlin:
-  image: 'schlaubiboy/kotlin:1.5.10-alpine'
-  filename: 'main.kt'
-  cmd: '/bin/ash -c "kotlinc main.kt -include-runtime -d main.jar && java -jar main.jar"'
-kotlin-script:
-  image: 'schlaubiboy/kotlin:1.5.10'
-  filename: 'main.kts'
-  entrypoint: 'kotlinc -script'
-  
-node:
-  image:      'node:lts-alpine3.13'
-  entrypoint: 'node'
-  filename:   'index.js'
-javascript:
-  use:        'node'
-js:
-  use:        'javascript'
-  
-deno:
-  image:      'hayd/alpine-deno:1.5.2'
-  entrypoint: 'deno run'
-  filename:   'main.ts'
-
-typescript:
-  use:        'deno'
-
-ts:
-  use:        'deno'
-
-elixir:
-  image:      'elixir:alpine'
-  entrypoint: 'elixir'
-  filename:   'main.exs'
-
-ash:
-  image:      'alpine:latest'
-  cmd:        '/bin/ash -c "sleep 0.05; /bin/ash main.ash"'
-  filename:   'main.ash'
-bash:
-  use:        'ash'
-sh:
-  use:        'ash'
-
-brainfuck:
-  image:      'esolang/brainfuck-esotope:latest'
-  entrypoint: 'brainfuck-esotope'
-  filename:   'main.bf'
-
-cpp:
-  image:      'frolvlad/alpine-gxx:latest'
-  cmd:        '/bin/ash -c "c++ --static main.cpp -o main && ./main"'
-  filename:   'main.cpp'
-c++:
-  use:        'cpp'
-
-c:
-  image:      'frolvlad/alpine-gxx:latest'
-  cmd:        '/bin/ash -c "c++ --static main.c -o main && ./main"'
-  filename:   'main.c'
-
-mono:
-  image:      'mono'
-  cmd:        '/bin/sh -c "mcs main.cs && mono main.exe"'
-  filename:   'main.cs'
-c#:
-  use:        'mono'
-csharp:
-  use:        'mono'
-
-dotnet-script:
-  image:      'ghcr.io/ranna-go/dotnet-script:latest'
-  entrypoint: 'dotnet script'
-  filename:   'main.csx'
-csx:
-  use:        'dotnet-script'
+pascal:
+  image:      'frolvlad/alpine-fpc:latest'
+  cmd:        '/bin/ash -c "fpc main.pas >> /dev/null && ./main"'
+  filename:   'main.pas'
 
 php:
   image:      'php:cli-alpine'
   entrypoint: 'php'
   filename:   'main.php'
 
-ruby:
-  image:      'ruby:alpine'
-  entrypoint: 'ruby'
-  filename:   'main.rb'
+py:
+  use:        'python3'
 
-haskell:
-  image:      'haskell:buster'
-  cmd:        '/bin/bash -c "ghc -o main main.hs >> /dev/null && ./main"'
-  filename:   'main.hs'
+python:
+  use:        'python3'
 
-dart:
-  image:      'google/dart:latest'
-  entrypoint: 'dart'
-  filename:   'main.dart'
-
-pascal:
-  image:      'frolvlad/alpine-fpc:latest'
-  cmd:        '/bin/ash -c "fpc main.pas >> /dev/null && ./main"'
-  filename:   'main.pas'
-fpc:
-  use:        'pascal'
+python3:
+  image:      'python:alpine'
+  entrypoint: 'python3'
+  filename:   'main.py'
 
 racket:
   use: 'racket-8-2'
+
+racket-7-9:
+  image:      'racket/racket:7.9'
+  cmd:        'racket -t main.rkt'
+  filename:   'main.rkt'
 
 racket-8-2:
   image:      'racket/racket:8.2'
   cmd:        'racket -t main.rkt'
   filename:   'main.rkt'
 
-racket-7-9:
-  image:      'racket/racket:7.9'
-  cmd:        'racket -t main.rkt'
-  filename:   'main.rkt'
+ruby:
+  image:      'ruby:alpine'
+  entrypoint: 'ruby'
+  filename:   'main.rb'
+
+rust:
+  image:      'rust:alpine'
+  cmd:        '/bin/ash -c "rustc main.rs && ./main"'
+  filename:   'main.rs'
+
+sh:
+  use:        'ash'
+
+ts:
+  use:        'deno'
+
+typescript:
+  use:        'deno'
