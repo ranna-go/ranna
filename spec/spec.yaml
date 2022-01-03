@@ -206,7 +206,7 @@ python3:
   entrypoint: 'python3'
   filename:   'main.py'
   example: |-
-    print "Hello world!"
+    print("Hello world!")
 
 racket:
   use: 'racket-8-2'
