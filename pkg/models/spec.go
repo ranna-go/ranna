@@ -8,6 +8,7 @@ type Spec struct {
 	Cmd        string `json:"cmd,omitempty" yaml:"cmd,omitempty"`
 	Registry   string `json:"registry,omitempty" yaml:"registry,omitempty"`
 	Use        string `json:"use,omitempty" yaml:"use,omitempty"`
+	Example    string `json:"example,omitempty" yaml:"example,omitempty"`
 }
 
 // SpecMap wraps a map[string]*Spec.
