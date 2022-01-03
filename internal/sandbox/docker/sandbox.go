@@ -7,6 +7,8 @@ import (
 	"github.com/ranna-go/ranna/pkg/models"
 )
 
+// DockerSandbox implements Sandbox for
+// Docker containers.
 type DockerSandbox struct {
 	client    *dockerclient.Client
 	container *dockerclient.Container
