@@ -108,12 +108,6 @@ haskell:
 java:
   use:        'openjdk-17'
 
-javascript:
-  use:        'node'
-
-js:
-  use:        'javascript'
-
 kotlin:
   image: 'schlaubiboy/kotlin:1.5.10-alpine'
   filename: 'main.kt'
@@ -153,6 +147,15 @@ node:
   filename:   'index.js'
   example: |-
     console.log("Hello world!")
+
+javascript:
+  use:        'node'
+
+js:
+  use:        'node'
+
+nodejs:
+  use:        'node'
 
 openjdk-11:
   image:      'openjdk:11'
