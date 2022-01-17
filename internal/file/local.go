@@ -9,7 +9,7 @@ func NewLocalFileProvider() *LocalFileProvider {
 }
 
 func (lf *LocalFileProvider) CreateDirectory(path string) error {
-	return os.MkdirAll(path, os.ModeDir)
+	return os.MkdirAll(path, os.ModeDir|os.ModePerm)
 }
 
 func (lf *LocalFileProvider) CreateFileWithContent(path, content string) (err error) {
