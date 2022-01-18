@@ -39,7 +39,7 @@ type Manager interface {
 	// On success, an execution response is returned.
 	RunInSandbox(req *models.ExecutionRequest) (res *models.ExecutionResponse, err error)
 
-	// PrepareEnvironment prepares the sandbox environment for
+	// PrepareEnvironments prepares the sandbox environment for
 	// faster first time creation of sandboxes.
 	//
 	// This pulls required images, for example.
@@ -153,8 +153,21 @@ func (m *managerImpl) RunInSandbox(req *models.ExecutionRequest) (res *models.Ex
 			return
 		}
 
+		// Extract the imports from the source string
+		imports := spc.Inline.ImportRegexCompiled.FindString(req.Code)
+		first := true
+		req.Code = spc.Inline.ImportRegexCompiled.ReplaceAllStringFunc(req.Code, func(s string) string {
+			if first {
+				first = false
+				return ""
+			}
+			return s
+		})
+
 		// Wrap the code to execute using the specified template
-		req.Code = strings.ReplaceAll(spc.Template, "$${CODE}", req.Code)
+		code := strings.ReplaceAll(spc.Inline.Template, "$${IMPORTS}", imports)
+		code = strings.ReplaceAll(code, "$${CODE}", req.Code)
+		req.Code = code
 	}
 
 	// Wrap in RunSpec

@@ -99,10 +99,12 @@ golang:
     func main() {
     	fmt.Println("Hello world!")
     }
-  template: |-
-    package main
-    import "fmt"
-    func main() {$${CODE}}
+  inline:
+    import_regex: '(?m)^import "[\w/]+"$|^import \((\n?\t?(\s+)?"[\w/]+";?)+\n?\)$'
+    template: |-
+      package main
+      $${IMPORTS}
+      func main() {$${CODE}}
 
 haskell:
   image:      'haskell:buster'
