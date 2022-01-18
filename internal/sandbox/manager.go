@@ -3,6 +3,7 @@ package sandbox
 import (
 	"errors"
 	"path"
+	"strings"
 	"sync"
 	"time"
 
@@ -19,8 +20,9 @@ import (
 )
 
 var (
-	errUnsupportredLanguage = errors.New("unsupported language spec")
-	errTimedOut             = errors.New("code execution timed out")
+	errUnsupportedLanguage        = errors.New("unsupported language spec")
+	errNoInlineExpressionsSupport = errors.New("this spec has no support for inline expressions")
+	errTimedOut                   = errors.New("code execution timed out")
 )
 
 // Manager is a higher level abstraction used to create and
@@ -37,7 +39,7 @@ type Manager interface {
 	// On success, an execution response is returned.
 	RunInSandbox(req *models.ExecutionRequest) (res *models.ExecutionResponse, err error)
 
-	// PrepareEnvironment prepares the sandbox environment for
+	// PrepareEnvironments prepares the sandbox environment for
 	// faster first time creation of sandboxes.
 	//
 	// This pulls required images, for example.
@@ -139,8 +141,33 @@ func (m *managerImpl) RunInSandbox(req *models.ExecutionRequest) (res *models.Ex
 	// Try to get spec from specified language
 	spc, ok := m.spec.Spec().Get(req.Language)
 	if !ok {
-		err = errUnsupportredLanguage
+		err = errUnsupportedLanguage
 		return
+	}
+
+	// Process the specified code if it is an inline expression
+	if req.InlineExpression {
+		// Check if the spec supports inline expressions
+		if !spc.SupportsTemplating() {
+			err = errNoInlineExpressionsSupport
+			return
+		}
+
+		// Extract the imports from the source string
+		imports := spc.Inline.ImportRegexCompiled.FindString(req.Code)
+		first := true
+		req.Code = spc.Inline.ImportRegexCompiled.ReplaceAllStringFunc(req.Code, func(s string) string {
+			if first {
+				first = false
+				return ""
+			}
+			return s
+		})
+
+		// Wrap the code to execute using the specified template
+		code := strings.ReplaceAll(spc.Inline.Template, "$${IMPORTS}", imports)
+		code = strings.ReplaceAll(code, "$${CODE}", req.Code)
+		req.Code = code
 	}
 
 	// Wrap in RunSpec

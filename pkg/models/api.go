@@ -3,10 +3,11 @@ package models
 // ExecutionRequest is the execution
 // request model.
 type ExecutionRequest struct {
-	Language    string            `json:"language"`
-	Code        string            `json:"code"`
-	Arguments   []string          `json:"arguments"`
-	Environment map[string]string `json:"environment"`
+	Language         string            `json:"language"`
+	Code             string            `json:"code"`
+	InlineExpression bool              `json:"inline_expression"`
+	Arguments        []string          `json:"arguments"`
+	Environment      map[string]string `json:"environment"`
 }
 
 // ExecutionResponse is the response

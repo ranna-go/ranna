@@ -3,6 +3,7 @@ package spec
 import (
 	"encoding/json"
 	"errors"
+	"regexp"
 	"strings"
 
 	"github.com/ghodss/yaml"
@@ -46,6 +47,12 @@ func (p *baseProvider) parseAndSet(data []byte, format string) (err error) {
 	m := make(models.SpecMap)
 	if err = unmarshaller(data, &m); err != nil {
 		return
+	}
+
+	for _, spec := range m {
+		if spec.Inline != nil {
+			spec.Inline.ImportRegexCompiled = regexp.MustCompile(spec.Inline.ImportRegex)
+		}
 	}
 
 	if p.m == nil {
