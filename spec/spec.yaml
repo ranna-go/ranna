@@ -44,6 +44,14 @@ cpp:
         printf("Hello world!\n");
         return 0;
     }
+  inline:
+    import_regex: '^#include ["<][\w/.]+[">]$'
+    template: |-
+      $${IMPORTS}
+      int main() {
+        $${CODE}
+        return 0;
+      }
 
 csharp:
   use:        'mono'

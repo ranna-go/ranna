@@ -18,6 +18,10 @@ var (
 	errEmptyCode         = fiber.NewError(fiber.StatusBadRequest, "code is empty")
 )
 
+// @title ranna main API
+// @version 1.0
+// @description The ranna main REST API.
+// @basepath /v1
 type Router struct {
 	spec    spec.Provider
 	cfg     config.Provider
@@ -43,6 +47,12 @@ func (r *Router) optionsBypass(ctx *fiber.Ctx) error {
 	return ctx.Next()
 }
 
+// @summary Get System Info
+// @description Returns general system and version information.
+// @produce json
+// @success 200 {object} models.ExecutionResponse
+// @failure 500 {object} models.ErrorModel
+// @router /info [get]
 func (r *Router) getInfo(ctx *fiber.Ctx) (err error) {
 	sandboxInfo, err := r.manager.GetProvider().Info()
 	if err != nil {
@@ -57,10 +67,24 @@ func (r *Router) getInfo(ctx *fiber.Ctx) (err error) {
 	return ctx.JSON(info)
 }
 
+// @summary Get Spec Map
+// @description Returns the available spec map.
+// @produce json
+// @success 200 {object} models.SpecMap
+// @router /spec [get]
 func (r *Router) getSpec(ctx *fiber.Ctx) (err error) {
 	return ctx.JSON(r.spec.Spec().GetSnapshot())
 }
 
+// @summary Get Spec Map
+// @description Returns the available spec map.
+// @accept json
+// @produce json
+// @param payload body models.ExecutionRequest true "The execution payload"
+// @success 200 {object} models.ExecutionResponse
+// @failure 400 {object} models.ErrorModel
+// @failure 500 {object} models.ErrorModel
+// @router /exec [post]
 func (r *Router) postExec(ctx *fiber.Ctx) (err error) {
 	req := new(models.ExecutionRequest)
 	if err = ctx.BodyParser(req); err != nil {

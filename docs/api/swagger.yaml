@@ -1,0 +1,128 @@
+basePath: /v1
+definitions:
+  models.ErrorModel:
+    properties:
+      code:
+        type: integer
+      context:
+        type: string
+      error:
+        type: string
+    type: object
+  models.ExecutionRequest:
+    properties:
+      arguments:
+        items:
+          type: string
+        type: array
+      code:
+        type: string
+      environment:
+        additionalProperties:
+          type: string
+        type: object
+      inline_expression:
+        type: boolean
+      language:
+        type: string
+    type: object
+  models.ExecutionResponse:
+    properties:
+      exectimems:
+        type: integer
+      stderr:
+        type: string
+      stdout:
+        type: string
+    type: object
+  models.InlineSpec:
+    properties:
+      import_regex:
+        type: string
+      template:
+        type: string
+    type: object
+  models.Spec:
+    properties:
+      cmd:
+        type: string
+      entrypoint:
+        type: string
+      example:
+        type: string
+      filename:
+        type: string
+      image:
+        type: string
+      inline:
+        $ref: '#/definitions/models.InlineSpec'
+      registry:
+        type: string
+      use:
+        type: string
+    type: object
+  models.SpecMap:
+    additionalProperties:
+      $ref: '#/definitions/models.Spec'
+    type: object
+info:
+  contact: {}
+  description: The ranna main REST API.
+  title: ranna main API
+  version: "1.0"
+paths:
+  /exec:
+    post:
+      consumes:
+      - application/json
+      description: Returns the available spec map.
+      parameters:
+      - description: The execution payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/models.ExecutionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ExecutionResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorModel'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorModel'
+      summary: Get Spec Map
+  /info:
+    get:
+      description: Returns general system and version information.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ExecutionResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorModel'
+      summary: Get System Info
+  /spec:
+    get:
+      description: Returns the available spec map.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.SpecMap'
+      summary: Get Spec Map
+swagger: "2.0"
