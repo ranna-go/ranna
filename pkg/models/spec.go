@@ -33,3 +33,19 @@ func (spec *Spec) SupportsTemplating() bool {
 
 // SpecMap wraps a map[string]*Spec.
 type SpecMap map[string]*Spec
+
+// Get returns the last spec in the map
+// also following "use" pointers.
+func (m SpecMap) Get(key string) (s *Spec, ok bool) {
+	for {
+		s = m[key]
+		if s == nil {
+			return
+		}
+		if s.Use == "" {
+			ok = true
+			return
+		}
+		key = s.Use
+	}
+}
