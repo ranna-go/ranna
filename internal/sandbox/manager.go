@@ -154,18 +154,11 @@ func (m *managerImpl) RunInSandbox(req *models.ExecutionRequest) (res *models.Ex
 		}
 
 		// Extract the imports from the source string
-		imports := spc.Inline.ImportRegexCompiled.FindString(req.Code)
-		first := true
-		req.Code = spc.Inline.ImportRegexCompiled.ReplaceAllStringFunc(req.Code, func(s string) string {
-			if first {
-				first = false
-				return ""
-			}
-			return s
-		})
+		imports := spc.Inline.ImportRegexCompiled.FindAllString(req.Code, -1)
+		req.Code = spc.Inline.ImportRegexCompiled.ReplaceAllString(req.Code, "")
 
 		// Wrap the code to execute using the specified template
-		code := strings.ReplaceAll(spc.Inline.Template, "$${IMPORTS}", imports)
+		code := strings.ReplaceAll(spc.Inline.Template, "$${IMPORTS}", strings.Join(imports, "\n"))
 		code = strings.ReplaceAll(code, "$${CODE}", req.Code)
 		req.Code = code
 	}
