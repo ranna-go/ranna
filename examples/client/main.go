@@ -26,7 +26,7 @@ func must(err error) {
 
 func main() {
 	c, err := ranna.New(ranna.Options{
-		Endpoint: "https://api.ranna.zekro.de",
+		Endpoint: "https://api.ranna.dev",
 	})
 	must(err)
 
