@@ -43,7 +43,7 @@ cpp:
   image:      'frolvlad/alpine-gxx:latest'
   cmd:        '/bin/ash -c "c++ --static main.cpp -o main && ./main"'
   filename:   'main.cpp'
-  language:   'c++'
+  language:   'cpp'
   example: |-
     #include <stdio.h>
 
@@ -94,7 +94,7 @@ dotnet-script:
   image:      'ghcr.io/ranna-go/dotnet-script:latest'
   entrypoint: 'dotnet script'
   filename:   'main.csx'
-  language:   'c#'
+  language:   'csharp'
   example: |-
     Console.WriteLine("Hello world!");
 
@@ -185,7 +185,7 @@ mono:
   image:      'mono'
   cmd:        '/bin/sh -c "mcs main.cs && mono main.exe"'
   filename:   'main.cs'
-  language:   'c#'
+  language:   'csharp'
   example: |-
     namespace HelloWorld
     {
