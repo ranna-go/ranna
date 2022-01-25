@@ -114,6 +114,25 @@ golang:
       $${IMPORTS}
       func main() {$${CODE}}
 
+gotip:
+  image:      'ghcr.io/ranna-go/gotip:latest'
+  entrypoint: 'gotip run'
+  filename:   'main.go'
+  example: |-
+    package main
+
+    import "fmt"
+
+    func main() {
+    	fmt.Println("Hello world!")
+    }
+  inline:
+    import_regex: '(?m)^import "[\w/]+"$|^import \((\n?\t?(\s+)?"[\w/]+";?)+\n?\)$'
+    template: |-
+      package main
+      $${IMPORTS}
+      func main() {$${CODE}}
+
 haskell:
   image:      'haskell:buster'
   cmd:        '/bin/bash -c "ghc -o main main.hs >> /dev/null && ./main"'
