@@ -2,16 +2,21 @@ ash:
   image:      'alpine:latest'
   cmd:        '/bin/ash -c "sleep 0.05; /bin/ash main.ash"'
   filename:   'main.ash'
+  language:   'bash'
   example: |-
     echo "Hello world!"
 
 bash:
   use:        'ash'
 
+sh:
+  use:        'ash'
+
 brainfuck:
   image:      'esolang/brainfuck-esotope:latest'
   entrypoint: 'brainfuck-esotope'
   filename:   'main.bf'
+  language:   'brainfuck'
   example: |-
     ++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>.
 
@@ -19,6 +24,7 @@ c:
   image:      'frolvlad/alpine-gxx:latest'
   cmd:        '/bin/ash -c "c++ --static main.c -o main && ./main"'
   filename:   'main.c'
+  language:   'c'
   example: |-
     #include <stdio.h>
 
@@ -37,6 +43,7 @@ cpp:
   image:      'frolvlad/alpine-gxx:latest'
   cmd:        '/bin/ash -c "c++ --static main.cpp -o main && ./main"'
   filename:   'main.cpp'
+  language:   'c++'
   example: |-
     #include <stdio.h>
 
@@ -63,6 +70,7 @@ dart:
   image:      'google/dart:latest'
   entrypoint: 'dart'
   filename:   'main.dart'
+  language:   'dart'
   example: |-
     void main() {
       print("Hello world!");
@@ -72,13 +80,21 @@ deno:
   image:      'hayd/alpine-deno:1.5.2'
   entrypoint: 'deno run'
   filename:   'main.ts'
+  language:   'typescript'
   example: |-
     console.log("Hello world!")
+
+ts:
+  use:        'deno'
+
+typescript:
+  use:        'deno'
 
 dotnet-script:
   image:      'ghcr.io/ranna-go/dotnet-script:latest'
   entrypoint: 'dotnet script'
   filename:   'main.csx'
+  language:   'c#'
   example: |-
     Console.WriteLine("Hello world!");
 
@@ -86,6 +102,7 @@ elixir:
   image:      'elixir:alpine'
   entrypoint: 'elixir'
   filename:   'main.exs'
+  language:   'elixir'
   example: |-
     "Hello world!" |> IO.puts
 
@@ -99,6 +116,7 @@ golang:
   image:      'golang:alpine'
   entrypoint: 'go run'
   filename:   'main.go'
+  language:   'go'
   example: |-
     package main
 
@@ -118,6 +136,7 @@ gotip:
   image:      'ghcr.io/ranna-go/gotip:latest'
   entrypoint: 'gotip run'
   filename:   'main.go'
+  language:   'go'
   example: |-
     package main
 
@@ -137,23 +156,26 @@ haskell:
   image:      'haskell:buster'
   cmd:        '/bin/bash -c "ghc -o main main.hs >> /dev/null && ./main"'
   filename:   'main.hs'
+  language:   'haskell'
 
 java:
   use:        'openjdk-17'
 
 kotlin:
-  image: 'schlaubiboy/kotlin:1.5.10-alpine'
-  filename: 'main.kt'
-  cmd: '/bin/ash -c "kotlinc main.kt -include-runtime -d main.jar && java -jar main.jar"'
+  image:      'schlaubiboy/kotlin:1.5.10-alpine'
+  filename:   'main.kt'
+  cmd:        '/bin/ash -c "kotlinc main.kt -include-runtime -d main.jar && java -jar main.jar"'
+  language:   'kotlin'
   example: |-
     fun main(args: Array<String>) {
       println("Hello world!")
     }
 
 kotlin-script:
-  image: 'schlaubiboy/kotlin:1.5.10'
-  filename: 'main.kts'
+  image:      'schlaubiboy/kotlin:1.5.10'
+  filename:   'main.kts'
   entrypoint: 'kotlinc -script'
+  language:   'kotlin'
   example: |-
     fun main(args: Array<String>) {
       println("Hello world!")
@@ -163,6 +185,7 @@ mono:
   image:      'mono'
   cmd:        '/bin/sh -c "mcs main.cs && mono main.exe"'
   filename:   'main.cs'
+  language:   'c#'
   example: |-
     namespace HelloWorld
     {
@@ -191,6 +214,7 @@ node:
   image:      'node:lts-alpine3.13'
   entrypoint: 'node'
   filename:   'index.js'
+  language:   'javascript'
   example: |-
     console.log("Hello world!")
 
@@ -207,6 +231,7 @@ openjdk-11:
   image:      'openjdk:11'
   entrypoint: 'java'
   filename:   'Main.java'
+  language:   'java'
   example: |-
     class HelloWorld {
         public static void main(String[] args) {
@@ -218,6 +243,7 @@ openjdk-17:
   image:      'openjdk:17'
   entrypoint: 'java'
   filename:   'Main.java'
+  language:   'java'
   example: |-
     class HelloWorld {
         public static void main(String[] args) {
@@ -229,6 +255,7 @@ pascal:
   image:      'frolvlad/alpine-fpc:latest'
   cmd:        '/bin/ash -c "fpc main.pas >> /dev/null && ./main"'
   filename:   'main.pas'
+  language:   'pascal'
   example: |-
     program Hello;
     begin
@@ -239,6 +266,7 @@ php:
   image:      'php:cli-alpine'
   entrypoint: 'php'
   filename:   'main.php'
+  language:   'php'
   example: |-
     <?php
         print("Hello World");
@@ -254,6 +282,7 @@ python3:
   image:      'python:alpine'
   entrypoint: 'python3'
   filename:   'main.py'
+  language:   'python'
   example: |-
     print("Hello world!")
 
@@ -264,6 +293,7 @@ racket-7-9:
   image:      'racket/racket:7.9'
   cmd:        'racket -t main.rkt'
   filename:   'main.rkt'
+  language:   'racket'
   example: |-
     #lang racket
     (display "Hello World")
@@ -272,6 +302,7 @@ racket-8-2:
   image:      'racket/racket:8.2'
   cmd:        'racket -t main.rkt'
   filename:   'main.rkt'
+  language:   'racket'
   example: |-
     #lang racket
     (display "Hello World")
@@ -280,6 +311,7 @@ ruby:
   image:      'ruby:alpine'
   entrypoint: 'ruby'
   filename:   'main.rb'
+  language:   'ruby'
   example: |-
     puts "Hello world!"
 
@@ -287,16 +319,8 @@ rust:
   image:      'rust:alpine'
   cmd:        '/bin/ash -c "rustc main.rs && ./main"'
   filename:   'main.rs'
+  language:   'rust'
   example: |-
     fn main() {
       println!("Hello world!");
     }
-
-sh:
-  use:        'ash'
-
-ts:
-  use:        'deno'
-
-typescript:
-  use:        'deno'
