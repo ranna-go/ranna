@@ -108,6 +108,7 @@ Returns the available spec map.
 | filename | string |  | No |
 | image | string |  | No |
 | inline | [models.InlineSpec](#modelsinlinespec) |  | No |
+| language | string |  | No |
 | registry | string |  | No |
 | use | string |  | No |
 

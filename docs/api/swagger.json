@@ -179,6 +179,9 @@
                 "inline": {
                     "$ref": "#/definitions/models.InlineSpec"
                 },
+                "language": {
+                    "type": "string"
+                },
                 "registry": {
                     "type": "string"
                 },

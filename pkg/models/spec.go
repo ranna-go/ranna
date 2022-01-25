@@ -13,6 +13,7 @@ type Spec struct {
 	Cmd        string      `json:"cmd,omitempty" yaml:"cmd,omitempty"`
 	Registry   string      `json:"registry,omitempty" yaml:"registry,omitempty"`
 	Use        string      `json:"use,omitempty" yaml:"use,omitempty"`
+	Language   string      `json:"language,omitempty" yaml:"language,omitempty"`
 	Example    string      `json:"example,omitempty" yaml:"example,omitempty"`
 	Inline     *InlineSpec `json:"inline,omitempty" yaml:"inline,omitempty"`
 }
