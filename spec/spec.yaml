@@ -154,6 +154,19 @@ mono:
             }
         }
     }
+  inline:
+    import_regex: '(?m)^using [\w.-]+;$'
+    template: |-
+      $${IMPORTS}
+      namespace HelloWorld
+      {
+          class Hello {         
+              static void Main(string[] args)
+              {
+                  $${CODE}
+              }
+          }
+      }
 
 node:
   image:      'node:lts-alpine3.13'
