@@ -1,16 +1,23 @@
+// Package chanwriter provides an io.Writer
+// implementation which writes into a channel.
 package chanwriter
 
 import (
 	"io"
 )
 
+// Chanwriter is an io.Writer implementation
+// which writes the passed byte slice into the
+// specified channel.
 type Chanwriter struct {
-	c chan []byte
+	c chan<- []byte
 }
 
 var _ io.Writer = (*Chanwriter)(nil)
 
-func New(c chan []byte) Chanwriter {
+// New creates a new Chanwriter wrapping the
+// passed channel.
+func New(c chan<- []byte) Chanwriter {
 	return Chanwriter{c}
 }
 
