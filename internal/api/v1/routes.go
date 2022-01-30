@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"fmt"
 	"runtime"
 
 	"github.com/gofiber/fiber/v2"
@@ -117,10 +116,8 @@ func (r *Router) postExec(ctx *fiber.Ctx) (err error) {
 		for {
 			select {
 			case <-cStop:
-				fmt.Println("stop")
 				return
 			case p := <-cStdOut:
-				fmt.Println(p)
 				stdOut.Write(p)
 			case p := <-cStdErr:
 				stdErr.Write(p)
