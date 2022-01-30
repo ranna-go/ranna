@@ -10,6 +10,7 @@ require (
 	github.com/fsouza/go-dockerclient v1.7.7
 	github.com/ghodss/yaml v1.0.0
 	github.com/gofiber/fiber/v2 v2.25.0
+	github.com/gofiber/websocket/v2 v2.0.15
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/heetch/confita v0.10.0
