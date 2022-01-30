@@ -12,7 +12,6 @@ import (
 	"github.com/ranna-go/ranna/internal/namespace"
 	"github.com/ranna-go/ranna/internal/spec"
 	"github.com/ranna-go/ranna/internal/static"
-	"github.com/ranna-go/ranna/internal/util"
 	"github.com/ranna-go/ranna/pkg/models"
 	"github.com/ranna-go/ranna/pkg/timeout"
 	"github.com/sarulabs/di/v2"
@@ -37,7 +36,10 @@ type Manager interface {
 	// blocked until the execution is finished or timed out.
 	//
 	// On success, an execution response is returned.
-	RunInSandbox(req *models.ExecutionRequest) (res *models.ExecutionResponse, err error)
+	RunInSandbox(
+		req *models.ExecutionRequest,
+		cOut, cErr chan []byte, cClose chan bool,
+	) (err error)
 
 	// PrepareEnvironments prepares the sandbox environment for
 	// faster first time creation of sandboxes.
@@ -65,7 +67,6 @@ type managerImpl struct {
 	cfg     config.Provider
 	ns      namespace.Provider
 
-	streamBufferCap  int
 	runningSandboxes *sync.Map
 	isCleanup        bool
 }
@@ -101,11 +102,6 @@ func NewManager(ctn di.Container) (m *managerImpl, err error) {
 	m.ns = ctn.Get(static.DiNamespaceProvider).(namespace.Provider)
 
 	m.runningSandboxes = &sync.Map{}
-	sbc, err := util.ParseMemoryStr(m.cfg.Config().Sandbox.StreamBufferCap)
-	if err != nil {
-		return
-	}
-	m.streamBufferCap = int(sbc)
 
 	return
 }
@@ -126,7 +122,10 @@ func (m *managerImpl) PrepareEnvironments(force bool) (errs []error) {
 	return
 }
 
-func (m *managerImpl) RunInSandbox(req *models.ExecutionRequest) (res *models.ExecutionResponse, err error) {
+func (m *managerImpl) RunInSandbox(
+	req *models.ExecutionRequest,
+	cOut, cErr chan []byte, cClose chan bool,
+) (err error) {
 	defer func() {
 		if err != nil && IsSystemError(err) {
 			logrus.
@@ -214,9 +213,8 @@ func (m *managerImpl) RunInSandbox(req *models.ExecutionRequest) (res *models.Ex
 	m.runningSandboxes.Store(sbx.ID(), wrapper)
 
 	// Run sandbox blocking with timeout
-	res = new(models.ExecutionResponse)
 	timedOut := timeout.RunBlockingWithTimeout(func() {
-		res, err = sbx.Run(m.streamBufferCap)
+		err = sbx.Run(cOut, cErr, cClose)
 	}, time.Duration(m.cfg.Config().Sandbox.TimeoutSeconds)*time.Second)
 
 	if err != nil {

@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"fmt"
 	"runtime"
 
 	"github.com/gofiber/fiber/v2"
@@ -9,8 +10,10 @@ import (
 	"github.com/ranna-go/ranna/internal/spec"
 	"github.com/ranna-go/ranna/internal/static"
 	"github.com/ranna-go/ranna/internal/util"
+	"github.com/ranna-go/ranna/pkg/cappedbuffer"
 	"github.com/ranna-go/ranna/pkg/models"
 	"github.com/sarulabs/di/v2"
+	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -23,15 +26,23 @@ var (
 // @description The ranna main REST API.
 // @basepath /v1
 type Router struct {
-	spec    spec.Provider
-	cfg     config.Provider
-	manager sandbox.Manager
+	spec            spec.Provider
+	cfg             config.Provider
+	manager         sandbox.Manager
+	streamBufferCap int
 }
 
 func (r *Router) Setup(route fiber.Router, ctn di.Container) {
 	r.cfg = ctn.Get(static.DiConfigProvider).(config.Provider)
 	r.spec = ctn.Get(static.DiSpecProvider).(spec.Provider)
 	r.manager = ctn.Get(static.DiSandboxManager).(sandbox.Manager)
+
+	sbc, err := util.ParseMemoryStr(r.cfg.Config().Sandbox.StreamBufferCap)
+	if err != nil {
+		logrus.WithError(err).Fatal("Invalid value for stream buffer cap")
+		return
+	}
+	r.streamBufferCap = int(sbc)
 
 	route.Use(r.optionsBypass)
 
@@ -95,12 +106,43 @@ func (r *Router) postExec(ctx *fiber.Ctx) (err error) {
 		return errEmptyCode
 	}
 
-	res, err := r.manager.RunInSandbox(req)
+	cStdOut := make(chan []byte)
+	cStdErr := make(chan []byte)
+	cStop := make(chan bool)
+
+	stdOut := cappedbuffer.New([]byte{}, r.streamBufferCap)
+	stdErr := cappedbuffer.New([]byte{}, r.streamBufferCap)
+
+	go func() {
+		for {
+			select {
+			case <-cStop:
+				fmt.Println("stop")
+				return
+			case p := <-cStdOut:
+				fmt.Println(p)
+				stdOut.Write(p)
+			case p := <-cStdErr:
+				stdErr.Write(p)
+			}
+		}
+	}()
+
+	execTime := util.MeasureTime(func() {
+		err = r.manager.RunInSandbox(req, cStdOut, cStdErr, cStop)
+	})
+
 	if err != nil {
 		if sandbox.IsSystemError(err) {
 			return err
 		}
 		return fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+
+	res := &models.ExecutionResponse{
+		StdOut:     stdOut.String(),
+		StdErr:     stdErr.String(),
+		ExecTimeMS: int(execTime.Milliseconds()),
 	}
 
 	if err = r.checkOutputLen(res.StdOut, res.StdErr); err != nil {
