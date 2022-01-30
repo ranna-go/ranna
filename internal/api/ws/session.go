@@ -166,7 +166,9 @@ func (s *session) handleExec(op OperationExec) (err error) {
 				})
 			}
 			if err != nil {
+				logrus.WithError(err).Error("Failed sending event")
 				if err = s.SendError(err, op.Nonce); err != nil {
+					logrus.WithError(err).Error("Failed sending error event")
 					return
 				}
 			}
