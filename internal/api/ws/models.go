@@ -1,0 +1,62 @@
+package ws
+
+import "github.com/ranna-go/ranna/pkg/models"
+
+type EventCode int
+
+const (
+	EventPong EventCode = iota
+	EventError
+	EventSpawn
+	EventLog
+	EventStop
+	EventKill // Unused
+)
+
+type OpCode int
+
+const (
+	OpPing OpCode = iota
+	OpExec
+	OpKill // Unused
+)
+
+type Event struct {
+	Code  EventCode   `json:"code"`
+	Nonce int         `json:"nonce,omitempty"`
+	Data  interface{} `json:"data,omitempty"`
+}
+
+type Operation struct {
+	Op    OpCode `json:"op"`
+	Nonce int    `json:"nonce"`
+}
+
+type OperationExec struct {
+	Operation
+	Args models.ExecutionRequest `json:"args"`
+}
+
+type OperationKill struct {
+	Operation
+	Args DataRunId `json:"args"`
+}
+
+type DataRunId struct {
+	RunId string `json:"runid"`
+}
+
+type DataLog struct {
+	DataRunId
+	StdOut string `json:"stdout,omitempty"`
+	StdErr string `json:"stderr,omitempty"`
+}
+
+type DataStop struct {
+	DataRunId
+	ExecTimeMS int `json:"exectimems"`
+}
+
+type DataSpawn struct {
+	DataRunId
+}

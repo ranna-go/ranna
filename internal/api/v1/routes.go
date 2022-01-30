@@ -4,6 +4,7 @@ import (
 	"runtime"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/ranna-go/ranna/internal/api/ws"
 	"github.com/ranna-go/ranna/internal/config"
 	"github.com/ranna-go/ranna/internal/sandbox"
 	"github.com/ranna-go/ranna/internal/spec"
@@ -48,6 +49,8 @@ func (r *Router) Setup(route fiber.Router, ctn di.Container) {
 	route.Get("/spec", r.getSpec)
 	route.Post("/exec", r.postExec)
 	route.Get("/info", r.getInfo)
+	route.Use("/ws", ws.Upgrade())
+	route.Get("/ws", ws.Handler(ctn))
 }
 
 func (r *Router) optionsBypass(ctx *fiber.Ctx) error {
@@ -107,7 +110,7 @@ func (r *Router) postExec(ctx *fiber.Ctx) (err error) {
 
 	cStdOut := make(chan []byte)
 	cStdErr := make(chan []byte)
-	cStop := make(chan bool)
+	cStop := make(chan bool, 1)
 
 	stdOut := cappedbuffer.New([]byte{}, r.streamBufferCap)
 	stdErr := cappedbuffer.New([]byte{}, r.streamBufferCap)
@@ -126,10 +129,11 @@ func (r *Router) postExec(ctx *fiber.Ctx) (err error) {
 	}()
 
 	execTime := util.MeasureTime(func() {
-		err = r.manager.RunInSandbox(req, cStdOut, cStdErr, cStop)
+		err = r.manager.RunInSandbox(req, nil, cStdOut, cStdErr, cStop)
 	})
 
 	if err != nil {
+		cStop <- false
 		if sandbox.IsSystemError(err) {
 			return err
 		}
@@ -148,6 +152,8 @@ func (r *Router) postExec(ctx *fiber.Ctx) (err error) {
 
 	return ctx.JSON(res)
 }
+
+// --- UTIL ---
 
 func (r *Router) checkOutputLen(stdout, stderr string) (err error) {
 	max, err := util.ParseMemoryStr(r.cfg.Config().API.MaxOutputLen)
