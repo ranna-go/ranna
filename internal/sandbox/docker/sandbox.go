@@ -2,9 +2,8 @@ package docker
 
 import (
 	dockerclient "github.com/fsouza/go-dockerclient"
-	"github.com/ranna-go/ranna/internal/util"
-	"github.com/ranna-go/ranna/pkg/cappedbuffer"
-	"github.com/ranna-go/ranna/pkg/models"
+	"github.com/ranna-go/ranna/internal/sandbox"
+	"github.com/ranna-go/ranna/pkg/chanwriter"
 )
 
 // DockerSandbox implements Sandbox for
@@ -14,13 +13,15 @@ type DockerSandbox struct {
 	container *dockerclient.Container
 }
 
+var _ sandbox.Sandbox = (*DockerSandbox)(nil)
+
 func (s *DockerSandbox) ID() string {
 	return s.container.ID
 }
 
-func (s *DockerSandbox) Run(bufferCap int) (res *models.ExecutionResponse, err error) {
-	buffStdout := cappedbuffer.New([]byte{}, bufferCap)
-	buffStderr := cappedbuffer.New([]byte{}, bufferCap)
+func (s *DockerSandbox) Run(cOut, cErr chan []byte, cClose chan bool) (err error) {
+	buffStdout := chanwriter.New(cOut)
+	buffStderr := chanwriter.New(cErr)
 	waiter, err := s.client.AttachToContainerNonBlocking(dockerclient.AttachToContainerOptions{
 		Container:    s.container.ID,
 		Stdout:       true,
@@ -38,15 +39,8 @@ func (s *DockerSandbox) Run(bufferCap int) (res *models.ExecutionResponse, err e
 		return
 	}
 
-	execTime := util.MeasureTime(func() {
-		waiter.Wait()
-	})
-
-	res = &models.ExecutionResponse{
-		StdOut:     buffStdout.String(),
-		StdErr:     buffStderr.String(),
-		ExecTimeMS: int(execTime.Milliseconds()),
-	}
+	waiter.Wait()
+	cClose <- true
 	return
 }
 

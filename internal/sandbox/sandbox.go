@@ -16,7 +16,7 @@ type Sandbox interface {
 	// bufferCap defines the maximum size of the
 	// output stream buffers used to capture the
 	// sandbox stdout and stderr streams.
-	Run(bufferCap int) (res *models.ExecutionResponse, err error)
+	Run(cOut, cErr chan []byte, cClose chan bool) (err error)
 
 	// IsRunning returns true if the sandbox is
 	// still executing.
