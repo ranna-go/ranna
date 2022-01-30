@@ -38,7 +38,9 @@ type Manager interface {
 	// On success, an execution response is returned.
 	RunInSandbox(
 		req *models.ExecutionRequest,
-		cOut, cErr chan []byte, cClose chan bool,
+		cSpn chan string,
+		cOut, cErr chan []byte,
+		cClose chan bool,
 	) (err error)
 
 	// PrepareEnvironments prepares the sandbox environment for
@@ -50,6 +52,10 @@ type Manager interface {
 	// though it has been already prepared before. This is useful
 	// to perform image updates, for example.
 	PrepareEnvironments(force bool) []error
+
+	// KillAndCleanUp takes a sandbox ID and, if
+	// existing, kills the running sandbox.
+	KillAndCleanUp(id string) (bool, error)
 
 	// Cleanup tries to kill and delete all running sandboxes.
 	Cleanup() []error
@@ -71,12 +77,16 @@ type managerImpl struct {
 	isCleanup        bool
 }
 
+var _ Manager = (*managerImpl)(nil)
+
 // sandboxWrapper wraps a sandbox instance and
 // the used hostDir.
 type sandboxWrapper struct {
-	sbx     Sandbox
+	Sandbox
 	hostDir string
 }
+
+var _ Sandbox = (*sandboxWrapper)(nil)
 
 // SystemError wraps an error occuring with the
 // environment or sandbox system.
@@ -124,7 +134,9 @@ func (m *managerImpl) PrepareEnvironments(force bool) (errs []error) {
 
 func (m *managerImpl) RunInSandbox(
 	req *models.ExecutionRequest,
-	cOut, cErr chan []byte, cClose chan bool,
+	cSpn chan string,
+	cOut, cErr chan []byte,
+	cClose chan bool,
 ) (err error) {
 	defer func() {
 		if err != nil && IsSystemError(err) {
@@ -203,6 +215,9 @@ func (m *managerImpl) RunInSandbox(
 		err = SystemError{err}
 		return
 	}
+	if cSpn != nil {
+		cSpn <- sbx.ID()
+	}
 	logrus.WithFields(logrus.Fields{
 		"id":   sbx.ID(),
 		"spec": req.Language,
@@ -244,6 +259,22 @@ func (m *managerImpl) RunInSandbox(
 	return
 }
 
+func (m *managerImpl) KillAndCleanUp(id string) (ok bool, err error) {
+	v, ok := m.runningSandboxes.Load(id)
+	if !ok {
+		return
+	}
+
+	sbx := v.(Sandbox)
+	if ok, err = sbx.IsRunning(); !ok || err != nil {
+		return
+	}
+
+	err = sbx.Kill()
+	ok = true
+	return
+}
+
 func (m *managerImpl) Cleanup() (errs []error) {
 	m.isCleanup = true
 	errs = []error{}
@@ -251,7 +282,7 @@ func (m *managerImpl) Cleanup() (errs []error) {
 	m.runningSandboxes.Range(func(key, value interface{}) bool {
 		w, ok := value.(*sandboxWrapper)
 		if ok {
-			logrus.WithField("id", w.sbx.ID()).Info("killing and cleaning up running container")
+			logrus.WithField("id", w.ID()).Info("killing and cleaning up running container")
 			if err := m.killAndCleanUp(w); err != nil {
 				errs = append(errs, err)
 			}
@@ -271,26 +302,26 @@ func (m *managerImpl) killAndCleanUp(w *sandboxWrapper) (err error) {
 		if err != nil {
 			logrus.
 				WithError(err).
-				WithField("id", w.sbx.ID()).
+				WithField("id", w.ID()).
 				Error("failed cleaning up container")
 		}
 	}()
 
-	logrus.WithField("id", w.sbx.ID()).Debug("calling killAndCleanUp")
+	logrus.WithField("id", w.ID()).Debug("calling killAndCleanUp")
 
-	ok, err := w.sbx.IsRunning()
+	ok, err := w.IsRunning()
 	if err != nil {
 		return
 	}
 	if ok {
-		err = w.sbx.Kill()
+		err = w.Kill()
 	}
-	if err = w.sbx.Delete(); err != nil {
+	if err = w.Delete(); err != nil {
 		return
 	}
 	if err = m.file.DeleteDirectory(w.hostDir); err != nil {
 		return
 	}
-	m.runningSandboxes.Delete(w.sbx.ID())
+	m.runningSandboxes.Delete(w.ID())
 	return
 }

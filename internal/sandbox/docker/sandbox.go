@@ -2,6 +2,7 @@ package docker
 
 import (
 	dockerclient "github.com/fsouza/go-dockerclient"
+	"github.com/ranna-go/ranna/internal/sandbox"
 	"github.com/ranna-go/ranna/pkg/chanwriter"
 )
 
@@ -11,6 +12,8 @@ type DockerSandbox struct {
 	client    *dockerclient.Client
 	container *dockerclient.Container
 }
+
+var _ sandbox.Sandbox = (*DockerSandbox)(nil)
 
 func (s *DockerSandbox) ID() string {
 	return s.container.ID

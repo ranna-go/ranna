@@ -23,6 +23,8 @@ type DockerSandboxProvider struct {
 	client *dockerclient.Client
 }
 
+var _ sandbox.Provider = (*DockerSandboxProvider)(nil)
+
 func NewDockerSandboxProvider(ctn di.Container) (dsp *DockerSandboxProvider, err error) {
 	dsp = &DockerSandboxProvider{}
 
