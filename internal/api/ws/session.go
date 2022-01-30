@@ -133,7 +133,7 @@ func (s *session) handleExec(op OperationExec) (err error) {
 			case <-cStop:
 				return
 			case runId = <-cSpn:
-				s.Send(Event{
+				err = s.Send(Event{
 					Code:  EventSpawn,
 					Nonce: op.Nonce,
 					Data: DataSpawn{
@@ -143,7 +143,7 @@ func (s *session) handleExec(op OperationExec) (err error) {
 					},
 				})
 			case p := <-cStdOut:
-				s.Send(Event{
+				err = s.Send(Event{
 					Code:  EventLog,
 					Nonce: op.Nonce,
 					Data: DataLog{
@@ -154,7 +154,7 @@ func (s *session) handleExec(op OperationExec) (err error) {
 					},
 				})
 			case p := <-cStdErr:
-				s.Send(Event{
+				err = s.Send(Event{
 					Code:  EventLog,
 					Nonce: op.Nonce,
 					Data: DataLog{
@@ -164,6 +164,11 @@ func (s *session) handleExec(op OperationExec) (err error) {
 						StdErr: string(p),
 					},
 				})
+			}
+			if err != nil {
+				if err = s.SendError(err, op.Nonce); err != nil {
+					return
+				}
 			}
 		}
 	}()
