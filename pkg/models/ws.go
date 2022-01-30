@@ -1,6 +1,4 @@
-package ws
-
-import "github.com/ranna-go/ranna/pkg/models"
+package models
 
 type EventCode int
 
@@ -18,7 +16,7 @@ type OpCode int
 const (
 	OpPing OpCode = iota
 	OpExec
-	OpKill // Unused
+	OpKill
 )
 
 type Event struct {
@@ -34,7 +32,7 @@ type Operation struct {
 
 type OperationExec struct {
 	Operation
-	Args models.ExecutionRequest `json:"args"`
+	Args ExecutionRequest `json:"args"`
 }
 
 type OperationKill struct {

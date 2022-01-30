@@ -9,6 +9,7 @@ import (
 	"github.com/ranna-go/ranna/internal/sandbox"
 	"github.com/ranna-go/ranna/internal/static"
 	"github.com/ranna-go/ranna/internal/util"
+	"github.com/ranna-go/ranna/pkg/models"
 	"github.com/sarulabs/di/v2"
 	"github.com/sirupsen/logrus"
 )
@@ -68,42 +69,42 @@ func (s *session) Handdler() fiber.Handler {
 	})
 }
 
-func (s *session) Send(v Event) (err error) {
+func (s *session) Send(v models.Event) (err error) {
 	err = s.conn.WriteJSON(v)
 	return
 }
 
 func (s *session) SendError(err error, nonce int) error {
-	return s.Send(Event{
-		Code:  EventError,
+	return s.Send(models.Event{
+		Code:  models.EventError,
 		Nonce: nonce,
 		Data:  err.Error(),
 	})
 }
 
 func (s *session) HandleOp(msg []byte) (err error, nonce int) {
-	var op Operation
+	var op models.Operation
 	if err = json.Unmarshal(msg, &op); err != nil {
 		return
 	}
 
-	var event Event
+	var event models.Event
 	event.Nonce = op.Nonce
 	nonce = op.Nonce
 
 	switch op.Op {
-	case OpPing:
-		event.Code = EventPong
+	case models.OpPing:
+		event.Code = models.EventPong
 		event.Data = "Pong!"
 		err = s.Send(event)
-	case OpExec:
-		var eop OperationExec
+	case models.OpExec:
+		var eop models.OperationExec
 		err = json.Unmarshal(msg, &eop)
 		if err == nil {
 			err = s.handleExec(eop)
 		}
-	case OpKill:
-		var eop OperationKill
+	case models.OpKill:
+		var eop models.OperationKill
 		err = json.Unmarshal(msg, &eop)
 		if err == nil {
 			err = s.handleKill(eop)
@@ -115,7 +116,7 @@ func (s *session) HandleOp(msg []byte) (err error, nonce int) {
 	return
 }
 
-func (s *session) handleExec(op OperationExec) (err error) {
+func (s *session) handleExec(op models.OperationExec) (err error) {
 	if op.Args.Code == "" {
 		return ErrEmptyCode
 	}
@@ -133,32 +134,32 @@ func (s *session) handleExec(op OperationExec) (err error) {
 			case <-cStop:
 				return
 			case runId = <-cSpn:
-				err = s.Send(Event{
-					Code:  EventSpawn,
+				err = s.Send(models.Event{
+					Code:  models.EventSpawn,
 					Nonce: op.Nonce,
-					Data: DataSpawn{
-						DataRunId: DataRunId{
+					Data: models.DataSpawn{
+						DataRunId: models.DataRunId{
 							RunId: runId,
 						},
 					},
 				})
 			case p := <-cStdOut:
-				err = s.Send(Event{
-					Code:  EventLog,
+				err = s.Send(models.Event{
+					Code:  models.EventLog,
 					Nonce: op.Nonce,
-					Data: DataLog{
-						DataRunId: DataRunId{
+					Data: models.DataLog{
+						DataRunId: models.DataRunId{
 							RunId: runId,
 						},
 						StdOut: string(p),
 					},
 				})
 			case p := <-cStdErr:
-				err = s.Send(Event{
-					Code:  EventLog,
+				err = s.Send(models.Event{
+					Code:  models.EventLog,
 					Nonce: op.Nonce,
-					Data: DataLog{
-						DataRunId: DataRunId{
+					Data: models.DataLog{
+						DataRunId: models.DataRunId{
 							RunId: runId,
 						},
 						StdErr: string(p),
@@ -183,11 +184,11 @@ func (s *session) handleExec(op OperationExec) (err error) {
 		cStop <- false
 	}
 
-	err = s.Send(Event{
-		Code:  EventStop,
+	err = s.Send(models.Event{
+		Code:  models.EventStop,
 		Nonce: op.Nonce,
-		Data: DataStop{
-			DataRunId: DataRunId{
+		Data: models.DataStop{
+			DataRunId: models.DataRunId{
 				RunId: runId,
 			},
 			ExecTimeMS: int(execTime.Milliseconds()),
@@ -197,7 +198,7 @@ func (s *session) handleExec(op OperationExec) (err error) {
 	return
 }
 
-func (s *session) handleKill(op OperationKill) (err error) {
+func (s *session) handleKill(op models.OperationKill) (err error) {
 	ok, err := s.manager.KillAndCleanUp(op.Args.RunId)
 	if err != nil {
 		return
