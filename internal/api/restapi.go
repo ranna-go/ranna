@@ -34,6 +34,7 @@ func NewRestAPI(ctn di.Container) (r *RestAPI, err error) {
 		ErrorHandler:            errorHandler,
 		EnableTrustedProxyCheck: len(trustedProxies) != 0,
 		TrustedProxies:          trustedProxies,
+		ProxyHeader:             "X-Forwarded-For",
 	})
 
 	new(v1.Router).Setup(r.app.Group("/v1"), ctn)
