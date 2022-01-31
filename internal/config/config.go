@@ -7,8 +7,8 @@ type Log struct {
 }
 
 type Ratelimit struct {
-	Burst        int `config:"api.ws.ratelimit.burst,required" json:"burst" yaml:"burst"`
-	LimitSeconds int `config:"api.ws.ratelimit.limitseconds,required" json:"limitseconds" yaml:"limitseconds"`
+	Burst        int `config:"api.ws.ratelimit.burst" json:"burst" yaml:"burst"`
+	LimitSeconds int `config:"api.ws.ratelimit.limitseconds" json:"limitseconds" yaml:"limitseconds"`
 }
 
 type WebSocket struct {
