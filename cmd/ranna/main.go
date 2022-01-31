@@ -28,7 +28,7 @@ func main() {
 	diBuilder.Add(di.Def{
 		Name: static.DiConfigProvider,
 		Build: func(ctn di.Container) (interface{}, error) {
-			p := config.NewConfitaProvider()
+			p := config.NewPaerser("")
 			return p, p.Load()
 		},
 	})

@@ -18,6 +18,7 @@ require (
 	github.com/klauspost/compress v1.14.1 // indirect
 	github.com/moby/sys/mount v0.3.0 // indirect
 	github.com/opencontainers/runc v1.1.0 // indirect
+	github.com/ranna-go/paerser v0.1.5-0.20220131112508-2d841296c032
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/sarulabs/di/v2 v2.4.2
 	github.com/sirupsen/logrus v1.8.1

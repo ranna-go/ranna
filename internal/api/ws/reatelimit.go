@@ -42,7 +42,7 @@ type RateLimitManager struct {
 
 func NewRateLimitManager(ctn di.Container) *RateLimitManager {
 	cfg := ctn.Get(static.DiConfigProvider).(config.Provider).
-		Config().API.WebSocket.RateLimit
+		Config().API.WS.RateLimit
 
 	limits := map[models.OpCode]limit{
 		models.OpExec: {

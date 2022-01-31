@@ -19,7 +19,7 @@ type API struct {
 	BindAddress    string    `config:"api.bindaddress,required" json:"bindaddress" yaml:"api"`
 	MaxOutputLen   string    `config:"api.maxoutputlen" json:"maxoutputlen" yaml:"maxoutputlen"`
 	TrustedProxies string    `config:"api.trustedproxies" json:"trustedproxies" yaml:"trustedproxies"`
-	WebSocket      WebSocket `json:"ws" yaml:"ws"`
+	WS             WebSocket `json:"ws" yaml:"ws"`
 }
 
 type Sandbox struct {
@@ -60,7 +60,7 @@ var defaults = Config{
 		BindAddress:    ":8080",
 		MaxOutputLen:   "1M",
 		TrustedProxies: "",
-		WebSocket: WebSocket{
+		WS: WebSocket{
 			RateLimit: Ratelimit{
 				Burst:        0,
 				LimitSeconds: 0,
