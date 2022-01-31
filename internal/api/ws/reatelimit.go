@@ -2,7 +2,6 @@ package ws
 
 import (
 	"fmt"
-	"strings"
 	"sync"
 	"time"
 
@@ -68,7 +67,7 @@ func (rlm *RateLimitManager) GetLimiter(c *websocket.Conn, op models.OpCode) Lim
 	if !ok || limits.Burst == 0 && limits.Limit == 0 {
 		return dummyLimiter{}
 	}
-	key := fmt.Sprintf("%d::%s", op, formatAddr(c.RemoteAddr().String()))
+	key := fmt.Sprintf("%d::%s", op, getAddr(c))
 	limiter, ok := rlm.limiters.GetValue(key).(Limiter)
 	if ok {
 		return limiter
@@ -85,8 +84,4 @@ func (rlm *RateLimitManager) createLimiter(key string, limit time.Duration, burs
 		rlm.pool.Put(v)
 	})
 	return limiter
-}
-
-func formatAddr(addr string) string {
-	return addr[:strings.LastIndex(addr, ":")]
 }

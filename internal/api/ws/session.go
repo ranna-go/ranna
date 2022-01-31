@@ -36,15 +36,15 @@ func newSession(rlm *RateLimitManager, ctn di.Container) (s *session) {
 
 func (s *session) Close() {
 	logrus.
-		WithField("addr", s.conn.RemoteAddr().String()).
+		WithField("addr", getAddr(s.conn)).
 		Debug("websocket connection closed")
 	sessionPool.Put(s)
 }
 
-func (s *session) Handdler() fiber.Handler {
+func (s *session) Handler() fiber.Handler {
 	return websocket.New(func(c *websocket.Conn) {
 		logrus.
-			WithField("addr", c.RemoteAddr().String()).
+			WithField("addr", getAddr(c)).
 			Debug("new websocket connection")
 
 		s.conn = c

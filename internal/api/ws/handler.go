@@ -9,6 +9,9 @@ import (
 func Upgrade() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		if websocket.IsWebSocketUpgrade(c) {
+			if ip := c.IP(); ip != "" {
+				c.Locals("ip", ip)
+			}
 			return c.Next()
 		}
 		return fiber.ErrUpgradeRequired
@@ -17,5 +20,5 @@ func Upgrade() fiber.Handler {
 
 func Handler(ctn di.Container) fiber.Handler {
 	rlm := NewRateLimitManager(ctn)
-	return newSession(rlm, ctn).Handdler()
+	return newSession(rlm, ctn).Handler()
 }
