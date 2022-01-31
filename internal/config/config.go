@@ -6,9 +6,19 @@ type Log struct {
 	Level int `config:"log.level" json:"level" yaml:"level"`
 }
 
+type Ratelimit struct {
+	Burst        int `config:"api.ws.ratelimit.burst,required" json:"burst" yaml:"burst"`
+	LimitSeconds int `config:"api.ws.ratelimit.limitseconds,required" json:"limitseconds" yaml:"limitseconds"`
+}
+
+type WebSocket struct {
+	RateLimit Ratelimit `json:"ratelimit" yaml:"ratelimit"`
+}
+
 type API struct {
-	BindAddress  string `config:"api.bindaddress,required" json:"bindaddress" yaml:"api"`
-	MaxOutputLen string `config:"api.maxoutputlen" json:"maxoutputlen" yaml:"maxoutputlen"`
+	BindAddress  string    `config:"api.bindaddress,required" json:"bindaddress" yaml:"api"`
+	MaxOutputLen string    `config:"api.maxoutputlen" json:"maxoutputlen" yaml:"maxoutputlen"`
+	WebSocket    WebSocket `json:"ws" yaml:"ws"`
 }
 
 type Sandbox struct {
@@ -48,6 +58,12 @@ var defaults = Config{
 	API: API{
 		BindAddress:  ":8080",
 		MaxOutputLen: "1M",
+		WebSocket: WebSocket{
+			RateLimit: Ratelimit{
+				Burst:        0,
+				LimitSeconds: 0,
+			},
+		},
 	},
 	Sandbox: Sandbox{
 		Runtime:          "",

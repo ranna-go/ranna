@@ -16,5 +16,6 @@ func Upgrade() fiber.Handler {
 }
 
 func Handler(ctn di.Container) fiber.Handler {
-	return newSession(ctn).Handdler()
+	rlm := NewRateLimitManager(ctn)
+	return newSession(rlm, ctn).Handdler()
 }
