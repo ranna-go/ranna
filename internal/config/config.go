@@ -16,9 +16,10 @@ type WebSocket struct {
 }
 
 type API struct {
-	BindAddress  string    `config:"api.bindaddress,required" json:"bindaddress" yaml:"api"`
-	MaxOutputLen string    `config:"api.maxoutputlen" json:"maxoutputlen" yaml:"maxoutputlen"`
-	WebSocket    WebSocket `json:"ws" yaml:"ws"`
+	BindAddress    string    `config:"api.bindaddress,required" json:"bindaddress" yaml:"api"`
+	MaxOutputLen   string    `config:"api.maxoutputlen" json:"maxoutputlen" yaml:"maxoutputlen"`
+	TrustedProxies string    `config:"api.trustedproxies" json:"trustedproxies" yaml:"trustedproxies"`
+	WebSocket      WebSocket `json:"ws" yaml:"ws"`
 }
 
 type Sandbox struct {
@@ -56,8 +57,9 @@ var defaults = Config{
 		Level: int(logrus.InfoLevel),
 	},
 	API: API{
-		BindAddress:  ":8080",
-		MaxOutputLen: "1M",
+		BindAddress:    ":8080",
+		MaxOutputLen:   "1M",
+		TrustedProxies: "",
 		WebSocket: WebSocket{
 			RateLimit: Ratelimit{
 				Burst:        0,

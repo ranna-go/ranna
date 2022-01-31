@@ -1,6 +1,8 @@
 package api
 
 import (
+	"strings"
+
 	"github.com/gofiber/fiber/v2"
 	v1 "github.com/ranna-go/ranna/internal/api/v1"
 	"github.com/ranna-go/ranna/internal/config"
@@ -22,10 +24,16 @@ func NewRestAPI(ctn di.Container) (r *RestAPI, err error) {
 		bindAddress: cfg.Config().API.BindAddress,
 	}
 
+	var trustedProxies []string
+	if tp := cfg.Config().API.TrustedProxies; tp != "" {
+		trustedProxies = strings.Split(tp, " ")
+	}
 	r.app = fiber.New(fiber.Config{
-		DisableStartupMessage: !cfg.Config().Debug,
-		ServerHeader:          "ranna",
-		ErrorHandler:          errorHandler,
+		DisableStartupMessage:   !cfg.Config().Debug,
+		ServerHeader:            "ranna",
+		ErrorHandler:            errorHandler,
+		EnableTrustedProxyCheck: len(trustedProxies) != 0,
+		TrustedProxies:          trustedProxies,
 	})
 
 	new(v1.Router).Setup(r.app.Group("/v1"), ctn)
