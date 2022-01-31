@@ -21,6 +21,8 @@ require (
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/sarulabs/di/v2 v2.4.2
 	github.com/sirupsen/logrus v1.8.1
+	github.com/zekroTJA/ratelimit v1.0.0
+	github.com/zekroTJA/timedmap v1.4.0
 	go.opencensus.io v0.23.0 // indirect
 	golang.org/x/sys v0.0.0-20220114195835-da31bd327af9 // indirect
 )

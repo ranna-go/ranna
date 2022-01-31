@@ -23,12 +23,14 @@ var sessionPool = sync.Pool{
 type session struct {
 	conn    *websocket.Conn
 	manager sandbox.Manager
+	rlm     *RateLimitManager
 }
 
-func newSession(ctn di.Container) (s *session) {
+func newSession(rlm *RateLimitManager, ctn di.Container) (s *session) {
 	s = sessionPool.Get().(*session)
 	s.conn = nil
 	s.manager = ctn.Get(static.DiSandboxManager).(sandbox.Manager)
+	s.rlm = rlm
 	return
 }
 
@@ -87,10 +89,15 @@ func (s *session) HandleOp(msg []byte) (err error, nonce int) {
 	if err = json.Unmarshal(msg, &op); err != nil {
 		return
 	}
+	nonce = op.Nonce
+
+	if !s.rlm.GetLimiter(s.conn, op.Op).Allow() {
+		err = ErrRateLimited
+		return
+	}
 
 	var event models.Event
 	event.Nonce = op.Nonce
-	nonce = op.Nonce
 
 	switch op.Op {
 	case models.OpPing:
