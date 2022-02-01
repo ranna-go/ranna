@@ -58,7 +58,10 @@ An event is composed by an event `code` specifying the event type as well as the
 
 ### `1` - `ERROR`
 
-The error message.
+| Name    | Type     | Description                        |
+| ------- | -------- | ---------------------------------- |
+| `code` | `number` | An HTTP like error code. |
+| `message` | `string` | A text representation of the error. |
 
 ### `2` - `SPAWN`
 
