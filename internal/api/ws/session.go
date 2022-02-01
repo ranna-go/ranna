@@ -60,7 +60,7 @@ func (s *session) Handler() fiber.Handler {
 				break
 			}
 			if typ != websocket.TextMessage {
-				s.SendError(ErrInvalidMessageType, 0)
+				s.SendError(models.ErrInvalidMessageType, 0)
 			}
 			go func() {
 				if err, nonce = s.HandleOp(msg); err != nil {
@@ -77,10 +77,16 @@ func (s *session) Send(v models.Event) (err error) {
 }
 
 func (s *session) SendError(err error, nonce int) error {
+	var data models.WsError
+	if wsErr, ok := err.(models.WsError); ok {
+		data = wsErr
+	} else {
+		data = models.WsError{500, err.Error()}
+	}
 	return s.Send(models.Event{
 		Code:  models.EventError,
 		Nonce: nonce,
-		Data:  err.Error(),
+		Data:  data,
 	})
 }
 
@@ -92,7 +98,7 @@ func (s *session) HandleOp(msg []byte) (err error, nonce int) {
 	nonce = op.Nonce
 
 	if !s.rlm.GetLimiter(s.conn, op.Op).Allow() {
-		err = ErrRateLimited
+		err = models.ErrRateLimited
 		return
 	}
 
@@ -117,7 +123,7 @@ func (s *session) HandleOp(msg []byte) (err error, nonce int) {
 			err = s.handleKill(eop)
 		}
 	default:
-		err = ErrInvalidOpCode
+		err = models.ErrInvalidOpCode
 	}
 
 	return
@@ -125,7 +131,7 @@ func (s *session) HandleOp(msg []byte) (err error, nonce int) {
 
 func (s *session) handleExec(op models.OperationExec) (err error) {
 	if op.Args.Code == "" {
-		return ErrEmptyCode
+		return models.ErrEmptyCode
 	}
 
 	cSpn := make(chan string, 1)
@@ -211,7 +217,7 @@ func (s *session) handleKill(op models.OperationKill) (err error) {
 		return
 	}
 	if !ok {
-		err = ErrSandboxNotRunning
+		err = models.ErrSandboxNotRunning
 	}
 	return
 }
