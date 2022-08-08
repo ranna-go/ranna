@@ -329,3 +329,15 @@ rust:
     fn main() {
       println!("Hello world!");
     }
+
+zig:
+  image:      'ziglang/static-base:llvm13-x86_64-1'
+  entrypoint: '/deps/local/bin/zig run'
+  filename:   'main.zig'
+  language:   'zig'
+  example: |-
+    const std = @import("std");
+
+    pub fn main() void {
+        std.debug.print("Hello, {s}!", .{"World"});
+    }
