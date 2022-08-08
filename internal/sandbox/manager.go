@@ -2,6 +2,7 @@ package sandbox
 
 import (
 	"errors"
+	"fmt"
 	"path"
 	"strings"
 	"sync"
@@ -164,14 +165,20 @@ func (m *managerImpl) RunInSandbox(
 			return
 		}
 
-		// Extract the imports from the source string
-		imports := spc.Inline.ImportRegexCompiled.FindAllString(req.Code, -1)
-		req.Code = spc.Inline.ImportRegexCompiled.ReplaceAllString(req.Code, "")
+		code := spc.Inline.Template
+
+		if spc.Inline.ImportRegexCompiled != nil {
+			// Extract the imports from the source string
+			imports := spc.Inline.ImportRegexCompiled.FindAllString(req.Code, -1)
+			req.Code = spc.Inline.ImportRegexCompiled.ReplaceAllString(req.Code, "")
+			code = strings.ReplaceAll(code, "$${IMPORTS}", strings.Join(imports, "\n"))
+			fmt.Println(imports, spc.Inline.ImportRegex)
+		}
 
 		// Wrap the code to execute using the specified template
-		code := strings.ReplaceAll(spc.Inline.Template, "$${IMPORTS}", strings.Join(imports, "\n"))
 		code = strings.ReplaceAll(code, "$${CODE}", req.Code)
 		req.Code = code
+		fmt.Println(code)
 	}
 
 	// Wrap in RunSpec
