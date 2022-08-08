@@ -271,6 +271,11 @@ php:
     <?php
         print("Hello World");
     ?>
+  inline:
+    template: |-
+      <?php
+        $${CODE}
+      ?>
 
 py:
   use:        'python3'
