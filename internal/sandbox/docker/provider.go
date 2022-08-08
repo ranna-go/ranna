@@ -2,6 +2,7 @@ package docker
 
 import (
 	"path"
+	"path/filepath"
 	"strings"
 
 	dockerclient "github.com/fsouza/go-dockerclient"
@@ -91,7 +92,11 @@ func (dsp *DockerSandboxProvider) CreateSandbox(spec sandbox.RunSpec) (sbx sandb
 		NetworkDisabled: !dsp.cfg.Config().Sandbox.EnableNetworking,
 	}
 
-	hostDir := spec.GetAssambledHostDir()
+	hostDir, err := filepath.Abs(spec.GetAssambledHostDir())
+	if err != nil {
+		return
+	}
+
 	hostCfg := &dockerclient.HostConfig{
 		Binds:   []string{hostDir + ":" + workingDir},
 		Runtime: dsp.cfg.Config().Sandbox.Runtime,
