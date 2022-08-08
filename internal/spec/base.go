@@ -50,7 +50,7 @@ func (p *baseProvider) parseAndSet(data []byte, format string) (err error) {
 	}
 
 	for _, spec := range m {
-		if spec.Inline != nil {
+		if spec.Inline != nil && spec.Inline.ImportRegex != "" {
 			spec.Inline.ImportRegexCompiled = regexp.MustCompile(spec.Inline.ImportRegex)
 		}
 	}

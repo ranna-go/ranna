@@ -27,8 +27,6 @@ type InlineSpec struct {
 // SupportsTemplating checks if a spec supports templating for inline expressions
 func (spec *Spec) SupportsTemplating() bool {
 	return spec.Inline != nil &&
-		spec.Inline.ImportRegex != "" &&
-		strings.Contains(spec.Inline.Template, "$${IMPORTS}") &&
 		strings.Contains(spec.Inline.Template, "$${CODE}")
 }
 
