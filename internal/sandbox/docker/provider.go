@@ -1,6 +1,7 @@
 package docker
 
 import (
+	"fmt"
 	"path"
 	"path/filepath"
 	"strings"
@@ -11,6 +12,7 @@ import (
 	"github.com/ranna-go/ranna/internal/static"
 	"github.com/ranna-go/ranna/internal/util"
 	"github.com/ranna-go/ranna/pkg/models"
+	"github.com/rs/xid"
 	"github.com/sarulabs/di/v2"
 	"github.com/sirupsen/logrus"
 )
@@ -111,6 +113,7 @@ func (dsp *DockerSandboxProvider) CreateSandbox(spec sandbox.RunSpec) (sbx sandb
 	container, err := dsp.client.CreateContainer(dockerclient.CreateContainerOptions{
 		Config:     ctnCfg,
 		HostConfig: hostCfg,
+		Name:       fmt.Sprintf("ranna-%s-%s", spec.Language, xid.New().String()),
 	})
 
 	sbx = &DockerSandbox{
