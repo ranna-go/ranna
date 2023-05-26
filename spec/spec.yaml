@@ -7,7 +7,12 @@ ash:
     echo "Hello world!"
 
 bash:
-  use:        'ash'
+  image:      'debian:stable-slim'
+  cmd:        '/bin/bash -c "sleep 0.05; /bin/bash main.bash"'
+  filename:   'main.bash'
+  language:   'bash'
+  example: |-
+    echo "Hello world!"
 
 sh:
   use:        'ash'
