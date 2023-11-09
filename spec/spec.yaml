@@ -232,6 +232,14 @@ js:
 nodejs:
   use:        'node'
 
+ocaml:
+  image:      'ocaml/opam:latest'
+  entrypoint: 'ocaml'
+  filename:   'main.ml'
+  language:   'ocaml'
+  example:    |-
+    let () = print_string "Hello world!\n"
+
 openjdk-11:
   image:      'openjdk:11'
   entrypoint: 'java'
