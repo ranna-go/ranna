@@ -235,6 +235,7 @@ nodejs:
 ocaml:
   image:      'ocaml/opam:latest'
   entrypoint: 'ocaml'
+  cmd:        '/bin/sh -c "ocaml main.ml"'
   filename:   'main.ml'
   language:   'ocaml'
   example:    |-
