@@ -118,7 +118,7 @@ go:
   use:        'golang'
 
 golang:
-  image:      'golang:alpine'
+  image:      'golang:latest'
   entrypoint: 'go run'
   filename:   'main.go'
   language:   'go'
