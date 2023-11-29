@@ -325,6 +325,12 @@ racket-8-2:
     #lang racket
     (display "Hello World")
 
+goat:
+  image:      'zekro/goat:latest'
+  entrypoint: 'goat'
+  filename:   'main.goat'
+  language:   'goatfile'
+
 ruby:
   image:      'ruby:alpine'
   entrypoint: 'ruby'
