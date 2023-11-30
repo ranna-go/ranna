@@ -114,6 +114,12 @@ elixir:
 fpc:
   use:        'pascal'
 
+goat:
+  image:      'zekro/goat:latest'
+  cmd:        'goat --no-color main.goat'
+  filename:   'main.goat'
+  language:   'goatfile'
+
 go:
   use:        'golang'
 
@@ -162,6 +168,9 @@ haskell:
   cmd:        '/bin/bash -c "ghc -o main main.hs >> /dev/null && ./main"'
   filename:   'main.hs'
   language:   'haskell'
+  example: |-
+    main :: IO ()
+    main = putStrLn "Hello, World!"
 
 java:
   use:        'openjdk-17'
@@ -324,12 +333,6 @@ racket-8-2:
   example: |-
     #lang racket
     (display "Hello World")
-
-goat:
-  image:      'zekro/goat:latest'
-  entrypoint: 'goat'
-  filename:   'main.goat'
-  language:   'goatfile'
 
 ruby:
   image:      'ruby:alpine'
