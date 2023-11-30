@@ -116,7 +116,7 @@ fpc:
 
 goat:
   image:      'zekro/goat:latest'
-  cmd:        'goat --no-color main.goat'
+  cmd:        '--no-color main.goat'
   filename:   'main.goat'
   language:   'goatfile'
 
