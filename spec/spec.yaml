@@ -114,6 +114,18 @@ elixir:
 fpc:
   use:        'pascal'
 
+gleam:
+  image:      'ghcr.io/gleam-lang/gleam:nightly'
+  filename:   'main.gleam'
+  cmd:        '/bin/ash -c "gleam new /tmp/ranna --name ranna > /dev/null && mv main.gleam /tmp/ranna/src/ranna.gleam && cd /tmp/ranna && gleam build > /dev/null && gleam run"'
+  language:   'gleam'
+  example: |-
+    import gleam/io
+
+    pub fn main() {
+      io.println("hello, friend!")
+    }
+
 goat:
   image:      'zekro/goat:latest'
   cmd:        '--no-color main.goat'
