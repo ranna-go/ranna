@@ -115,7 +115,7 @@ fpc:
   use:        'pascal'
 
 gleam:
-  image:      'ghcr.io/gleam-lang/gleam:1.1.0-erlang-alpine'
+  image:      'ghcr.io/gleam-lang/gleam:v1.2.0-rc1-erlang-alpine'
   filename:   'main.gleam'
   cmd:        '/bin/ash -c "gleam new /tmp/ranna --name ranna > /dev/null && mv main.gleam /tmp/ranna/src/ranna.gleam && cd /tmp/ranna && gleam build > /dev/null && gleam run"'
   language:   'gleam'
