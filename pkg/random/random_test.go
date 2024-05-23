@@ -1,15 +1,18 @@
 package random
 
-import "testing"
+import (
+	"errors"
+	"testing"
+)
 
 func TestGetRandBase64Str(t *testing.T) {
 	v, err := GetRandBase64Str(0)
-	if v != "" || err != ErrInvalidLen {
+	if v != "" || !errors.Is(err, ErrInvalidLen) {
 		t.Error("invalid length not detected")
 	}
 
 	v, err = GetRandBase64Str(-1)
-	if v != "" || err != ErrInvalidLen {
+	if v != "" || !errors.Is(err, ErrInvalidLen) {
 		t.Error("invalid length not detected")
 	}
 
@@ -48,12 +51,12 @@ func TestGetRandBase64StrUniqueness(t *testing.T) {
 
 func TestGetRandByteArray(t *testing.T) {
 	v, err := GetRandByteArray(0)
-	if v != nil || err != ErrInvalidLen {
+	if v != nil || !errors.Is(err, ErrInvalidLen) {
 		t.Error("invalid length not detected")
 	}
 
 	v, err = GetRandByteArray(-1)
-	if v != nil || err != ErrInvalidLen {
+	if v != nil || !errors.Is(err, ErrInvalidLen) {
 		t.Error("invalid length not detected")
 	}
 

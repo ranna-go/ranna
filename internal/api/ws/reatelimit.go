@@ -6,10 +6,7 @@ import (
 	"time"
 
 	"github.com/gofiber/websocket/v2"
-	"github.com/ranna-go/ranna/internal/config"
-	"github.com/ranna-go/ranna/internal/static"
 	"github.com/ranna-go/ranna/pkg/models"
-	"github.com/sarulabs/di/v2"
 	"github.com/zekroTJA/ratelimit"
 	"github.com/zekroTJA/timedmap"
 )
@@ -40,14 +37,13 @@ type RateLimitManager struct {
 	limiters *timedmap.TimedMap
 }
 
-func NewRateLimitManager(ctn di.Container) *RateLimitManager {
-	cfg := ctn.Get(static.DiConfigProvider).(config.Provider).
-		Config().API.WS.RateLimit
+func NewRateLimitManager(cfg ConfigProvider) *RateLimitManager {
+	rlCfg := cfg.Config().API.WS.RateLimit
 
 	limits := map[models.OpCode]limit{
 		models.OpExec: {
-			Burst: cfg.Burst,
-			Limit: time.Duration(cfg.LimitSeconds) * time.Second,
+			Burst: rlCfg.Burst,
+			Limit: time.Duration(rlCfg.LimitSeconds) * time.Second,
 		},
 	}
 

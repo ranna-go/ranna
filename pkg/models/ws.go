@@ -8,7 +8,6 @@ const (
 	EventSpawn
 	EventLog
 	EventStop
-	EventKill // Unused
 )
 
 type OpCode int

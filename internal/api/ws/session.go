@@ -2,15 +2,13 @@ package ws
 
 import (
 	"encoding/json"
+	"errors"
 	"sync"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
-	"github.com/ranna-go/ranna/internal/sandbox"
-	"github.com/ranna-go/ranna/internal/static"
 	"github.com/ranna-go/ranna/internal/util"
 	"github.com/ranna-go/ranna/pkg/models"
-	"github.com/sarulabs/di/v2"
 	"github.com/sirupsen/logrus"
 )
 
@@ -21,15 +19,16 @@ var sessionPool = sync.Pool{
 }
 
 type session struct {
-	conn    *websocket.Conn
-	manager sandbox.Manager
-	rlm     *RateLimitManager
+	manager SandboxManager
+
+	conn *websocket.Conn
+	rlm  *RateLimitManager
 }
 
-func newSession(rlm *RateLimitManager, ctn di.Container) (s *session) {
+func newSession(rlm *RateLimitManager, manager SandboxManager) (s *session) {
 	s = sessionPool.Get().(*session)
 	s.conn = nil
-	s.manager = ctn.Get(static.DiSandboxManager).(sandbox.Manager)
+	s.manager = manager
 	s.rlm = rlm
 	return
 }
@@ -78,10 +77,8 @@ func (s *session) Send(v models.Event) (err error) {
 
 func (s *session) SendError(err error, nonce int) error {
 	var data models.WsError
-	if wsErr, ok := err.(models.WsError); ok {
-		data = wsErr
-	} else {
-		data = models.WsError{500, err.Error()}
+	if !errors.As(err, &data) {
+		data = models.WsError{Code: 500, Message: err.Error()}
 	}
 	return s.Send(models.Event{
 		Code:  models.EventError,

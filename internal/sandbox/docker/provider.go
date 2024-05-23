@@ -1,19 +1,17 @@
 package docker
 
 import (
+	"errors"
 	"fmt"
 	"path"
 	"path/filepath"
 	"strings"
 
 	dockerclient "github.com/fsouza/go-dockerclient"
-	"github.com/ranna-go/ranna/internal/config"
 	"github.com/ranna-go/ranna/internal/sandbox"
-	"github.com/ranna-go/ranna/internal/static"
 	"github.com/ranna-go/ranna/internal/util"
 	"github.com/ranna-go/ranna/pkg/models"
 	"github.com/rs/xid"
-	"github.com/sarulabs/di/v2"
 	"github.com/sirupsen/logrus"
 )
 
@@ -21,17 +19,17 @@ const (
 	containerRootPath = "/var/tmp/exec"
 )
 
-type DockerSandboxProvider struct {
-	cfg    config.Provider
+type Provider struct {
+	cfg    ConfigProvider
 	client *dockerclient.Client
 }
 
-var _ sandbox.Provider = (*DockerSandboxProvider)(nil)
+var _ sandbox.Provider = (*Provider)(nil)
 
-func NewDockerSandboxProvider(ctn di.Container) (dsp *DockerSandboxProvider, err error) {
-	dsp = &DockerSandboxProvider{}
+func NewProvider(cfg ConfigProvider) (dsp *Provider, err error) {
+	dsp = &Provider{}
 
-	dsp.cfg = ctn.Get(static.DiConfigProvider).(config.Provider)
+	dsp.cfg = cfg
 
 	dsp.client, err = dockerclient.NewClientFromEnv()
 	if err != nil {
@@ -41,7 +39,7 @@ func NewDockerSandboxProvider(ctn di.Container) (dsp *DockerSandboxProvider, err
 	return
 }
 
-func (dsp DockerSandboxProvider) Info() (v *models.SandboxInfo, err error) {
+func (dsp *Provider) Info() (v *models.SandboxInfo, err error) {
 	info, err := dsp.client.Info()
 	if err != nil {
 		return
@@ -53,7 +51,7 @@ func (dsp DockerSandboxProvider) Info() (v *models.SandboxInfo, err error) {
 	return
 }
 
-func (dsp DockerSandboxProvider) Prepare(spec models.Spec, force bool) (err error) {
+func (dsp *Provider) Prepare(spec models.Spec, force bool) (err error) {
 	repo, tag := getImage(spec.Image)
 
 	if force {
@@ -61,7 +59,7 @@ func (dsp DockerSandboxProvider) Prepare(spec models.Spec, force bool) (err erro
 	} else {
 		_, err = dsp.client.InspectImage(repo + ":" + tag)
 	}
-	if err == dockerclient.ErrNoSuchImage {
+	if errors.Is(err, dockerclient.ErrNoSuchImage) {
 		logrus.WithFields(logrus.Fields{
 			"repo": repo,
 			"tag":  tag,
@@ -76,7 +74,7 @@ func (dsp DockerSandboxProvider) Prepare(spec models.Spec, force bool) (err erro
 	return
 }
 
-func (dsp *DockerSandboxProvider) CreateSandbox(spec sandbox.RunSpec) (sbx sandbox.Sandbox, err error) {
+func (dsp *Provider) CreateSandbox(spec sandbox.RunSpec) (sbx sandbox.Sandbox, err error) {
 	repo, tag := getImage(spec.Image)
 
 	err = dsp.Prepare(spec.Spec, false)
@@ -116,7 +114,7 @@ func (dsp *DockerSandboxProvider) CreateSandbox(spec sandbox.RunSpec) (sbx sandb
 		Name:       fmt.Sprintf("ranna-%s-%s", spec.Language, xid.New().String()),
 	})
 
-	sbx = &DockerSandbox{
+	sbx = &Sandbox{
 		client:    dsp.client,
 		container: container,
 	}
