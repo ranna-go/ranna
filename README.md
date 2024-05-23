@@ -4,12 +4,7 @@
 
 ## ⚠ PLEASE READ BEFORE USE
 
-First of all, this project is currently **work in progress** and not fully finished.  
-Also, this service allows **arbitrary code execution in Docker containers**. This will be a high security risk! If you want to use this service, only use this on a separate, encapsulated server environment!
-
-## 📃 Todo
-
-👉 Take a look in the [**issue tracker**](https://github.com/ranna-go/ranna/issues).
+This service allows **arbitrary code execution in Docker containers**. This might be a high security risk! If you want to use this service, only use this on a separate, encapsulated server environment and follow the [security practices described in the wiki](https://github.com/ranna-go/ranna/wiki/%F0%9F%94%92-Security)!
 
 ## 🛠 Architecture
 
@@ -42,6 +37,10 @@ ranna also provides a Go client package available in [`pkg/client`](https://gith
 See the simple [example implementation](https://github.com/ranna-go/ranna/blob/master/examples/client/main.go) how to use the client package.
 
 [Here](https://pkg.go.dev/github.com/ranna-go/ranna#section-directories) you can find some handy documentation for the provided packages.
+
+## 📃 Todo
+
+👉 Take a look in the [**issue tracker**](https://github.com/ranna-go/ranna/issues).
 
 ---
 
