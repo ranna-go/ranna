@@ -3,6 +3,7 @@ package sandbox
 import (
 	"errors"
 	"fmt"
+	"github.com/zekrotja/rogu/log"
 	"path"
 	"strings"
 	"sync"
@@ -10,7 +11,6 @@ import (
 
 	"github.com/ranna-go/ranna/pkg/models"
 	"github.com/ranna-go/ranna/pkg/timeout"
-	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -125,7 +125,7 @@ func (m *ManagerImpl) PrepareEnvironments(force bool) (errs []error) {
 			continue
 		}
 		if err := m.sandbox.Prepare(*spec, force); err != nil {
-			logrus.WithField("image", spec.Image).WithError(err).Error("failed preparing env")
+			log.Error().Field("image", spec.Image).Err(err).Msg("failed preparing env")
 			errs = append(errs, err)
 		}
 	}
@@ -141,12 +141,10 @@ func (m *ManagerImpl) RunInSandbox(
 ) (err error) {
 	defer func() {
 		if err != nil && IsSystemError(err) {
-			logrus.
-				WithError(err).
-				WithFields(logrus.Fields{
-					"spec": req.Language,
-				}).
-				Error("sandbox run failed")
+			log.Error().
+				Err(err).
+				Field("spec", req.Language).
+				Msg("sandbox run failed")
 		}
 	}()
 
@@ -225,10 +223,7 @@ func (m *ManagerImpl) RunInSandbox(
 	if cSpn != nil {
 		cSpn <- sbx.ID()
 	}
-	logrus.WithFields(logrus.Fields{
-		"id":   sbx.ID(),
-		"spec": req.Language,
-	}).Info("created sandbox")
+	log.Info().Fields("id", sbx.ID(), "spec", req.Language).Msg("created sandbox")
 
 	// Store sandbox to track run state later
 	wrapper := &sandboxWrapper{sbx, hostDir}
@@ -258,10 +253,7 @@ func (m *ManagerImpl) RunInSandbox(
 	if timedOut {
 		err = errTimedOut
 	}
-	logrus.WithFields(logrus.Fields{
-		"id":   sbx.ID(),
-		"spec": req.Language,
-	}).Info("sandbox cleaned up")
+	log.Info().Fields("id", sbx.ID(), "spec", req.Language).Msg("sandbox cleaned up")
 
 	return
 }
@@ -289,7 +281,7 @@ func (m *ManagerImpl) Cleanup() (errs []error) {
 	m.runningSandboxes.Range(func(key, value interface{}) bool {
 		w, ok := value.(*sandboxWrapper)
 		if ok {
-			logrus.WithField("id", w.ID()).Info("killing and cleaning up running container")
+			log.Info().Field("id", w.ID()).Msg("killing and cleaning up running container")
 			if err := m.killAndCleanUp(w); err != nil {
 				errs = append(errs, err)
 			}
@@ -307,14 +299,14 @@ func (m *ManagerImpl) GetProvider() Provider {
 func (m *ManagerImpl) killAndCleanUp(w *sandboxWrapper) (err error) {
 	defer func() {
 		if err != nil {
-			logrus.
-				WithError(err).
-				WithField("id", w.ID()).
-				Error("failed cleaning up container")
+			log.Error().
+				Err(err).
+				Field("id", w.ID()).
+				Msg("failed cleaning up container")
 		}
 	}()
 
-	logrus.WithField("id", w.ID()).Debug("calling killAndCleanUp")
+	log.Debug().Field("id", w.ID()).Msg("calling killAndCleanUp")
 
 	ok, err := w.IsRunning()
 	if err != nil {

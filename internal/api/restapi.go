@@ -2,12 +2,12 @@ package api
 
 import (
 	"errors"
+	"github.com/zekrotja/rogu/log"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	v1 "github.com/ranna-go/ranna/internal/api/v1"
 	"github.com/ranna-go/ranna/pkg/models"
-	"github.com/sirupsen/logrus"
 )
 
 type RestAPI struct {
@@ -40,7 +40,7 @@ func NewRestAPI(cfg ConfigProvider, spec SpecProvider, manager SandboxManager) (
 }
 
 func (r *RestAPI) ListenAndServeBlocking() error {
-	logrus.WithFields(logrus.Fields{"addr": r.bindAddress}).Info("Starting REST API ...")
+	log.Info().Field("addr", r.bindAddress).Msg("Starting REST API ...")
 	return r.app.Listen(r.bindAddress)
 }
 

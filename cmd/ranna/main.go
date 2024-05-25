@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/zekrotja/rogu/log"
 	"os"
 	"os/signal"
 	"strings"
@@ -16,7 +17,6 @@ import (
 	"github.com/ranna-go/ranna/internal/sandbox/docker"
 	"github.com/ranna-go/ranna/internal/scheduler"
 	"github.com/ranna-go/ranna/internal/spec"
-	"github.com/sirupsen/logrus"
 )
 
 type ConfigProvider interface {
@@ -50,13 +50,10 @@ func main() {
 	err := cfg.Load()
 	checkErr(err)
 
-	logrus.SetLevel(logrus.Level(cfg.Config().Log.Level))
-	logrus.SetFormatter(&logrus.TextFormatter{
-		ForceColors: cfg.Config().Debug,
-	})
+	log.SetLevel(cfg.Config().Log.Level)
 
 	if cfg.Config().Sandbox.EnableNetworking {
-		logrus.Warn("ATTENTION: Sandbox Networking is enabled by config! This is a high security risk!")
+		log.Warn().Msg("ATTENTION: Sandbox Networking is enabled by config! This is a high security risk!")
 	}
 
 	specFile := cfg.Config().SpecFile
@@ -79,7 +76,7 @@ func main() {
 	sandboxManager, err := sandbox.NewManager(sandboxProvider, specProvider, fileProvider, cfg, namespaceProvider)
 	checkErr(err)
 	defer func() {
-		logrus.Info("cleaning up running sandboxes ...")
+		log.Info().Msg("cleaning up running sandboxes ...")
 		// TODO: Handle errors
 		sandboxManager.Cleanup()
 	}()
@@ -92,15 +89,15 @@ func main() {
 	defer schedulerProvider.Stop()
 
 	if !cfg.Config().SkipStartupPrep {
-		logrus.Info("Prepare spec environments ...")
+		log.Info().Msg("Prepare spec environments ...")
 		// TODO: Handle errors
 		sandboxManager.PrepareEnvironments(true)
 	} else {
-		logrus.Warn("Skipping spec preparation on startup")
+		log.Warn().Msg("Skipping spec preparation on startup")
 	}
 
 	if err := scheduleTasks(cfg, schedulerProvider, sandboxManager, specProvider); err != nil {
-		logrus.WithError(err).Fatal("failed scheduling job")
+		log.Fatal().Err(err).Msg("failed scheduling job")
 	}
 
 	go func() {
@@ -121,7 +118,7 @@ func scheduleTasks(
 ) (err error) {
 	schedule := func(name, spec string, job func()) (err error) {
 		if spec != "" {
-			logrus.WithField("name", name).WithField("spec", spec).Info("Scheduling job")
+			log.Info().Field("name", name).Field("spec", spec).Msg("Scheduling job")
 			_, err = sched.Schedule(spec, job)
 		}
 		return
@@ -129,8 +126,8 @@ func scheduleTasks(
 
 	scheduleSpec := cfg.Config().Scheduler.UpdateImages
 	if err = schedule("update spec environments", scheduleSpec, func() {
-		logrus.Info("Updating spec environments ...")
-		defer logrus.Info("Updating spec finished")
+		log.Info().Msg("Updating spec environments ...")
+		defer log.Info().Msg("Updating spec finished")
 		mgr.PrepareEnvironments(true)
 	}); err != nil {
 		return
@@ -139,9 +136,9 @@ func scheduleTasks(
 	scheduleSpec = cfg.Config().Scheduler.UpdateSpecs
 	if err = schedule("update specs", scheduleSpec, func() {
 		if err = specProvider.Load(); err != nil {
-			logrus.WithError(err).Error("Failed loading specs")
+			log.Error().Err(err).Msg("Failed loading specs")
 		} else {
-			logrus.Info("Specs updated")
+			log.Info().Msg("Specs updated")
 		}
 	}); err != nil {
 		return

@@ -3,13 +3,13 @@ package ws
 import (
 	"encoding/json"
 	"errors"
+	"github.com/zekrotja/rogu/log"
 	"sync"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
 	"github.com/ranna-go/ranna/internal/util"
 	"github.com/ranna-go/ranna/pkg/models"
-	"github.com/sirupsen/logrus"
 )
 
 var sessionPool = sync.Pool{
@@ -34,17 +34,17 @@ func newSession(rlm *RateLimitManager, manager SandboxManager) (s *session) {
 }
 
 func (s *session) Close() {
-	logrus.
-		WithField("addr", getAddr(s.conn)).
-		Debug("websocket connection closed")
+	log.Debug().
+		Field("addr", getAddr(s.conn)).
+		Msg("websocket connection closed")
 	sessionPool.Put(s)
 }
 
 func (s *session) Handler() fiber.Handler {
 	return websocket.New(func(c *websocket.Conn) {
-		logrus.
-			WithField("addr", getAddr(c)).
-			Debug("new websocket connection")
+		log.Debug().
+			Field("addr", getAddr(c)).
+			Msg("new websocket connection")
 
 		s.conn = c
 		var (
@@ -177,9 +177,9 @@ func (s *session) handleExec(op models.OperationExec) (err error) {
 				})
 			}
 			if err != nil {
-				logrus.WithError(err).Error("Failed sending event")
+				log.Error().Err(err).Msg("Failed sending event")
 				if err = s.SendError(err, op.Nonce); err != nil {
-					logrus.WithError(err).Error("Failed sending error event")
+					log.Error().Err(err).Msg("Failed sending error event")
 					return
 				}
 			}

@@ -3,6 +3,7 @@ package docker
 import (
 	"errors"
 	"fmt"
+	"github.com/zekrotja/rogu/log"
 	"path"
 	"path/filepath"
 	"strings"
@@ -12,7 +13,6 @@ import (
 	"github.com/ranna-go/ranna/internal/util"
 	"github.com/ranna-go/ranna/pkg/models"
 	"github.com/rs/xid"
-	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -60,10 +60,7 @@ func (dsp *Provider) Prepare(spec models.Spec, force bool) (err error) {
 		_, err = dsp.client.InspectImage(repo + ":" + tag)
 	}
 	if errors.Is(err, dockerclient.ErrNoSuchImage) {
-		logrus.WithFields(logrus.Fields{
-			"repo": repo,
-			"tag":  tag,
-		}).Info("pull image")
+		log.Info().Fields("repo", repo, "tag", tag).Msg("pull image")
 		err = dsp.client.PullImage(dockerclient.PullImageOptions{
 			Repository: repo,
 			Tag:        tag,

@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"github.com/zekrotja/rogu/log"
 	"runtime"
 
 	"github.com/gofiber/fiber/v2"
@@ -10,7 +11,6 @@ import (
 	"github.com/ranna-go/ranna/internal/util"
 	"github.com/ranna-go/ranna/pkg/cappedbuffer"
 	"github.com/ranna-go/ranna/pkg/models"
-	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -42,7 +42,7 @@ func (r *Router) Setup(route fiber.Router,
 
 	sbc, err := util.ParseMemoryStr(r.cfg.Config().Sandbox.StreamBufferCap)
 	if err != nil {
-		logrus.WithError(err).Fatal("Invalid value for stream buffer cap")
+		log.Fatal().Err(err).Msg("Invalid value for stream buffer cap")
 		return
 	}
 	r.streamBufferCap = int(sbc)
