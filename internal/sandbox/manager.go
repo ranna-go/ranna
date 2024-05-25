@@ -3,20 +3,14 @@ package sandbox
 import (
 	"errors"
 	"fmt"
+	"github.com/zekrotja/rogu/log"
 	"path"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/ranna-go/ranna/internal/config"
-	"github.com/ranna-go/ranna/internal/file"
-	"github.com/ranna-go/ranna/internal/namespace"
-	"github.com/ranna-go/ranna/internal/spec"
-	"github.com/ranna-go/ranna/internal/static"
 	"github.com/ranna-go/ranna/pkg/models"
 	"github.com/ranna-go/ranna/pkg/timeout"
-	"github.com/sarulabs/di/v2"
-	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -36,7 +30,7 @@ type Manager interface {
 	// The sandbox is then started and the current go routine is
 	// blocked until the execution is finished or timed out.
 	//
-	// On success, an execution response is returned.
+	// On success returns an execution response.
 	RunInSandbox(
 		req *models.ExecutionRequest,
 		cSpn chan string,
@@ -65,20 +59,20 @@ type Manager interface {
 	GetProvider() Provider
 }
 
-// managerImpl is the standard implementation
+// ManagerImpl is the standard implementation
 // of Manager.
-type managerImpl struct {
+type ManagerImpl struct {
 	sandbox Provider
-	spec    spec.Provider
-	file    file.Provider
-	cfg     config.Provider
-	ns      namespace.Provider
+	spec    SpecProvider
+	file    FileProvider
+	cfg     ConfigProvider
+	ns      NamespaceProvider
 
 	runningSandboxes *sync.Map
 	isCleanup        bool
 }
 
-var _ Manager = (*managerImpl)(nil)
+var _ Manager = (*ManagerImpl)(nil)
 
 // sandboxWrapper wraps a sandbox instance and
 // the used hostDir.
@@ -98,26 +92,32 @@ type SystemError struct {
 // IsSystemError returns true when the passed
 // error is type of SystemError.
 func IsSystemError(err error) (ok bool) {
-	_, ok = err.(SystemError)
-	return
+	var systemError SystemError
+	return errors.As(err, &systemError)
 }
 
-// NewManager returns a new instance of managerImpl.
-func NewManager(ctn di.Container) (m *managerImpl, err error) {
-	m = &managerImpl{}
+// NewManager returns a new instance of ManagerImpl.
+func NewManager(
+	sandbox Provider,
+	spec SpecProvider,
+	file FileProvider,
+	cfg ConfigProvider,
+	ns NamespaceProvider,
+) (m *ManagerImpl, err error) {
+	m = &ManagerImpl{}
 
-	m.sandbox = ctn.Get(static.DiSandboxProvider).(Provider)
-	m.spec = ctn.Get(static.DiSpecProvider).(spec.Provider)
-	m.file = ctn.Get(static.DiFileProvider).(file.Provider)
-	m.cfg = ctn.Get(static.DiConfigProvider).(config.Provider)
-	m.ns = ctn.Get(static.DiNamespaceProvider).(namespace.Provider)
+	m.sandbox = sandbox
+	m.spec = spec
+	m.file = file
+	m.cfg = cfg
+	m.ns = ns
 
 	m.runningSandboxes = &sync.Map{}
 
 	return
 }
 
-func (m *managerImpl) PrepareEnvironments(force bool) (errs []error) {
+func (m *ManagerImpl) PrepareEnvironments(force bool) (errs []error) {
 	errs = []error{}
 
 	for _, spec := range m.spec.Spec().GetSnapshot() {
@@ -125,7 +125,7 @@ func (m *managerImpl) PrepareEnvironments(force bool) (errs []error) {
 			continue
 		}
 		if err := m.sandbox.Prepare(*spec, force); err != nil {
-			logrus.WithField("image", spec.Image).WithError(err).Error("failed preparing env")
+			log.Error().Field("image", spec.Image).Err(err).Msg("failed preparing env")
 			errs = append(errs, err)
 		}
 	}
@@ -133,7 +133,7 @@ func (m *managerImpl) PrepareEnvironments(force bool) (errs []error) {
 	return
 }
 
-func (m *managerImpl) RunInSandbox(
+func (m *ManagerImpl) RunInSandbox(
 	req *models.ExecutionRequest,
 	cSpn chan string,
 	cOut, cErr chan []byte,
@@ -141,12 +141,10 @@ func (m *managerImpl) RunInSandbox(
 ) (err error) {
 	defer func() {
 		if err != nil && IsSystemError(err) {
-			logrus.
-				WithError(err).
-				WithFields(logrus.Fields{
-					"spec": req.Language,
-				}).
-				Error("sandbox run failed")
+			log.Error().
+				Err(err).
+				Field("spec", req.Language).
+				Msg("sandbox run failed")
 		}
 	}()
 
@@ -201,15 +199,15 @@ func (m *managerImpl) RunInSandbox(
 		runSpc.Cmd = spc.FileName
 	}
 
-	// Create host directory + sub directory on the
+	// Create host directory + sub-directory on the
 	// Docker host.
-	hostDir := runSpc.GetAssambledHostDir()
+	hostDir := runSpc.GetAssembledHostDir()
 	if err = m.file.CreateDirectory(hostDir); err != nil {
 		err = SystemError{err}
 		return
 	}
 
-	// Create code snippet file in the host + sub directory
+	// Create code snippet file in the host + sub-directory
 	fileDir := path.Join(hostDir, spc.FileName)
 	if err = m.file.CreateFileWithContent(fileDir, req.Code); err != nil {
 		err = SystemError{err}
@@ -225,10 +223,7 @@ func (m *managerImpl) RunInSandbox(
 	if cSpn != nil {
 		cSpn <- sbx.ID()
 	}
-	logrus.WithFields(logrus.Fields{
-		"id":   sbx.ID(),
-		"spec": req.Language,
-	}).Info("created sandbox")
+	log.Info().Fields("id", sbx.ID(), "spec", req.Language).Msg("created sandbox")
 
 	// Store sandbox to track run state later
 	wrapper := &sandboxWrapper{sbx, hostDir}
@@ -258,15 +253,12 @@ func (m *managerImpl) RunInSandbox(
 	if timedOut {
 		err = errTimedOut
 	}
-	logrus.WithFields(logrus.Fields{
-		"id":   sbx.ID(),
-		"spec": req.Language,
-	}).Info("sandbox cleaned up")
+	log.Info().Fields("id", sbx.ID(), "spec", req.Language).Msg("sandbox cleaned up")
 
 	return
 }
 
-func (m *managerImpl) KillAndCleanUp(id string) (ok bool, err error) {
+func (m *ManagerImpl) KillAndCleanUp(id string) (ok bool, err error) {
 	v, ok := m.runningSandboxes.Load(id)
 	if !ok {
 		return
@@ -282,14 +274,14 @@ func (m *managerImpl) KillAndCleanUp(id string) (ok bool, err error) {
 	return
 }
 
-func (m *managerImpl) Cleanup() (errs []error) {
+func (m *ManagerImpl) Cleanup() (errs []error) {
 	m.isCleanup = true
 	errs = []error{}
 
 	m.runningSandboxes.Range(func(key, value interface{}) bool {
 		w, ok := value.(*sandboxWrapper)
 		if ok {
-			logrus.WithField("id", w.ID()).Info("killing and cleaning up running container")
+			log.Info().Field("id", w.ID()).Msg("killing and cleaning up running container")
 			if err := m.killAndCleanUp(w); err != nil {
 				errs = append(errs, err)
 			}
@@ -300,21 +292,21 @@ func (m *managerImpl) Cleanup() (errs []error) {
 	return
 }
 
-func (m *managerImpl) GetProvider() Provider {
+func (m *ManagerImpl) GetProvider() Provider {
 	return m.sandbox
 }
 
-func (m *managerImpl) killAndCleanUp(w *sandboxWrapper) (err error) {
+func (m *ManagerImpl) killAndCleanUp(w *sandboxWrapper) (err error) {
 	defer func() {
 		if err != nil {
-			logrus.
-				WithError(err).
-				WithField("id", w.ID()).
-				Error("failed cleaning up container")
+			log.Error().
+				Err(err).
+				Field("id", w.ID()).
+				Msg("failed cleaning up container")
 		}
 	}()
 
-	logrus.WithField("id", w.ID()).Debug("calling killAndCleanUp")
+	log.Debug().Field("id", w.ID()).Msg("calling killAndCleanUp")
 
 	ok, err := w.IsRunning()
 	if err != nil {

@@ -2,16 +2,14 @@ package ws
 
 import (
 	"encoding/json"
+	"errors"
+	"github.com/zekrotja/rogu/log"
 	"sync"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
-	"github.com/ranna-go/ranna/internal/sandbox"
-	"github.com/ranna-go/ranna/internal/static"
 	"github.com/ranna-go/ranna/internal/util"
 	"github.com/ranna-go/ranna/pkg/models"
-	"github.com/sarulabs/di/v2"
-	"github.com/sirupsen/logrus"
 )
 
 var sessionPool = sync.Pool{
@@ -21,31 +19,32 @@ var sessionPool = sync.Pool{
 }
 
 type session struct {
-	conn    *websocket.Conn
-	manager sandbox.Manager
-	rlm     *RateLimitManager
+	manager SandboxManager
+
+	conn *websocket.Conn
+	rlm  *RateLimitManager
 }
 
-func newSession(rlm *RateLimitManager, ctn di.Container) (s *session) {
+func newSession(rlm *RateLimitManager, manager SandboxManager) (s *session) {
 	s = sessionPool.Get().(*session)
 	s.conn = nil
-	s.manager = ctn.Get(static.DiSandboxManager).(sandbox.Manager)
+	s.manager = manager
 	s.rlm = rlm
 	return
 }
 
 func (s *session) Close() {
-	logrus.
-		WithField("addr", getAddr(s.conn)).
-		Debug("websocket connection closed")
+	log.Debug().
+		Field("addr", getAddr(s.conn)).
+		Msg("websocket connection closed")
 	sessionPool.Put(s)
 }
 
 func (s *session) Handler() fiber.Handler {
 	return websocket.New(func(c *websocket.Conn) {
-		logrus.
-			WithField("addr", getAddr(c)).
-			Debug("new websocket connection")
+		log.Debug().
+			Field("addr", getAddr(c)).
+			Msg("new websocket connection")
 
 		s.conn = c
 		var (
@@ -78,10 +77,8 @@ func (s *session) Send(v models.Event) (err error) {
 
 func (s *session) SendError(err error, nonce int) error {
 	var data models.WsError
-	if wsErr, ok := err.(models.WsError); ok {
-		data = wsErr
-	} else {
-		data = models.WsError{500, err.Error()}
+	if !errors.As(err, &data) {
+		data = models.WsError{Code: 500, Message: err.Error()}
 	}
 	return s.Send(models.Event{
 		Code:  models.EventError,
@@ -180,9 +177,9 @@ func (s *session) handleExec(op models.OperationExec) (err error) {
 				})
 			}
 			if err != nil {
-				logrus.WithError(err).Error("Failed sending event")
+				log.Error().Err(err).Msg("Failed sending event")
 				if err = s.SendError(err, op.Nonce); err != nil {
-					logrus.WithError(err).Error("Failed sending error event")
+					log.Error().Err(err).Msg("Failed sending error event")
 					return
 				}
 			}

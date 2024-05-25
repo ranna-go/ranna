@@ -3,7 +3,6 @@ package ws
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
-	"github.com/sarulabs/di/v2"
 )
 
 func Upgrade() fiber.Handler {
@@ -18,7 +17,7 @@ func Upgrade() fiber.Handler {
 	}
 }
 
-func Handler(ctn di.Container) fiber.Handler {
-	rlm := NewRateLimitManager(ctn)
-	return newSession(rlm, ctn).Handler()
+func Handler(cfg ConfigProvider, manager SandboxManager) fiber.Handler {
+	rlm := NewRateLimitManager(cfg)
+	return newSession(rlm, manager).Handler()
 }

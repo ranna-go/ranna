@@ -1,9 +1,11 @@
 package config
 
-import "github.com/sirupsen/logrus"
+import (
+	"github.com/zekrotja/rogu/level"
+)
 
 type Log struct {
-	Level int `config:"log.level" json:"level" yaml:"level"`
+	Level level.Level `config:"log.level" json:"level" yaml:"level"`
 }
 
 type Ratelimit struct {
@@ -54,7 +56,7 @@ var defaults = Config{
 	SkipStartupPrep: false,
 
 	Log: Log{
-		Level: int(logrus.InfoLevel),
+		Level: level.Info,
 	},
 	API: API{
 		BindAddress:    ":8080",

@@ -26,7 +26,7 @@ type Sandbox interface {
 	// taking care of the teardown of internal
 	// processes.
 	//
-	// Its like plugging the cable. ;)
+	// It's like plugging the cable. ;)
 	Kill() error
 
 	// Delete tears down the used resources

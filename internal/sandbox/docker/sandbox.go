@@ -6,20 +6,20 @@ import (
 	"github.com/ranna-go/ranna/pkg/chanwriter"
 )
 
-// DockerSandbox implements Sandbox for
+// Sandbox implements Sandbox for
 // Docker containers.
-type DockerSandbox struct {
+type Sandbox struct {
 	client    *dockerclient.Client
 	container *dockerclient.Container
 }
 
-var _ sandbox.Sandbox = (*DockerSandbox)(nil)
+var _ sandbox.Sandbox = (*Sandbox)(nil)
 
-func (s *DockerSandbox) ID() string {
+func (s *Sandbox) ID() string {
 	return s.container.ID
 }
 
-func (s *DockerSandbox) Run(cOut, cErr chan []byte, cClose chan bool) (err error) {
+func (s *Sandbox) Run(cOut, cErr chan []byte, cClose chan bool) (err error) {
 	buffStdout := chanwriter.New(cOut)
 	buffStderr := chanwriter.New(cErr)
 	waiter, err := s.client.AttachToContainerNonBlocking(dockerclient.AttachToContainerOptions{
@@ -44,8 +44,8 @@ func (s *DockerSandbox) Run(cOut, cErr chan []byte, cClose chan bool) (err error
 	return
 }
 
-func (s *DockerSandbox) IsRunning() (ok bool, err error) {
-	ctn, err := s.client.InspectContainer(s.container.ID)
+func (s *Sandbox) IsRunning() (ok bool, err error) {
+	ctn, err := s.client.InspectContainerWithOptions(dockerclient.InspectContainerOptions{ID: s.container.ID})
 	if err != nil {
 		return
 	}
@@ -54,13 +54,13 @@ func (s *DockerSandbox) IsRunning() (ok bool, err error) {
 	return
 }
 
-func (s *DockerSandbox) Kill() error {
+func (s *Sandbox) Kill() error {
 	return s.client.KillContainer(dockerclient.KillContainerOptions{
 		ID: s.container.ID,
 	})
 }
 
-func (s *DockerSandbox) Delete() error {
+func (s *Sandbox) Delete() error {
 	return s.client.RemoveContainer(dockerclient.RemoveContainerOptions{
 		ID: s.container.ID,
 	})

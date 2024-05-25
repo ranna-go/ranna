@@ -1,19 +1,16 @@
 package v1
 
 import (
+	"github.com/zekrotja/rogu/log"
 	"runtime"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/ranna-go/ranna/internal/api/ws"
-	"github.com/ranna-go/ranna/internal/config"
 	"github.com/ranna-go/ranna/internal/sandbox"
-	"github.com/ranna-go/ranna/internal/spec"
 	"github.com/ranna-go/ranna/internal/static"
 	"github.com/ranna-go/ranna/internal/util"
 	"github.com/ranna-go/ranna/pkg/cappedbuffer"
 	"github.com/ranna-go/ranna/pkg/models"
-	"github.com/sarulabs/di/v2"
-	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -21,25 +18,31 @@ var (
 	errEmptyCode         = fiber.NewError(fiber.StatusBadRequest, "code is empty")
 )
 
+// Router
+//
 // @title ranna main API
 // @version 1.0
 // @description The ranna main REST API.
 // @basepath /v1
 type Router struct {
-	spec            spec.Provider
-	cfg             config.Provider
-	manager         sandbox.Manager
+	spec            SpecProvider
+	cfg             ConfigProvider
+	manager         SandboxManager
 	streamBufferCap int
 }
 
-func (r *Router) Setup(route fiber.Router, ctn di.Container) {
-	r.cfg = ctn.Get(static.DiConfigProvider).(config.Provider)
-	r.spec = ctn.Get(static.DiSpecProvider).(spec.Provider)
-	r.manager = ctn.Get(static.DiSandboxManager).(sandbox.Manager)
+func (r *Router) Setup(route fiber.Router,
+	cfg ConfigProvider,
+	spec SpecProvider,
+	manager SandboxManager,
+) {
+	r.cfg = cfg
+	r.spec = spec
+	r.manager = manager
 
 	sbc, err := util.ParseMemoryStr(r.cfg.Config().Sandbox.StreamBufferCap)
 	if err != nil {
-		logrus.WithError(err).Fatal("Invalid value for stream buffer cap")
+		log.Fatal().Err(err).Msg("Invalid value for stream buffer cap")
 		return
 	}
 	r.streamBufferCap = int(sbc)
@@ -50,7 +53,7 @@ func (r *Router) Setup(route fiber.Router, ctn di.Container) {
 	route.Post("/exec", r.postExec)
 	route.Get("/info", r.getInfo)
 	route.Use("/ws", ws.Upgrade())
-	route.Get("/ws", ws.Handler(ctn))
+	route.Get("/ws", ws.Handler(cfg, manager))
 }
 
 func (r *Router) optionsBypass(ctx *fiber.Ctx) error {
@@ -156,11 +159,11 @@ func (r *Router) postExec(ctx *fiber.Ctx) (err error) {
 // --- UTIL ---
 
 func (r *Router) checkOutputLen(stdout, stderr string) (err error) {
-	max, err := util.ParseMemoryStr(r.cfg.Config().API.MaxOutputLen)
+	maxOutLen, err := util.ParseMemoryStr(r.cfg.Config().API.MaxOutputLen)
 	if err != nil {
 		return
 	}
-	if int64(len(stdout))+int64(len(stderr)) > max {
+	if int64(len(stdout))+int64(len(stderr)) > maxOutLen {
 		err = errOutputLenExceeded
 	}
 	return

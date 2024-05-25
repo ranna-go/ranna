@@ -27,7 +27,7 @@ func (lct *CronScheduler) Schedule(spec interface{}, job func()) (id interface{}
 	return lct.c.AddFunc(specStr, job)
 }
 
-func (lct *CronScheduler) Unschedule(id interface{}) error {
+func (lct *CronScheduler) UnSchedule(id interface{}) error {
 	cid, ok := id.(cron.EntryID)
 	if !ok {
 		return errors.New("invalid id type")

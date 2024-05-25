@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-// HttpProviders implements Provider for fetching
+// HttpProvider implements Provider for fetching
 // spec definitions over an HTTP endpoint.
 type HttpProvider struct {
 	*baseProvider
