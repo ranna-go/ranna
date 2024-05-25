@@ -1,4 +1,4 @@
-FROM golang:1.19-alpine AS build
+FROM golang:alpine AS build
 WORKDIR /build
 COPY cmd/ cmd/
 COPY internal/ internal/
