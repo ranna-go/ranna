@@ -92,7 +92,7 @@ func (dsp *Provider) CreateSandbox(spec sandbox.RunSpec) (sbx sandbox.Sandbox, e
 		NetworkDisabled: !dsp.cfg.Config().Sandbox.EnableNetworking,
 	}
 
-	hostDir, err := filepath.Abs(spec.GetAssambledHostDir())
+	hostDir, err := filepath.Abs(spec.GetAssembledHostDir())
 	if err != nil {
 		return
 	}

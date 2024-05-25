@@ -203,7 +203,7 @@ func (m *ManagerImpl) RunInSandbox(
 
 	// Create host directory + sub-directory on the
 	// Docker host.
-	hostDir := runSpc.GetAssambledHostDir()
+	hostDir := runSpc.GetAssembledHostDir()
 	if err = m.file.CreateDirectory(hostDir); err != nil {
 		err = SystemError{err}
 		return

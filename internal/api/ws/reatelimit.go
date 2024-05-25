@@ -8,7 +8,7 @@ import (
 	"github.com/gofiber/websocket/v2"
 	"github.com/ranna-go/ranna/pkg/models"
 	"github.com/zekroTJA/ratelimit"
-	"github.com/zekroTJA/timedmap"
+	"github.com/zekroTJA/timedmap/v2"
 )
 
 const (
@@ -34,7 +34,7 @@ func (dummyLimiter) Allow() bool {
 type RateLimitManager struct {
 	limits   map[models.OpCode]limit
 	pool     *sync.Pool
-	limiters *timedmap.TimedMap
+	limiters *timedmap.TimedMap[string, Limiter]
 }
 
 func NewRateLimitManager(cfg ConfigProvider) *RateLimitManager {
@@ -54,7 +54,7 @@ func NewRateLimitManager(cfg ConfigProvider) *RateLimitManager {
 				return ratelimit.NewLimiter(0, 0)
 			},
 		},
-		limiters: timedmap.New(cleanupInterval),
+		limiters: timedmap.New[string, Limiter](cleanupInterval),
 	}
 }
 
@@ -64,7 +64,7 @@ func (rlm *RateLimitManager) GetLimiter(c *websocket.Conn, op models.OpCode) Lim
 		return dummyLimiter{}
 	}
 	key := fmt.Sprintf("%d::%s", op, getAddr(c))
-	limiter, ok := rlm.limiters.GetValue(key).(Limiter)
+	limiter, ok := rlm.limiters.GetValue(key)
 	if ok {
 		return limiter
 	}
@@ -76,7 +76,7 @@ func (rlm *RateLimitManager) createLimiter(key string, limit time.Duration, burs
 	limiter.SetLimit(limit)
 	limiter.SetBurst(burst)
 	limiter.Reset()
-	rlm.limiters.Set(key, limiter, entryLifetime, func(v interface{}) {
+	rlm.limiters.Set(key, limiter, entryLifetime, func(v Limiter) {
 		rlm.pool.Put(v)
 	})
 	return limiter
