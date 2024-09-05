@@ -1,35 +1,43 @@
 ash:
-  image:      'alpine:latest'
-  cmd:        '/bin/ash -c "sleep 0.05; /bin/ash main.ash"'
-  filename:   'main.ash'
-  language:   'bash'
+  image: "alpine:latest"
+  cmd: '/bin/ash -c "sleep 0.05; /bin/ash main.ash"'
+  filename: "main.ash"
+  language: "bash"
   example: |-
     echo "Hello world!"
 
 bash:
-  image:      'debian:stable-slim'
-  cmd:        '/bin/bash -c "sleep 0.05; /bin/bash main.bash"'
-  filename:   'main.bash'
-  language:   'bash'
+  image: "debian:stable-slim"
+  cmd: '/bin/bash -c "sleep 0.05; /bin/bash main.bash"'
+  filename: "main.bash"
+  language: "bash"
   example: |-
     echo "Hello world!"
 
+bun:
+  image: "oven/bun"
+  filename: "main.ts"
+  entrypoint: "bun run"
+  language: "typescript"
+  example: |-
+    console.log("Hello world!")
+
 sh:
-  use:        'ash'
+  use: "ash"
 
 brainfuck:
-  image:      'esolang/brainfuck-esotope:latest'
-  entrypoint: 'brainfuck-esotope'
-  filename:   'main.bf'
-  language:   'brainfuck'
+  image: "esolang/brainfuck-esotope:latest"
+  entrypoint: "brainfuck-esotope"
+  filename: "main.bf"
+  language: "brainfuck"
   example: |-
     ++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>.
 
 c:
-  image:      'frolvlad/alpine-gxx:latest'
-  cmd:        '/bin/ash -c "c++ --static main.c -o main && ./main"'
-  filename:   'main.c'
-  language:   'c'
+  image: "frolvlad/alpine-gxx:latest"
+  cmd: '/bin/ash -c "c++ --static main.c -o main && ./main"'
+  filename: "main.c"
+  language: "c"
   example: |-
     #include <stdio.h>
 
@@ -39,16 +47,16 @@ c:
     }
 
 c#:
-  use:        'mono'
+  use: "mono"
 
 c++:
-  use:        'cpp'
+  use: "cpp"
 
 cpp:
-  image:      'frolvlad/alpine-gxx:latest'
-  cmd:        '/bin/ash -c "c++ --static main.cpp -o main && ./main"'
-  filename:   'main.cpp'
-  language:   'cpp'
+  image: "frolvlad/alpine-gxx:latest"
+  cmd: '/bin/ash -c "c++ --static main.cpp -o main && ./main"'
+  filename: "main.cpp"
+  language: "cpp"
   example: |-
     #include <stdio.h>
 
@@ -66,59 +74,59 @@ cpp:
       }
 
 csharp:
-  use:        'mono'
+  use: "mono"
 
 csx:
-  use:        'dotnet-script'
+  use: "dotnet-script"
 
 dart:
-  image:      'google/dart:latest'
-  entrypoint: 'dart'
-  filename:   'main.dart'
-  language:   'dart'
+  image: "google/dart:latest"
+  entrypoint: "dart"
+  filename: "main.dart"
+  language: "dart"
   example: |-
     void main() {
       print("Hello world!");
     }
 
 deno:
-  image:      'hayd/alpine-deno:1.5.2'
-  entrypoint: 'deno run'
-  filename:   'main.ts'
-  language:   'typescript'
+  image: "hayd/alpine-deno:1.5.2"
+  entrypoint: "deno run"
+  filename: "main.ts"
+  language: "typescript"
   example: |-
     console.log("Hello world!")
 
 ts:
-  use:        'deno'
+  use: "deno"
 
 typescript:
-  use:        'deno'
+  use: "deno"
 
 dotnet-script:
-  image:      'ghcr.io/ranna-go/dotnet-script:latest'
-  entrypoint: 'dotnet script'
-  filename:   'main.csx'
-  language:   'csharp'
+  image: "ghcr.io/ranna-go/dotnet-script:latest"
+  entrypoint: "dotnet script"
+  filename: "main.csx"
+  language: "csharp"
   example: |-
     Console.WriteLine("Hello world!");
 
 elixir:
-  image:      'elixir:alpine'
-  entrypoint: 'elixir'
-  filename:   'main.exs'
-  language:   'elixir'
+  image: "elixir:alpine"
+  entrypoint: "elixir"
+  filename: "main.exs"
+  language: "elixir"
   example: |-
     "Hello world!" |> IO.puts
 
 fpc:
-  use:        'pascal'
+  use: "pascal"
 
 gleam:
-  image:      'ghcr.io/gleam-lang/gleam:v1.2.0-rc1-erlang-alpine'
-  filename:   'main.gleam'
-  cmd:        '/bin/ash -c "gleam new /tmp/ranna --name ranna > /dev/null && mv main.gleam /tmp/ranna/src/ranna.gleam && cd /tmp/ranna && gleam build > /dev/null && gleam run"'
-  language:   'gleam'
+  image: "ghcr.io/gleam-lang/gleam:v1.2.0-rc1-erlang-alpine"
+  filename: "main.gleam"
+  cmd: '/bin/ash -c "gleam new /tmp/ranna --name ranna > /dev/null && mv main.gleam /tmp/ranna/src/ranna.gleam && cd /tmp/ranna && gleam build > /dev/null && gleam run"'
+  language: "gleam"
   example: |-
     import gleam/io
 
@@ -127,19 +135,19 @@ gleam:
     }
 
 goat:
-  image:      'zekro/goat:latest'
-  cmd:        '--no-color main.goat'
-  filename:   'main.goat'
-  language:   'goatfile'
+  image: "zekro/goat:latest"
+  cmd: "--no-color main.goat"
+  filename: "main.goat"
+  language: "goatfile"
 
 go:
-  use:        'golang'
+  use: "golang"
 
 golang:
-  image:      'golang:latest'
-  entrypoint: 'go run'
-  filename:   'main.go'
-  language:   'go'
+  image: "golang:latest"
+  entrypoint: "go run"
+  filename: "main.go"
+  language: "go"
   example: |-
     package main
 
@@ -156,10 +164,10 @@ golang:
       func main() {$${CODE}}
 
 gotip:
-  image:      'ghcr.io/ranna-go/gotip:latest'
-  entrypoint: 'gotip run'
-  filename:   'main.go'
-  language:   'go'
+  image: "ghcr.io/ranna-go/gotip:latest"
+  entrypoint: "gotip run"
+  filename: "main.go"
+  language: "go"
   example: |-
     package main
 
@@ -176,42 +184,42 @@ gotip:
       func main() {$${CODE}}
 
 haskell:
-  image:      'haskell:buster'
-  cmd:        '/bin/bash -c "ghc -o main main.hs >> /dev/null && ./main"'
-  filename:   'main.hs'
-  language:   'haskell'
+  image: "haskell:buster"
+  cmd: '/bin/bash -c "ghc -o main main.hs >> /dev/null && ./main"'
+  filename: "main.hs"
+  language: "haskell"
   example: |-
     main :: IO ()
     main = putStrLn "Hello, World!"
 
 java:
-  use:        'openjdk-17'
+  use: "openjdk-17"
 
 kotlin:
-  image:      'schlaubiboy/kotlin:1.5.10-alpine'
-  filename:   'main.kt'
-  cmd:        '/bin/ash -c "kotlinc main.kt -include-runtime -d main.jar && java -jar main.jar"'
-  language:   'kotlin'
+  image: "schlaubiboy/kotlin:1.5.10-alpine"
+  filename: "main.kt"
+  cmd: '/bin/ash -c "kotlinc main.kt -include-runtime -d main.jar && java -jar main.jar"'
+  language: "kotlin"
   example: |-
     fun main(args: Array<String>) {
       println("Hello world!")
     }
 
 kotlin-script:
-  image:      'schlaubiboy/kotlin:1.5.10'
-  filename:   'main.kts'
-  entrypoint: 'kotlinc -script'
-  language:   'kotlin'
+  image: "schlaubiboy/kotlin:1.5.10"
+  filename: "main.kts"
+  entrypoint: "kotlinc -script"
+  language: "kotlin"
   example: |-
     fun main(args: Array<String>) {
       println("Hello world!")
     }
 
 mono:
-  image:      'mono'
-  cmd:        '/bin/sh -c "mcs main.cs && mono main.exe"'
-  filename:   'main.cs'
-  language:   'csharp'
+  image: "mono"
+  cmd: '/bin/sh -c "mcs main.cs && mono main.exe"'
+  filename: "main.cs"
+  language: "csharp"
   example: |-
     namespace HelloWorld
     {
@@ -237,35 +245,35 @@ mono:
       }
 
 node:
-  image:      'node:lts-alpine3.13'
-  entrypoint: 'node'
-  filename:   'index.js'
-  language:   'javascript'
+  image: "node:lts-alpine3.13"
+  entrypoint: "node"
+  filename: "index.js"
+  language: "javascript"
   example: |-
     console.log("Hello world!")
 
 javascript:
-  use:        'node'
+  use: "node"
 
 js:
-  use:        'node'
+  use: "node"
 
 nodejs:
-  use:        'node'
+  use: "node"
 
 ocaml:
-  image:      'ocaml/opam:latest'
-  cmd:        '/bin/sh -c "ocaml main.ml"'
-  filename:   'main.ml'
-  language:   'ocaml'
-  example:    |-
+  image: "ocaml/opam:latest"
+  cmd: '/bin/sh -c "ocaml main.ml"'
+  filename: "main.ml"
+  language: "ocaml"
+  example: |-
     let () = print_string "Hello world!\n"
 
 openjdk-11:
-  image:      'openjdk:11'
-  entrypoint: 'java'
-  filename:   'Main.java'
-  language:   'java'
+  image: "openjdk:11"
+  entrypoint: "java"
+  filename: "Main.java"
+  language: "java"
   example: |-
     class HelloWorld {
         public static void main(String[] args) {
@@ -274,10 +282,10 @@ openjdk-11:
     }
 
 openjdk-17:
-  image:      'openjdk:17'
-  entrypoint: 'java'
-  filename:   'Main.java'
-  language:   'java'
+  image: "openjdk:17"
+  entrypoint: "java"
+  filename: "Main.java"
+  language: "java"
   example: |-
     class HelloWorld {
         public static void main(String[] args) {
@@ -286,10 +294,10 @@ openjdk-17:
     }
 
 pascal:
-  image:      'frolvlad/alpine-fpc:latest'
-  cmd:        '/bin/ash -c "fpc main.pas >> /dev/null && ./main"'
-  filename:   'main.pas'
-  language:   'pascal'
+  image: "frolvlad/alpine-fpc:latest"
+  cmd: '/bin/ash -c "fpc main.pas >> /dev/null && ./main"'
+  filename: "main.pas"
+  language: "pascal"
   example: |-
     program Hello;
     begin
@@ -297,10 +305,10 @@ pascal:
     end.
 
 php:
-  image:      'php:cli-alpine'
-  entrypoint: 'php'
-  filename:   'main.php'
-  language:   'php'
+  image: "php:cli-alpine"
+  entrypoint: "php"
+  filename: "main.php"
+  language: "php"
   example: |-
     <?php
         print("Hello World");
@@ -312,63 +320,63 @@ php:
       ?>
 
 py:
-  use:        'python3'
+  use: "python3"
 
 python:
-  use:        'python3'
+  use: "python3"
 
 python3:
-  image:      'python:alpine'
-  entrypoint: 'python3'
-  filename:   'main.py'
-  language:   'python'
+  image: "python:alpine"
+  entrypoint: "python3"
+  filename: "main.py"
+  language: "python"
   example: |-
     print("Hello world!")
 
 racket:
-  use: 'racket-8-2'
+  use: "racket-8-2"
 
 racket-7-9:
-  image:      'racket/racket:7.9'
-  cmd:        'racket -t main.rkt'
-  filename:   'main.rkt'
-  language:   'racket'
+  image: "racket/racket:7.9"
+  cmd: "racket -t main.rkt"
+  filename: "main.rkt"
+  language: "racket"
   example: |-
     #lang racket
     (display "Hello World")
 
 racket-8-2:
-  image:      'racket/racket:8.2'
-  cmd:        'racket -t main.rkt'
-  filename:   'main.rkt'
-  language:   'racket'
+  image: "racket/racket:8.2"
+  cmd: "racket -t main.rkt"
+  filename: "main.rkt"
+  language: "racket"
   example: |-
     #lang racket
     (display "Hello World")
 
 ruby:
-  image:      'ruby:alpine'
-  entrypoint: 'ruby'
-  filename:   'main.rb'
-  language:   'ruby'
+  image: "ruby:alpine"
+  entrypoint: "ruby"
+  filename: "main.rb"
+  language: "ruby"
   example: |-
     puts "Hello world!"
 
 rust:
-  image:      'rust:alpine'
-  cmd:        '/bin/ash -c "rustc main.rs && ./main"'
-  filename:   'main.rs'
-  language:   'rust'
+  image: "rust:alpine"
+  cmd: '/bin/ash -c "rustc main.rs && ./main"'
+  filename: "main.rs"
+  language: "rust"
   example: |-
     fn main() {
       println!("Hello world!");
     }
 
 zig:
-  image:      'ziglang/static-base:llvm13-x86_64-1'
-  entrypoint: '/deps/local/bin/zig run'
-  filename:   'main.zig'
-  language:   'zig'
+  image: "ziglang/static-base:llvm13-x86_64-1"
+  entrypoint: "/deps/local/bin/zig run"
+  filename: "main.zig"
+  language: "zig"
   example: |-
     const std = @import("std");
 
