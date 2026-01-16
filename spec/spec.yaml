@@ -26,8 +26,7 @@ sh:
   use: "ash"
 
 brainfuck:
-  image: "esolang/brainfuck-esotope:latest"
-  entrypoint: "brainfuck-esotope"
+  image: "ghcr.io/zekrotja/bfc:latest"
   filename: "main.bf"
   language: "brainfuck"
   example: |-
@@ -223,7 +222,7 @@ mono:
   example: |-
     namespace HelloWorld
     {
-        class Hello {         
+        class Hello {
             static void Main(string[] args)
             {
                 System.Console.WriteLine("Hello world!");
@@ -236,7 +235,7 @@ mono:
       $${IMPORTS}
       namespace HelloWorld
       {
-          class Hello {         
+          class Hello {
               static void Main(string[] args)
               {
                   $${CODE}
@@ -277,7 +276,7 @@ openjdk-11:
   example: |-
     class HelloWorld {
         public static void main(String[] args) {
-            System.out.println("Hello world!"); 
+            System.out.println("Hello world!");
         }
     }
 
@@ -289,7 +288,7 @@ openjdk-17:
   example: |-
     class HelloWorld {
         public static void main(String[] args) {
-            System.out.println("Hello world!"); 
+            System.out.println("Hello world!");
         }
     }
 
