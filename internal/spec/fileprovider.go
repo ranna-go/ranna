@@ -19,12 +19,11 @@ func NewFileProvider(fileName string) *FileProvider {
 	return &FileProvider{baseProvider: newBaseProvider(), fileName: fileName}
 }
 
-func (fp *FileProvider) Load() (err error) {
-	data, err := os.ReadFile(fp.fileName)
+func (t *FileProvider) Load() (err error) {
+	data, err := os.ReadFile(t.fileName)
 	if err != nil {
-		return
+		return err
 	}
 
-	err = fp.parseAndSet(data, strings.ToLower(path.Ext(fp.fileName)))
-	return
+	return t.parseAndSet(data, strings.ToLower(path.Ext(t.fileName)))
 }
