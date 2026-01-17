@@ -21,16 +21,16 @@ func NewPaerser(configFile string) *Paerser {
 	}
 }
 
-func (p *Paerser) Config() *Config {
-	return p.cfg
+func (t *Paerser) Config() *Config {
+	return t.cfg
 }
 
-func (p *Paerser) Load() (err error) {
+func (t *Paerser) Load() (err error) {
 	cfg := defaults
 
 	cfgFile := defaultConfigLoc
-	if p.configFile != "" {
-		cfgFile = p.configFile
+	if t.configFile != "" {
+		cfgFile = t.configFile
 	}
 	if err = file.Decode(cfgFile, &cfg); err != nil && !os.IsNotExist(err) {
 		return
@@ -41,7 +41,7 @@ func (p *Paerser) Load() (err error) {
 		return
 	}
 
-	p.cfg = &cfg
+	t.cfg = &cfg
 
 	return
 }

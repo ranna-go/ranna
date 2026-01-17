@@ -22,47 +22,47 @@ func NewEnvProvider(prefix string) *EnvProvider {
 	}
 }
 
-func (ep *EnvProvider) Load() (err error) {
+func (t *EnvProvider) Load() (err error) {
 
-	ep.c.Debug = ep.getBool("DEBUG", false)
-	ep.c.SpecFile = ep.getString("SPECFILE", "spec/spec.yaml")
-	ep.c.HostRootDir = ep.getString("HOSTROOTDIR", "/var/opt/ranna")
-	ep.c.Sandbox.TimeoutSeconds, err = ep.getInt("EXECUTIONTIMEOUTSECONDS", 20)
+	t.c.Debug = t.getBool("DEBUG", false)
+	t.c.SpecFile = t.getString("SPECFILE", "spec/spec.yaml")
+	t.c.HostRootDir = t.getString("HOSTROOTDIR", "/var/opt/ranna")
+	t.c.Sandbox.TimeoutSeconds, err = t.getInt("EXECUTIONTIMEOUTSECONDS", 20)
 	if err != nil {
 		return
 	}
 
-	ep.c.API.BindAddress = ep.getString("API_BINDADDRESS", ":8080")
+	t.c.API.BindAddress = t.getString("API_BINDADDRESS", ":8080")
 
-	ep.c.Sandbox.Memory = ep.getString("RESOURCES_MEMORY", "100M")
+	t.c.Sandbox.Memory = t.getString("RESOURCES_MEMORY", "100M")
 
 	return
 }
 
-func (ep *EnvProvider) Config() *Config {
-	return ep.c
+func (t *EnvProvider) Config() *Config {
+	return t.c
 }
 
-func (ep *EnvProvider) getString(key, def string) (v string) {
+func (t *EnvProvider) getString(key, def string) (v string) {
 	var ok bool
-	if v, ok = os.LookupEnv(ep.prefix + key); !ok {
+	if v, ok = os.LookupEnv(t.prefix + key); !ok {
 		v = def
 	}
 	return
 }
 
-func (ep *EnvProvider) getBool(key string, def bool) (v bool) {
+func (t *EnvProvider) getBool(key string, def bool) (v bool) {
 	defStr := ""
 	if def {
 		defStr = "true"
 	}
 
-	vStr := strings.ToLower(ep.getString(key, defStr))
+	vStr := strings.ToLower(t.getString(key, defStr))
 	return vStr == "true" || vStr == "1"
 }
 
-func (ep *EnvProvider) getInt(key string, def int) (v int, err error) {
-	vStr := ep.getString(key, "")
+func (t *EnvProvider) getInt(key string, def int) (v int, err error) {
+	vStr := t.getString(key, "")
 	if vStr == "" {
 		v = def
 		return

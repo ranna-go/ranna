@@ -19,16 +19,16 @@ func NewProvider() *Provider {
 	}
 }
 
-func (p *Provider) Load() error {
+func (t *Provider) Load() error {
 	loader := confita.NewLoader(
 		env.NewBackend(),
 		file.NewOptionalBackend("config.json"),
 		file.NewOptionalBackend("config.yaml"),
 		flags.NewBackend(),
 	)
-	return loader.Load(context.Background(), p.cfg)
+	return loader.Load(context.Background(), t.cfg)
 }
 
-func (p *Provider) Config() *Config {
-	return p.cfg
+func (t *Provider) Config() *Config {
+	return t.cfg
 }
