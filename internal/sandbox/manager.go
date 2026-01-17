@@ -1,6 +1,7 @@
 package sandbox
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"path"
@@ -12,7 +13,6 @@ import (
 	"github.com/zekrotja/rogu/log"
 
 	"github.com/ranna-go/ranna/pkg/models"
-	"github.com/ranna-go/ranna/pkg/timeout"
 )
 
 var (
@@ -73,7 +73,6 @@ type ManagerImpl struct {
 	logger  rogu.Logger
 
 	runningSandboxes *sync.Map
-	isCleanup        bool
 }
 
 // sandboxWrapper wraps a sandbox instance and
@@ -118,14 +117,14 @@ func NewManager(
 	return t, nil
 }
 
-func (t *ManagerImpl) PrepareEnvironments(force bool) (errs []error) {
+func (t *ManagerImpl) PrepareEnvironments(ctx context.Context, force bool) (errs []error) {
 	errs = []error{}
 
 	for _, spec := range t.spec.Spec().GetSnapshot() {
 		if spec.Image == "" {
 			continue
 		}
-		if err := t.sandbox.Prepare(*spec, force); err != nil {
+		if err := t.sandbox.Prepare(ctx, *spec, force); err != nil {
 			t.logger.Error().Field("image", spec.Image).Err(err).Msg("failed preparing env")
 			errs = append(errs, err)
 		}
@@ -135,6 +134,7 @@ func (t *ManagerImpl) PrepareEnvironments(force bool) (errs []error) {
 }
 
 func (t *ManagerImpl) RunInSandbox(
+	ctx context.Context,
 	req *models.ExecutionRequest,
 	cSpn chan string,
 	cOut chan []byte,
@@ -212,7 +212,7 @@ func (t *ManagerImpl) RunInSandbox(
 	}
 
 	// Create sandbox using RunSpec
-	sbx, err := t.sandbox.CreateSandbox(runSpc)
+	sbx, err := t.sandbox.CreateSandbox(ctx, runSpc)
 	if err != nil {
 		return SystemError{err}
 	}
@@ -225,61 +225,56 @@ func (t *ManagerImpl) RunInSandbox(
 	wrapper := &sandboxWrapper{sbx, hostDir}
 	t.runningSandboxes.Store(sbx.ID(), wrapper)
 
-	// Run sandbox blocking with timeout
-	timedOut := timeout.RunBlockingWithTimeout(func() {
-		err = sbx.Run(cOut, cErr, cClose)
-	}, time.Duration(t.cfg.Config().Sandbox.TimeoutSeconds)*time.Second)
+	timeout := time.Duration(t.cfg.Config().Sandbox.TimeoutSeconds) * time.Second
+	runCtx, cancelRunCtx := context.WithTimeoutCause(ctx, timeout, errTimedOut)
+	defer cancelRunCtx()
 
+	err = sbx.Run(runCtx, cOut, cErr, cClose)
+	defer func() {
+		// Kill container if it is still running, delete the
+		// container after as well as delete the snippet host
+		// directory.
+		if cErr := t.killAndCleanUp(ctx, wrapper); cErr != nil {
+			err = SystemError{error: errors.Join(err, cErr)}
+		}
+		t.logger.Info().Fields("id", sbx.ID(), "spec", req.Language).Msg("sandbox cleaned up")
+	}()
 	if err != nil {
+		if errors.Is(err, errTimedOut) {
+			return err
+		}
 		return SystemError{err}
 	}
-	// When manager is in 'cleanup mode' and running containers
-	// are killed, skip here and don't try to clean up container
-	// again.
-	if t.isCleanup {
-		return nil
-	}
-	// Kill container if it is still running, delete the
-	// container after as well as delete the snippet host
-	// directory.
-	if err = t.killAndCleanUp(wrapper); err != nil {
-		return err
-	}
-	if timedOut {
-		err = errTimedOut
-	}
-	t.logger.Info().Fields("id", sbx.ID(), "spec", req.Language).Msg("sandbox cleaned up")
 
 	return err
 }
 
-func (t *ManagerImpl) KillAndCleanUp(id string) (ok bool, err error) {
+func (t *ManagerImpl) KillAndCleanUp(ctx context.Context, id string) (ok bool, err error) {
 	v, ok := t.runningSandboxes.Load(id)
 	if !ok {
 		return false, nil
 	}
 
 	sbx := v.(Sandbox)
-	if ok, err = sbx.IsRunning(); !ok || err != nil {
+	if ok, err = sbx.IsRunning(ctx); !ok || err != nil {
 		return ok, err
 	}
 
-	if err = sbx.Kill(); err != nil {
+	if err = sbx.Kill(ctx); err != nil {
 		return false, err
 	}
 
 	return true, nil
 }
 
-func (t *ManagerImpl) Cleanup() (errs []error) {
-	t.isCleanup = true
+func (t *ManagerImpl) Cleanup(ctx context.Context) (errs []error) {
 	errs = []error{}
 
 	t.runningSandboxes.Range(func(key, value any) bool {
 		w, ok := value.(*sandboxWrapper)
 		if ok {
 			t.logger.Info().Field("id", w.ID()).Msg("killing and cleaning up running container")
-			if err := t.killAndCleanUp(w); err != nil {
+			if err := t.killAndCleanUp(ctx, w); err != nil {
 				errs = append(errs, err)
 			}
 		}
@@ -293,7 +288,7 @@ func (t *ManagerImpl) GetProvider() Provider {
 	return t.sandbox
 }
 
-func (t *ManagerImpl) killAndCleanUp(w *sandboxWrapper) (err error) {
+func (t *ManagerImpl) killAndCleanUp(ctx context.Context, w *sandboxWrapper) (err error) {
 	defer func() {
 		if err != nil {
 			t.logger.Error().
@@ -305,14 +300,14 @@ func (t *ManagerImpl) killAndCleanUp(w *sandboxWrapper) (err error) {
 
 	t.logger.Debug().Field("id", w.ID()).Msg("calling killAndCleanUp")
 
-	ok, err := w.IsRunning()
+	ok, err := w.IsRunning(ctx)
 	if err != nil {
 		return err
 	}
 	if ok {
-		err = w.Kill()
+		err = w.Kill(ctx)
 	}
-	if err = w.Delete(); err != nil {
+	if err = w.Delete(ctx); err != nil {
 		return err
 	}
 	if err = t.file.DeleteDirectory(w.hostDir); err != nil {

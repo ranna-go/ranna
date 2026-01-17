@@ -30,10 +30,10 @@ func (t *Sandbox) ID() string {
 	return t.container.ID
 }
 
-func (t *Sandbox) Run(cOut, cErr chan []byte, cClose chan bool) (err error) {
+func (t *Sandbox) Run(ctx context.Context, cOut, cErr chan []byte, cClose chan bool) (err error) {
 	buffStdout := chanwriter.New(cOut)
 	buffStderr := chanwriter.New(cErr)
-	res, err := t.client.ContainerAttach(context.TODO(), t.container.ID, client.ContainerAttachOptions{
+	res, err := t.client.ContainerAttach(ctx, t.container.ID, client.ContainerAttachOptions{
 		Stdout: true,
 		Stderr: true,
 		Stream: true,
@@ -49,18 +49,18 @@ func (t *Sandbox) Run(cOut, cErr chan []byte, cClose chan bool) (err error) {
 	go func() {
 		_, err := stdcopy.StdCopy(buffStdout, buffStderr, res.Reader)
 		if err != nil {
-			t.logger.Error().Err(err).Msg("failed copying stdin/stdout")
+			t.logger.Debug().Err(err).Msg("failed copying stdin/stdout")
 			cErrStdCopy <- err
 		}
 	}()
 
-	_, err = t.client.ContainerStart(context.TODO(), t.container.ID, client.ContainerStartOptions{})
+	_, err = t.client.ContainerStart(ctx, t.container.ID, client.ContainerStartOptions{})
 	if err != nil {
 		return err
 	}
 	t.logger.Debug().Fields("id", t.container.ID).Msg("container started")
 
-	wait := t.client.ContainerWait(context.TODO(), t.container.ID, client.ContainerWaitOptions{})
+	wait := t.client.ContainerWait(ctx, t.container.ID, client.ContainerWaitOptions{})
 	select {
 	case err = <-wait.Error:
 	case err = <-cErrStdCopy:
@@ -73,8 +73,8 @@ func (t *Sandbox) Run(cOut, cErr chan []byte, cClose chan bool) (err error) {
 	return err
 }
 
-func (t *Sandbox) IsRunning() (ok bool, err error) {
-	ctn, err := t.client.ContainerInspect(context.TODO(), t.container.ID, client.ContainerInspectOptions{})
+func (t *Sandbox) IsRunning(ctx context.Context) (ok bool, err error) {
+	ctn, err := t.client.ContainerInspect(ctx, t.container.ID, client.ContainerInspectOptions{})
 	if err != nil {
 		return
 	}
@@ -83,12 +83,12 @@ func (t *Sandbox) IsRunning() (ok bool, err error) {
 	return
 }
 
-func (t *Sandbox) Kill() error {
-	_, err := t.client.ContainerKill(context.TODO(), t.container.ID, client.ContainerKillOptions{})
+func (t *Sandbox) Kill(ctx context.Context) error {
+	_, err := t.client.ContainerKill(ctx, t.container.ID, client.ContainerKillOptions{})
 	return err
 }
 
-func (t *Sandbox) Delete() error {
-	_, err := t.client.ContainerRemove(context.TODO(), t.container.ID, client.ContainerRemoveOptions{})
+func (t *Sandbox) Delete(ctx context.Context) error {
+	_, err := t.client.ContainerRemove(ctx, t.container.ID, client.ContainerRemoveOptions{})
 	return err
 }

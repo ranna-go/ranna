@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/signal"
@@ -29,7 +30,7 @@ type Scheduler interface {
 }
 
 type Manager interface {
-	PrepareEnvironments(force bool) []error
+	PrepareEnvironments(ctx context.Context, force bool) []error
 }
 
 type SpecProvider interface {
@@ -46,6 +47,9 @@ func checkErr(err error) {
 
 func main() {
 	godotenv.Load()
+
+	ctx, cancelCtx := context.WithCancel(context.Background())
+	defer cancelCtx()
 
 	cfg := config.NewPaerser("")
 	err := cfg.Load()
@@ -79,7 +83,7 @@ func main() {
 	defer func() {
 		log.Info().Msg("cleaning up running sandboxes ...")
 		// TODO: Handle errors
-		sandboxManager.Cleanup()
+		sandboxManager.Cleanup(ctx)
 	}()
 
 	webApi, err := api.NewRestAPI(cfg, specProvider, sandboxManager)
@@ -92,12 +96,12 @@ func main() {
 	if !cfg.Config().SkipStartupPrep {
 		log.Info().Msg("Prepare spec environments ...")
 		// TODO: Handle errors
-		sandboxManager.PrepareEnvironments(true)
+		sandboxManager.PrepareEnvironments(ctx, true)
 	} else {
 		log.Warn().Msg("Skipping spec preparation on startup")
 	}
 
-	if err := scheduleTasks(cfg, schedulerProvider, sandboxManager, specProvider); err != nil {
+	if err := scheduleTasks(ctx, cfg, schedulerProvider, sandboxManager, specProvider); err != nil {
 		log.Fatal().Err(err).Msg("failed scheduling job")
 	}
 
@@ -112,6 +116,7 @@ func main() {
 }
 
 func scheduleTasks(
+	ctx context.Context,
 	cfg ConfigProvider,
 	sched Scheduler,
 	mgr Manager,
@@ -129,7 +134,7 @@ func scheduleTasks(
 	err = schedule("update spec environments", scheduleSpec, func() {
 		log.Info().Msg("Updating spec environments ...")
 		defer log.Info().Msg("Updating spec finished")
-		mgr.PrepareEnvironments(true)
+		mgr.PrepareEnvironments(ctx, true)
 	})
 	if err != nil {
 		return err

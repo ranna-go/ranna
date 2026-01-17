@@ -71,7 +71,7 @@ func (t *Router) optionsBypass(ctx *fiber.Ctx) error {
 // @failure 500 {object} models.ErrorModel
 // @router /info [get]
 func (t *Router) getInfo(ctx *fiber.Ctx) (err error) {
-	sandboxInfo, err := t.manager.GetProvider().Info()
+	sandboxInfo, err := t.manager.GetProvider().Info(ctx.Context())
 	if err != nil {
 		return err
 	}
@@ -133,7 +133,7 @@ func (t *Router) postExec(ctx *fiber.Ctx) (err error) {
 	}()
 
 	execTime := util.MeasureTime(func() {
-		err = t.manager.RunInSandbox(req, nil, cStdOut, cStdErr, cStop)
+		err = t.manager.RunInSandbox(ctx.Context(), req, nil, cStdOut, cStdErr, cStop)
 	})
 
 	if err != nil {

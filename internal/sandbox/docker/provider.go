@@ -42,8 +42,8 @@ func NewProvider(cfg ConfigProvider) (t *Provider, err error) {
 	return t, nil
 }
 
-func (t *Provider) Info() (v *models.SandboxInfo, err error) {
-	info, err := t.client.Info(context.TODO(), client.InfoOptions{})
+func (t *Provider) Info(ctx context.Context) (v *models.SandboxInfo, err error) {
+	info, err := t.client.Info(ctx, client.InfoOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -54,29 +54,29 @@ func (t *Provider) Info() (v *models.SandboxInfo, err error) {
 	return v, nil
 }
 
-func (t *Provider) Prepare(spec models.Spec, force bool) (err error) {
+func (t *Provider) Prepare(ctx context.Context, spec models.Spec, force bool) (err error) {
 	repo, tag := getImage(spec.Image)
 
 	if !force {
 		t.logger.Debug().Fields("image", spec.Image).Msg("inspecting image")
-		_, err = t.client.ImageInspect(context.TODO(), spec.Image)
+		_, err = t.client.ImageInspect(ctx, spec.Image)
 		if err == nil {
 			return nil
 		}
 	}
 
 	t.logger.Info().Fields("repo", repo, "tag", tag).Msg("pull image")
-	resp, err := t.client.ImagePull(context.TODO(), spec.Image, client.ImagePullOptions{})
+	resp, err := t.client.ImagePull(ctx, spec.Image, client.ImagePullOptions{})
 	if err != nil {
 		return err
 	}
-	return resp.Wait(context.TODO())
+	return resp.Wait(ctx)
 }
 
-func (t *Provider) CreateSandbox(spec sandbox.RunSpec) (sbx sandbox.Sandbox, err error) {
+func (t *Provider) CreateSandbox(ctx context.Context, spec sandbox.RunSpec) (sbx sandbox.Sandbox, err error) {
 	repo, tag := getImage(spec.Image)
 
-	err = t.Prepare(spec.Spec, false)
+	err = t.Prepare(ctx, spec.Spec, false)
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +107,7 @@ func (t *Provider) CreateSandbox(spec sandbox.RunSpec) (sbx sandbox.Sandbox, err
 	}
 	hostCfg.MemorySwap = hostCfg.Memory
 
-	container, err := t.client.ContainerCreate(context.TODO(), client.ContainerCreateOptions{
+	container, err := t.client.ContainerCreate(ctx, client.ContainerCreateOptions{
 		Config:     ctnCfg,
 		HostConfig: hostCfg,
 		Name:       fmt.Sprintf("ranna-%s-%s", spec.Language, xid.New().String()),

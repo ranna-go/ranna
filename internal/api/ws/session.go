@@ -1,6 +1,7 @@
 package ws
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"sync"
@@ -187,7 +188,7 @@ func (t *session) handleExec(op models.OperationExec) (err error) {
 	}()
 
 	execTime := util.MeasureTime(func() {
-		err = t.manager.RunInSandbox(&op.Args, cSpn, cStdOut, cStdErr, cStop)
+		err = t.manager.RunInSandbox(context.TODO(), &op.Args, cSpn, cStdOut, cStdErr, cStop)
 	})
 
 	if err != nil {
@@ -209,7 +210,7 @@ func (t *session) handleExec(op models.OperationExec) (err error) {
 }
 
 func (t *session) handleKill(op models.OperationKill) (err error) {
-	ok, err := t.manager.KillAndCleanUp(op.Args.RunId)
+	ok, err := t.manager.KillAndCleanUp(context.TODO(), op.Args.RunId)
 	if err != nil {
 		return
 	}
