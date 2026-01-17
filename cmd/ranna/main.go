@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/zekrotja/rogu/log"
 	"os"
 	"os/signal"
 	"strings"
 	"syscall"
+
+	"github.com/zekrotja/rogu/log"
 
 	"github.com/joho/godotenv"
 	"github.com/ranna-go/ranna/internal/api"
@@ -24,7 +25,7 @@ type ConfigProvider interface {
 }
 
 type Scheduler interface {
-	Schedule(spec interface{}, job func()) (id interface{}, err error)
+	Schedule(spec any, job func()) (id any, err error)
 }
 
 type Manager interface {
@@ -106,7 +107,7 @@ func main() {
 	}()
 
 	sc := make(chan os.Signal, 1)
-	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
+	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 	<-sc
 }
 
@@ -121,28 +122,30 @@ func scheduleTasks(
 			log.Info().Field("name", name).Field("spec", spec).Msg("Scheduling job")
 			_, err = sched.Schedule(spec, job)
 		}
-		return
+		return err
 	}
 
 	scheduleSpec := cfg.Config().Scheduler.UpdateImages
-	if err = schedule("update spec environments", scheduleSpec, func() {
+	err = schedule("update spec environments", scheduleSpec, func() {
 		log.Info().Msg("Updating spec environments ...")
 		defer log.Info().Msg("Updating spec finished")
 		mgr.PrepareEnvironments(true)
-	}); err != nil {
-		return
+	})
+	if err != nil {
+		return err
 	}
 
 	scheduleSpec = cfg.Config().Scheduler.UpdateSpecs
-	if err = schedule("update specs", scheduleSpec, func() {
+	err = schedule("update specs", scheduleSpec, func() {
 		if err = specProvider.Load(); err != nil {
 			log.Error().Err(err).Msg("Failed loading specs")
 		} else {
 			log.Info().Msg("Specs updated")
 		}
-	}); err != nil {
-		return
+	})
+	if err != nil {
+		return err
 	}
 
-	return
+	return nil
 }
