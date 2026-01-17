@@ -28,24 +28,22 @@ type Provider struct {
 	client *client.Client
 }
 
-var _ sandbox.Provider = (*Provider)(nil)
+func NewProvider(cfg ConfigProvider) (t *Provider, err error) {
+	t = &Provider{}
 
-func NewProvider(cfg ConfigProvider) (dsp *Provider, err error) {
-	dsp = &Provider{}
+	t.cfg = cfg
+	t.logger = log.Tagged("Provider")
 
-	dsp.cfg = cfg
-	dsp.logger = log.Tagged("Provider")
-
-	dsp.client, err = client.New(client.FromEnv)
+	t.client, err = client.New(client.FromEnv)
 	if err != nil {
 		return nil, err
 	}
 
-	return dsp, nil
+	return t, nil
 }
 
-func (dsp *Provider) Info() (v *models.SandboxInfo, err error) {
-	info, err := dsp.client.Info(context.TODO(), client.InfoOptions{})
+func (t *Provider) Info() (v *models.SandboxInfo, err error) {
+	info, err := t.client.Info(context.TODO(), client.InfoOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -56,29 +54,29 @@ func (dsp *Provider) Info() (v *models.SandboxInfo, err error) {
 	return v, nil
 }
 
-func (dsp *Provider) Prepare(spec models.Spec, force bool) (err error) {
+func (t *Provider) Prepare(spec models.Spec, force bool) (err error) {
 	repo, tag := getImage(spec.Image)
 
 	if !force {
-		dsp.logger.Debug().Fields("image", spec.Image).Msg("inspecting image")
-		_, err = dsp.client.ImageInspect(context.TODO(), spec.Image)
+		t.logger.Debug().Fields("image", spec.Image).Msg("inspecting image")
+		_, err = t.client.ImageInspect(context.TODO(), spec.Image)
 		if err == nil {
 			return nil
 		}
 	}
 
-	dsp.logger.Info().Fields("repo", repo, "tag", tag).Msg("pull image")
-	resp, err := dsp.client.ImagePull(context.TODO(), spec.Image, client.ImagePullOptions{})
+	t.logger.Info().Fields("repo", repo, "tag", tag).Msg("pull image")
+	resp, err := t.client.ImagePull(context.TODO(), spec.Image, client.ImagePullOptions{})
 	if err != nil {
 		return err
 	}
 	return resp.Wait(context.TODO())
 }
 
-func (dsp *Provider) CreateSandbox(spec sandbox.RunSpec) (sbx sandbox.Sandbox, err error) {
+func (t *Provider) CreateSandbox(spec sandbox.RunSpec) (sbx sandbox.Sandbox, err error) {
 	repo, tag := getImage(spec.Image)
 
-	err = dsp.Prepare(spec.Spec, false)
+	err = t.Prepare(spec.Spec, false)
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +88,7 @@ func (dsp *Provider) CreateSandbox(spec sandbox.RunSpec) (sbx sandbox.Sandbox, e
 		Entrypoint:      spec.GetEntrypoint(),
 		Cmd:             spec.GetCommandWithArgs(),
 		Env:             spec.GetEnv(),
-		NetworkDisabled: !dsp.cfg.Config().Sandbox.EnableNetworking,
+		NetworkDisabled: !t.cfg.Config().Sandbox.EnableNetworking,
 	}
 
 	hostDir, err := filepath.Abs(spec.GetAssembledHostDir())
@@ -100,23 +98,23 @@ func (dsp *Provider) CreateSandbox(spec sandbox.RunSpec) (sbx sandbox.Sandbox, e
 
 	hostCfg := &container.HostConfig{
 		Binds:   []string{hostDir + ":" + workingDir},
-		Runtime: dsp.cfg.Config().Sandbox.Runtime,
+		Runtime: t.cfg.Config().Sandbox.Runtime,
 	}
 
-	hostCfg.Memory, err = util.ParseMemoryStr(dsp.cfg.Config().Sandbox.Memory)
+	hostCfg.Memory, err = util.ParseMemoryStr(t.cfg.Config().Sandbox.Memory)
 	if err != nil {
 		return nil, err
 	}
 	hostCfg.MemorySwap = hostCfg.Memory
 
-	container, err := dsp.client.ContainerCreate(context.TODO(), client.ContainerCreateOptions{
+	container, err := t.client.ContainerCreate(context.TODO(), client.ContainerCreateOptions{
 		Config:     ctnCfg,
 		HostConfig: hostCfg,
 		Name:       fmt.Sprintf("ranna-%s-%s", spec.Language, xid.New().String()),
 	})
-	dsp.logger.Debug().Fields("spec", spec.Image, "id", container.ID).Msg("container created")
+	t.logger.Debug().Fields("spec", spec.Image, "id", container.ID).Msg("container created")
 
-	sbx = newSandbox(dsp.client, &container)
+	sbx = newSandbox(t.client, &container)
 
 	return sbx, nil
 }
