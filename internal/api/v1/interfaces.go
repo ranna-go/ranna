@@ -19,7 +19,8 @@ type SandboxManager interface {
 	RunInSandbox(
 		req *models.ExecutionRequest,
 		cSpn chan string,
-		cOut, cErr chan []byte,
+		cOut chan []byte,
+		cErr chan []byte,
 		cClose chan bool,
 	) (err error)
 	PrepareEnvironments(force bool) []error

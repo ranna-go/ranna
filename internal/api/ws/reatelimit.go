@@ -58,26 +58,26 @@ func NewRateLimitManager(cfg ConfigProvider) *RateLimitManager {
 	}
 }
 
-func (rlm *RateLimitManager) GetLimiter(c *websocket.Conn, op models.OpCode) Limiter {
-	limits, ok := rlm.limits[op]
+func (t *RateLimitManager) GetLimiter(c *websocket.Conn, op models.OpCode) Limiter {
+	limits, ok := t.limits[op]
 	if !ok || limits.Burst == 0 && limits.Limit == 0 {
 		return dummyLimiter{}
 	}
 	key := fmt.Sprintf("%d::%s", op, getAddr(c))
-	limiter, ok := rlm.limiters.GetValue(key)
+	limiter, ok := t.limiters.GetValue(key)
 	if ok {
 		return limiter
 	}
-	return rlm.createLimiter(key, limits.Limit, limits.Burst)
+	return t.createLimiter(key, limits.Limit, limits.Burst)
 }
 
-func (rlm *RateLimitManager) createLimiter(key string, limit time.Duration, burst int) Limiter {
-	limiter := rlm.pool.Get().(*ratelimit.Limiter)
+func (t *RateLimitManager) createLimiter(key string, limit time.Duration, burst int) Limiter {
+	limiter := t.pool.Get().(*ratelimit.Limiter)
 	limiter.SetLimit(limit)
 	limiter.SetBurst(burst)
 	limiter.Reset()
-	rlm.limiters.Set(key, limiter, entryLifetime, func(v Limiter) {
-		rlm.pool.Put(v)
+	t.limiters.Set(key, limiter, entryLifetime, func(v Limiter) {
+		t.pool.Put(v)
 	})
 	return limiter
 }
