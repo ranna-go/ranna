@@ -54,6 +54,11 @@ type DataStop struct {
 	ExecTimeMS int `json:"exectimems"`
 }
 
+type DataError struct {
+	DataRunId
+	Error error
+}
+
 type DataSpawn struct {
 	DataRunId
 }

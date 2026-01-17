@@ -38,7 +38,6 @@ type Manager interface {
 		cSpn chan string,
 		cOut chan []byte,
 		cErr chan []byte,
-		cClose chan bool,
 	) (err error)
 
 	// PrepareEnvironments prepares the sandbox environment for
@@ -139,7 +138,6 @@ func (t *ManagerImpl) RunInSandbox(
 	cSpn chan string,
 	cOut chan []byte,
 	cErr chan []byte,
-	cClose chan bool,
 ) (err error) {
 	defer func() {
 		if err != nil && IsSystemError(err) {
@@ -229,7 +227,7 @@ func (t *ManagerImpl) RunInSandbox(
 	runCtx, cancelRunCtx := context.WithTimeoutCause(ctx, timeout, errTimedOut)
 	defer cancelRunCtx()
 
-	err = sbx.Run(runCtx, cOut, cErr, cClose)
+	err = sbx.Run(runCtx, cOut, cErr)
 	defer func() {
 		// Kill container if it is still running, delete the
 		// container after as well as delete the snippet host
@@ -241,6 +239,7 @@ func (t *ManagerImpl) RunInSandbox(
 	}()
 	if err != nil {
 		if errors.Is(err, errTimedOut) {
+			t.logger.Debug().Fields("id", sbx.ID(), "spec", req.Language).Msg("execution timed out")
 			return err
 		}
 		return SystemError{err}

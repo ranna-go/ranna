@@ -24,7 +24,6 @@ type SandboxManager interface {
 		cSpn chan string,
 		cOut chan []byte,
 		cErr chan []byte,
-		cClose chan bool,
 	) (err error)
 	PrepareEnvironments(ctx context.Context, force bool) []error
 	KillAndCleanUp(ctx context.Context, id string) (bool, error)

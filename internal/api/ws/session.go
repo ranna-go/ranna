@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"net/http"
 	"sync"
 
 	"github.com/zekrotja/rogu"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
+	"github.com/ranna-go/ranna/internal/sandbox"
 	"github.com/ranna-go/ranna/internal/util"
 	"github.com/ranna-go/ranna/pkg/models"
 )
@@ -81,7 +83,7 @@ func (t *session) Send(v models.Event) (err error) {
 func (t *session) SendError(nonce int, err error) error {
 	var data models.WsError
 	if !errors.As(err, &data) {
-		data = models.WsError{Code: 500, Message: err.Error()}
+		data = models.WsError{Code: http.StatusInternalServerError, Message: err.Error()}
 	}
 	return t.Send(models.Event{
 		Code:  models.EventError,
@@ -135,7 +137,7 @@ func (t *session) handleExec(op models.OperationExec) (err error) {
 	cSpn := make(chan string, 1)
 	cStdOut := make(chan []byte)
 	cStdErr := make(chan []byte)
-	cStop := make(chan bool, 1)
+	cStop := make(chan struct{}, 1)
 
 	var runId string
 
@@ -186,13 +188,19 @@ func (t *session) handleExec(op models.OperationExec) (err error) {
 			}
 		}
 	}()
+	defer func() {
+		cStop <- struct{}{}
+	}()
 
 	execTime := util.MeasureTime(func() {
-		err = t.manager.RunInSandbox(context.TODO(), &op.Args, cSpn, cStdOut, cStdErr, cStop)
+		err = t.manager.RunInSandbox(context.TODO(), &op.Args, cSpn, cStdOut, cStdErr)
 	})
 
 	if err != nil {
-		cStop <- false
+		if sandbox.IsSystemError(err) {
+			return t.SendError(op.Nonce, err)
+		}
+		return t.SendError(op.Nonce, models.WsError{Code: http.StatusBadRequest, Message: err.Error()})
 	}
 
 	err = t.Send(models.Event{

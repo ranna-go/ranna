@@ -114,15 +114,15 @@ func (t *Router) postExec(ctx *fiber.Ctx) (err error) {
 
 	cStdOut := make(chan []byte)
 	cStdErr := make(chan []byte)
-	cStop := make(chan bool, 1)
 
 	stdOut := cappedbuffer.New([]byte{}, t.streamBufferCap)
 	stdErr := cappedbuffer.New([]byte{}, t.streamBufferCap)
+	cClose := make(chan struct{}, 1)
 
 	go func() {
 		for {
 			select {
-			case <-cStop:
+			case <-cClose:
 				return
 			case p := <-cStdOut:
 				stdOut.Write(p)
@@ -131,13 +131,15 @@ func (t *Router) postExec(ctx *fiber.Ctx) (err error) {
 			}
 		}
 	}()
+	defer func() {
+		cClose <- struct{}{}
+	}()
 
 	execTime := util.MeasureTime(func() {
-		err = t.manager.RunInSandbox(ctx.Context(), req, nil, cStdOut, cStdErr, cStop)
+		err = t.manager.RunInSandbox(ctx.Context(), req, nil, cStdOut, cStdErr)
 	})
 
 	if err != nil {
-		cStop <- false
 		if sandbox.IsSystemError(err) {
 			return err
 		}

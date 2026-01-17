@@ -30,7 +30,7 @@ func (t *Sandbox) ID() string {
 	return t.container.ID
 }
 
-func (t *Sandbox) Run(ctx context.Context, cOut, cErr chan []byte, cClose chan bool) (err error) {
+func (t *Sandbox) Run(ctx context.Context, cOut, cErr chan []byte) (err error) {
 	buffStdout := chanwriter.New(cOut)
 	buffStderr := chanwriter.New(cErr)
 	res, err := t.client.ContainerAttach(ctx, t.container.ID, client.ContainerAttachOptions{
@@ -69,7 +69,6 @@ func (t *Sandbox) Run(ctx context.Context, cOut, cErr chan []byte, cClose chan b
 
 	t.logger.Debug().Fields("id", t.container.ID).Msg("container finished")
 
-	cClose <- true
 	return err
 }
 

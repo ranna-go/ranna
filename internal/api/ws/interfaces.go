@@ -18,7 +18,6 @@ type SandboxManager interface {
 		cSpn chan string,
 		cOut chan []byte,
 		cErr chan []byte,
-		cClose chan bool,
 	) (err error)
 	KillAndCleanUp(ctx context.Context, id string) (bool, error)
 }
