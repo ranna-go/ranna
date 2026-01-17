@@ -8,6 +8,6 @@ func NewRandomProvider() *RandomProvider {
 	return &RandomProvider{}
 }
 
-func (p *RandomProvider) Get() (string, error) {
+func (t *RandomProvider) Get() (string, error) {
 	return random.GetRandBase64Str(32)
 }
