@@ -37,9 +37,9 @@ func New(buf []byte, cap int) *CappedBuffer {
 // of the internal buffer + len(p) is not larger than
 // the specified cap. Otherwise, ErrBufferOverflow is
 // returned.
-func (cb *CappedBuffer) Write(p []byte) (n int, err error) {
-	if cb.cap > 0 && cb.Len()+len(p) > cb.cap {
+func (t *CappedBuffer) Write(p []byte) (n int, err error) {
+	if t.cap > 0 && t.Len()+len(p) > t.cap {
 		return 0, ErrBufferOverflow
 	}
-	return cb.Buffer.Write(p)
+	return t.Buffer.Write(p)
 }

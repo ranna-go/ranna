@@ -8,6 +8,8 @@ import (
 	"github.com/ranna-go/paerser/file"
 )
 
+const envPrefix = "RANNA_"
+
 const defaultConfigLoc = "./config.yaml"
 
 type Paerser struct {
@@ -21,27 +23,27 @@ func NewPaerser(configFile string) *Paerser {
 	}
 }
 
-func (p *Paerser) Config() *Config {
-	return p.cfg
+func (t *Paerser) Config() *Config {
+	return t.cfg
 }
 
-func (p *Paerser) Load() (err error) {
+func (t *Paerser) Load() (err error) {
 	cfg := defaults
 
 	cfgFile := defaultConfigLoc
-	if p.configFile != "" {
-		cfgFile = p.configFile
+	if t.configFile != "" {
+		cfgFile = t.configFile
 	}
 	if err = file.Decode(cfgFile, &cfg); err != nil && !os.IsNotExist(err) {
 		return
 	}
 
 	godotenv.Load()
-	if err = env.Decode(os.Environ(), "RANNA_", &cfg); err != nil {
+	if err = env.Decode(os.Environ(), envPrefix, &cfg); err != nil {
 		return
 	}
 
-	p.cfg = &cfg
+	t.cfg = &cfg
 
 	return
 }

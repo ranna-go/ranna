@@ -8,6 +8,6 @@ func NewDummyProvider(staticName string) *DummyProvider {
 	return &DummyProvider{staticName}
 }
 
-func (p *DummyProvider) Get() (string, error) {
-	return p.staticName, nil
+func (t *DummyProvider) Get() (string, error) {
+	return t.staticName, nil
 }

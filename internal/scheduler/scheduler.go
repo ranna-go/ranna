@@ -6,10 +6,10 @@ type Scheduler interface {
 
 	// Schedule a new job with the given scheduling spec.
 	// Returns a unique identifier of the scheduled job.
-	Schedule(spec interface{}, job func()) (id interface{}, err error)
+	Schedule(spec any, job func()) (id any, err error)
 
 	// UnSchedule removes a given job from the scheduler.
-	UnSchedule(id interface{}) error
+	UnSchedule(id any) error
 
 	// Start runs the scheduler cycle.
 	Start()

@@ -27,12 +27,10 @@ func newBaseProvider() *baseProvider {
 // to parse the given data.
 //
 // The parsed map is then set to the internal spec map.
-func (p *baseProvider) parseAndSet(data []byte, format string) (err error) {
-	if strings.HasPrefix(format, ".") {
-		format = format[1:]
-	}
+func (t *baseProvider) parseAndSet(data []byte, format string) (err error) {
+	format = strings.TrimPrefix(format, ".")
 
-	var unmarshaller func([]byte, interface{}) error
+	var unmarshaller func([]byte, any) error
 
 	switch format {
 	case "yml", "yaml", "application/x-yaml", "text/yaml":
@@ -55,16 +53,16 @@ func (p *baseProvider) parseAndSet(data []byte, format string) (err error) {
 		}
 	}
 
-	if p.m == nil {
-		p.m = NewSafeSpecMap(m)
+	if t.m == nil {
+		t.m = NewSafeSpecMap(m)
 	} else {
-		p.m.Update(m)
+		t.m.Update(m)
 	}
 
 	return
 }
 
 // Spec returns the internal spec map instance.
-func (p *baseProvider) Spec() *SafeSpecMap {
-	return p.m
+func (t *baseProvider) Spec() *SafeSpecMap {
+	return t.m
 }

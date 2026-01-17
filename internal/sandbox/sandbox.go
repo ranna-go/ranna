@@ -1,6 +1,10 @@
 package sandbox
 
-import "github.com/ranna-go/ranna/pkg/models"
+import (
+	"context"
+
+	"github.com/ranna-go/ranna/pkg/models"
+)
 
 // Sandbox defines an interface to control an encapsulated
 // code execution environment.
@@ -16,22 +20,22 @@ type Sandbox interface {
 	// bufferCap defines the maximum size of the
 	// output stream buffers used to capture the
 	// sandbox stdout and stderr streams.
-	Run(cOut, cErr chan []byte, cClose chan bool) (err error)
+	Run(ctx context.Context, cOut chan []byte, cErr chan []byte) (err error)
 
 	// IsRunning returns true if the sandbox is
 	// still executing.
-	IsRunning() (bool, error)
+	IsRunning(ctx context.Context) (bool, error)
 
 	// Kill stops the sandbox instantly without
 	// taking care of the teardown of internal
 	// processes.
 	//
 	// It's like plugging the cable. ;)
-	Kill() error
+	Kill(ctx context.Context) error
 
 	// Delete tears down the used resources
 	// of the sandbox and deletes it.
-	Delete() error
+	Delete(ctx context.Context) error
 }
 
 // Provider defines an interface to prepare the
@@ -43,14 +47,14 @@ type Provider interface {
 	// time startups of sandboxes.
 	//
 	// This pulls images used in specs, for example.
-	Prepare(spec models.Spec, force bool) error
+	Prepare(ctx context.Context, spec models.Spec, force bool) error
 
 	// CreateSandbox creates a new sandbox by given spec,
 	// allocates necessary resources for the sandbox and
 	// prepare it to be run.
-	CreateSandbox(spec RunSpec) (Sandbox, error)
+	CreateSandbox(ctx context.Context, spec RunSpec) (Sandbox, error)
 
 	// Info returns general information about the used
 	// sandbox provider.
-	Info() (*models.SandboxInfo, error)
+	Info(ctx context.Context) (*models.SandboxInfo, error)
 }

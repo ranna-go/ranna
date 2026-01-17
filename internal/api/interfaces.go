@@ -1,6 +1,8 @@
 package api
 
 import (
+	"context"
+
 	"github.com/ranna-go/ranna/internal/config"
 	"github.com/ranna-go/ranna/internal/sandbox"
 	"github.com/ranna-go/ranna/internal/spec"
@@ -17,13 +19,14 @@ type SpecProvider interface {
 
 type SandboxManager interface {
 	RunInSandbox(
+		ctx context.Context,
 		req *models.ExecutionRequest,
 		cSpn chan string,
-		cOut, cErr chan []byte,
-		cClose chan bool,
+		cOut chan []byte,
+		cErr chan []byte,
 	) (err error)
-	PrepareEnvironments(force bool) []error
-	KillAndCleanUp(id string) (bool, error)
-	Cleanup() []error
+	PrepareEnvironments(ctx context.Context, force bool) []error
+	KillAndCleanUp(ctx context.Context, id string) (bool, error)
+	Cleanup(ctx context.Context) []error
 	GetProvider() sandbox.Provider
 }

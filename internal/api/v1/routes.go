@@ -1,8 +1,9 @@
 package v1
 
 import (
-	"github.com/zekrotja/rogu/log"
 	"runtime"
+
+	"github.com/zekrotja/rogu/log"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/ranna-go/ranna/internal/api/ws"
@@ -31,32 +32,32 @@ type Router struct {
 	streamBufferCap int
 }
 
-func (r *Router) Setup(route fiber.Router,
+func (t *Router) Setup(route fiber.Router,
 	cfg ConfigProvider,
 	spec SpecProvider,
 	manager SandboxManager,
 ) {
-	r.cfg = cfg
-	r.spec = spec
-	r.manager = manager
+	t.cfg = cfg
+	t.spec = spec
+	t.manager = manager
 
-	sbc, err := util.ParseMemoryStr(r.cfg.Config().Sandbox.StreamBufferCap)
+	sbc, err := util.ParseMemoryStr(t.cfg.Config().Sandbox.StreamBufferCap)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Invalid value for stream buffer cap")
 		return
 	}
-	r.streamBufferCap = int(sbc)
+	t.streamBufferCap = int(sbc)
 
-	route.Use(r.optionsBypass)
+	route.Use(t.optionsBypass)
 
-	route.Get("/spec", r.getSpec)
-	route.Post("/exec", r.postExec)
-	route.Get("/info", r.getInfo)
+	route.Get("/spec", t.getSpec)
+	route.Post("/exec", t.postExec)
+	route.Get("/info", t.getInfo)
 	route.Use("/ws", ws.Upgrade())
 	route.Get("/ws", ws.Handler(cfg, manager))
 }
 
-func (r *Router) optionsBypass(ctx *fiber.Ctx) error {
+func (t *Router) optionsBypass(ctx *fiber.Ctx) error {
 	if ctx.Method() == "OPTIONS" {
 		return ctx.SendStatus(fiber.StatusOK)
 	}
@@ -69,10 +70,10 @@ func (r *Router) optionsBypass(ctx *fiber.Ctx) error {
 // @success 200 {object} models.ExecutionResponse
 // @failure 500 {object} models.ErrorModel
 // @router /info [get]
-func (r *Router) getInfo(ctx *fiber.Ctx) (err error) {
-	sandboxInfo, err := r.manager.GetProvider().Info()
+func (t *Router) getInfo(ctx *fiber.Ctx) (err error) {
+	sandboxInfo, err := t.manager.GetProvider().Info(ctx.Context())
 	if err != nil {
-		return
+		return err
 	}
 	info := &models.SystemInfo{
 		SandboxInfo: sandboxInfo,
@@ -88,8 +89,8 @@ func (r *Router) getInfo(ctx *fiber.Ctx) (err error) {
 // @produce json
 // @success 200 {object} models.SpecMap
 // @router /spec [get]
-func (r *Router) getSpec(ctx *fiber.Ctx) (err error) {
-	return ctx.JSON(r.spec.Spec().GetSnapshot())
+func (t *Router) getSpec(ctx *fiber.Ctx) (err error) {
+	return ctx.JSON(t.spec.Spec().GetSnapshot())
 }
 
 // @summary Get Spec Map
@@ -101,10 +102,10 @@ func (r *Router) getSpec(ctx *fiber.Ctx) (err error) {
 // @failure 400 {object} models.ErrorModel
 // @failure 500 {object} models.ErrorModel
 // @router /exec [post]
-func (r *Router) postExec(ctx *fiber.Ctx) (err error) {
+func (t *Router) postExec(ctx *fiber.Ctx) (err error) {
 	req := new(models.ExecutionRequest)
 	if err = ctx.BodyParser(req); err != nil {
-		return
+		return err
 	}
 
 	if req.Code == "" {
@@ -113,15 +114,15 @@ func (r *Router) postExec(ctx *fiber.Ctx) (err error) {
 
 	cStdOut := make(chan []byte)
 	cStdErr := make(chan []byte)
-	cStop := make(chan bool, 1)
 
-	stdOut := cappedbuffer.New([]byte{}, r.streamBufferCap)
-	stdErr := cappedbuffer.New([]byte{}, r.streamBufferCap)
+	stdOut := cappedbuffer.New([]byte{}, t.streamBufferCap)
+	stdErr := cappedbuffer.New([]byte{}, t.streamBufferCap)
+	cClose := make(chan struct{}, 1)
 
 	go func() {
 		for {
 			select {
-			case <-cStop:
+			case <-cClose:
 				return
 			case p := <-cStdOut:
 				stdOut.Write(p)
@@ -130,13 +131,15 @@ func (r *Router) postExec(ctx *fiber.Ctx) (err error) {
 			}
 		}
 	}()
+	defer func() {
+		cClose <- struct{}{}
+	}()
 
 	execTime := util.MeasureTime(func() {
-		err = r.manager.RunInSandbox(req, nil, cStdOut, cStdErr, cStop)
+		err = t.manager.RunInSandbox(ctx.Context(), req, nil, cStdOut, cStdErr)
 	})
 
 	if err != nil {
-		cStop <- false
 		if sandbox.IsSystemError(err) {
 			return err
 		}
@@ -149,7 +152,7 @@ func (r *Router) postExec(ctx *fiber.Ctx) (err error) {
 		ExecTimeMS: int(execTime.Milliseconds()),
 	}
 
-	if err = r.checkOutputLen(res.StdOut, res.StdErr); err != nil {
+	if err = t.checkOutputLen(res.StdOut, res.StdErr); err != nil {
 		return
 	}
 
@@ -158,13 +161,15 @@ func (r *Router) postExec(ctx *fiber.Ctx) (err error) {
 
 // --- UTIL ---
 
-func (r *Router) checkOutputLen(stdout, stderr string) (err error) {
-	maxOutLen, err := util.ParseMemoryStr(r.cfg.Config().API.MaxOutputLen)
+func (t *Router) checkOutputLen(stdout, stderr string) (err error) {
+	maxOutLen, err := util.ParseMemoryStr(t.cfg.Config().API.MaxOutputLen)
 	if err != nil {
-		return
+		return err
 	}
+
 	if int64(len(stdout))+int64(len(stderr)) > maxOutLen {
-		err = errOutputLenExceeded
+		return errOutputLenExceeded
 	}
-	return
+
+	return nil
 }

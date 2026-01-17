@@ -14,7 +14,7 @@ import "time"
 // timeout.
 func RunBlockingWithTimeout(f func(), timeout time.Duration) (v bool) {
 	if f == nil {
-		return
+		return false
 	}
 
 	cFinished := make(chan struct{}, 1)
@@ -27,9 +27,8 @@ func RunBlockingWithTimeout(f func(), timeout time.Duration) (v bool) {
 
 	select {
 	case <-timer.C:
-		v = true
+		return true
 	case <-cFinished:
+		return false
 	}
-
-	return
 }

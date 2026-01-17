@@ -19,9 +19,9 @@ const (
 )
 
 type Event struct {
-	Code  EventCode   `json:"code"`
-	Nonce int         `json:"nonce,omitempty"`
-	Data  interface{} `json:"data,omitempty"`
+	Code  EventCode `json:"code"`
+	Nonce int       `json:"nonce,omitempty"`
+	Data  any       `json:"data,omitempty"`
 }
 
 type Operation struct {
@@ -52,6 +52,11 @@ type DataLog struct {
 type DataStop struct {
 	DataRunId
 	ExecTimeMS int `json:"exectimems"`
+}
+
+type DataError struct {
+	DataRunId
+	Error error
 }
 
 type DataSpawn struct {

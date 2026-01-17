@@ -25,7 +25,7 @@ func NewHttpProvider(url string) *HttpProvider {
 func (hp *HttpProvider) Load() (err error) {
 	res, err := http.Get(hp.url)
 	if err != nil {
-		return
+		return err
 	}
 	if res.StatusCode >= 400 {
 		return fmt.Errorf("request failed: %d", res.StatusCode)
@@ -33,17 +33,16 @@ func (hp *HttpProvider) Load() (err error) {
 
 	buf, err := io.ReadAll(res.Body)
 	if err != nil {
-		return
+		return err
 	}
 
 	ext := strings.ToLower(path.Ext(hp.url))
 	if ext == "" {
 		ext, _, err = mime.ParseMediaType(res.Header.Get("content-type"))
 		if err != nil {
-			return
+			return err
 		}
 	}
 
-	err = hp.parseAndSet(buf, ext)
-	return
+	return hp.parseAndSet(buf, ext)
 }

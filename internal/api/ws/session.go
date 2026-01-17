@@ -1,52 +1,58 @@
 package ws
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
-	"github.com/zekrotja/rogu/log"
+	"net/http"
 	"sync"
+
+	"github.com/zekrotja/rogu"
+	"github.com/zekrotja/rogu/log"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/websocket/v2"
+	"github.com/ranna-go/ranna/internal/sandbox"
 	"github.com/ranna-go/ranna/internal/util"
 	"github.com/ranna-go/ranna/pkg/models"
 )
 
 var sessionPool = sync.Pool{
-	New: func() interface{} {
+	New: func() any {
 		return &session{}
 	},
 }
 
 type session struct {
 	manager SandboxManager
-
-	conn *websocket.Conn
-	rlm  *RateLimitManager
+	logger  rogu.Logger
+	conn    *websocket.Conn
+	rlm     *RateLimitManager
 }
 
-func newSession(rlm *RateLimitManager, manager SandboxManager) (s *session) {
-	s = sessionPool.Get().(*session)
-	s.conn = nil
-	s.manager = manager
-	s.rlm = rlm
-	return
+func newSession(rlm *RateLimitManager, manager SandboxManager) (t *session) {
+	t = sessionPool.Get().(*session)
+	t.conn = nil
+	t.manager = manager
+	t.logger = log.Tagged("WS")
+	t.rlm = rlm
+	return t
 }
 
-func (s *session) Close() {
-	log.Debug().
-		Field("addr", getAddr(s.conn)).
+func (t *session) Close() {
+	t.logger.Debug().
+		Field("addr", getAddr(t.conn)).
 		Msg("websocket connection closed")
-	sessionPool.Put(s)
+	sessionPool.Put(t)
 }
 
-func (s *session) Handler() fiber.Handler {
+func (t *session) Handler() fiber.Handler {
 	return websocket.New(func(c *websocket.Conn) {
-		log.Debug().
+		t.logger.Debug().
 			Field("addr", getAddr(c)).
 			Msg("new websocket connection")
 
-		s.conn = c
+		t.conn = c
 		var (
 			typ   int
 			msg   []byte
@@ -55,48 +61,45 @@ func (s *session) Handler() fiber.Handler {
 		)
 		for {
 			if typ, msg, err = c.ReadMessage(); err != nil {
-				s.Close()
+				t.Close()
 				break
 			}
 			if typ != websocket.TextMessage {
-				s.SendError(models.ErrInvalidMessageType, 0)
+				t.SendError(0, models.ErrInvalidMessageType)
 			}
 			go func() {
-				if err, nonce = s.HandleOp(msg); err != nil {
-					s.SendError(err, nonce)
+				if nonce, err = t.HandleOp(msg); err != nil {
+					t.SendError(nonce, err)
 				}
 			}()
 		}
 	})
 }
 
-func (s *session) Send(v models.Event) (err error) {
-	err = s.conn.WriteJSON(v)
-	return
+func (t *session) Send(v models.Event) (err error) {
+	return t.conn.WriteJSON(v)
 }
 
-func (s *session) SendError(err error, nonce int) error {
+func (t *session) SendError(nonce int, err error) error {
 	var data models.WsError
 	if !errors.As(err, &data) {
-		data = models.WsError{Code: 500, Message: err.Error()}
+		data = models.WsError{Code: http.StatusInternalServerError, Message: err.Error()}
 	}
-	return s.Send(models.Event{
+	return t.Send(models.Event{
 		Code:  models.EventError,
 		Nonce: nonce,
 		Data:  data,
 	})
 }
 
-func (s *session) HandleOp(msg []byte) (err error, nonce int) {
+func (t *session) HandleOp(msg []byte) (nonce int, err error) {
 	var op models.Operation
 	if err = json.Unmarshal(msg, &op); err != nil {
-		return
+		return 0, err
 	}
-	nonce = op.Nonce
 
-	if !s.rlm.GetLimiter(s.conn, op.Op).Allow() {
-		err = models.ErrRateLimited
-		return
+	if !t.rlm.GetLimiter(t.conn, op.Op).Allow() {
+		return op.Nonce, models.ErrRateLimited
 	}
 
 	var event models.Event
@@ -106,27 +109,27 @@ func (s *session) HandleOp(msg []byte) (err error, nonce int) {
 	case models.OpPing:
 		event.Code = models.EventPong
 		event.Data = "Pong!"
-		err = s.Send(event)
+		err = t.Send(event)
 	case models.OpExec:
 		var eop models.OperationExec
 		err = json.Unmarshal(msg, &eop)
 		if err == nil {
-			err = s.handleExec(eop)
+			err = t.handleExec(eop)
 		}
 	case models.OpKill:
 		var eop models.OperationKill
 		err = json.Unmarshal(msg, &eop)
 		if err == nil {
-			err = s.handleKill(eop)
+			err = t.handleKill(eop)
 		}
 	default:
 		err = models.ErrInvalidOpCode
 	}
 
-	return
+	return op.Nonce, err
 }
 
-func (s *session) handleExec(op models.OperationExec) (err error) {
+func (t *session) handleExec(op models.OperationExec) (err error) {
 	if op.Args.Code == "" {
 		return models.ErrEmptyCode
 	}
@@ -134,7 +137,7 @@ func (s *session) handleExec(op models.OperationExec) (err error) {
 	cSpn := make(chan string, 1)
 	cStdOut := make(chan []byte)
 	cStdErr := make(chan []byte)
-	cStop := make(chan bool, 1)
+	cStop := make(chan struct{}, 1)
 
 	var runId string
 
@@ -144,7 +147,7 @@ func (s *session) handleExec(op models.OperationExec) (err error) {
 			case <-cStop:
 				return
 			case runId = <-cSpn:
-				err = s.Send(models.Event{
+				err = t.Send(models.Event{
 					Code:  models.EventSpawn,
 					Nonce: op.Nonce,
 					Data: models.DataSpawn{
@@ -154,7 +157,7 @@ func (s *session) handleExec(op models.OperationExec) (err error) {
 					},
 				})
 			case p := <-cStdOut:
-				err = s.Send(models.Event{
+				err = t.Send(models.Event{
 					Code:  models.EventLog,
 					Nonce: op.Nonce,
 					Data: models.DataLog{
@@ -165,7 +168,7 @@ func (s *session) handleExec(op models.OperationExec) (err error) {
 					},
 				})
 			case p := <-cStdErr:
-				err = s.Send(models.Event{
+				err = t.Send(models.Event{
 					Code:  models.EventLog,
 					Nonce: op.Nonce,
 					Data: models.DataLog{
@@ -177,24 +180,30 @@ func (s *session) handleExec(op models.OperationExec) (err error) {
 				})
 			}
 			if err != nil {
-				log.Error().Err(err).Msg("Failed sending event")
-				if err = s.SendError(err, op.Nonce); err != nil {
-					log.Error().Err(err).Msg("Failed sending error event")
+				t.logger.Error().Err(err).Msg("Failed sending event")
+				if err = t.SendError(op.Nonce, err); err != nil {
+					t.logger.Error().Err(err).Msg("Failed sending error event")
 					return
 				}
 			}
 		}
 	}()
+	defer func() {
+		cStop <- struct{}{}
+	}()
 
 	execTime := util.MeasureTime(func() {
-		err = s.manager.RunInSandbox(&op.Args, cSpn, cStdOut, cStdErr, cStop)
+		err = t.manager.RunInSandbox(context.TODO(), &op.Args, cSpn, cStdOut, cStdErr)
 	})
 
 	if err != nil {
-		cStop <- false
+		if sandbox.IsSystemError(err) {
+			return t.SendError(op.Nonce, err)
+		}
+		return t.SendError(op.Nonce, models.WsError{Code: http.StatusBadRequest, Message: err.Error()})
 	}
 
-	err = s.Send(models.Event{
+	err = t.Send(models.Event{
 		Code:  models.EventStop,
 		Nonce: op.Nonce,
 		Data: models.DataStop{
@@ -205,11 +214,11 @@ func (s *session) handleExec(op models.OperationExec) (err error) {
 		},
 	})
 
-	return
+	return err
 }
 
-func (s *session) handleKill(op models.OperationKill) (err error) {
-	ok, err := s.manager.KillAndCleanUp(op.Args.RunId)
+func (t *session) handleKill(op models.OperationKill) (err error) {
+	ok, err := t.manager.KillAndCleanUp(context.TODO(), op.Args.RunId)
 	if err != nil {
 		return
 	}

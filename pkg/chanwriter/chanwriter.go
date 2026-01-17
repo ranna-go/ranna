@@ -21,10 +21,10 @@ func New(c chan<- []byte) Chanwriter {
 	return Chanwriter{c}
 }
 
-func (w Chanwriter) Write(p []byte) (n int, err error) {
+func (t Chanwriter) Write(p []byte) (n int, err error) {
 	n = len(p)
 	cp := make([]byte, n)
 	copy(cp, p)
-	w.c <- cp
+	t.c <- cp
 	return
 }

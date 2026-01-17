@@ -19,27 +19,27 @@ func NewCronScheduler() *CronScheduler {
 	}
 }
 
-func (lct *CronScheduler) Schedule(spec interface{}, job func()) (id interface{}, err error) {
+func (t *CronScheduler) Schedule(spec any, job func()) (id any, err error) {
 	specStr, ok := spec.(string)
 	if !ok {
 		return nil, errors.New("invalid spec type: must be a string")
 	}
-	return lct.c.AddFunc(specStr, job)
+	return t.c.AddFunc(specStr, job)
 }
 
-func (lct *CronScheduler) UnSchedule(id interface{}) error {
+func (t *CronScheduler) UnSchedule(id any) error {
 	cid, ok := id.(cron.EntryID)
 	if !ok {
 		return errors.New("invalid id type")
 	}
-	lct.c.Remove(cid)
+	t.c.Remove(cid)
 	return nil
 }
 
-func (lct *CronScheduler) Start() {
-	lct.c.Start()
+func (t *CronScheduler) Start() {
+	t.c.Start()
 }
 
-func (lct *CronScheduler) Stop() {
-	lct.c.Stop()
+func (t *CronScheduler) Stop() {
+	t.c.Stop()
 }

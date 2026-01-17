@@ -2,8 +2,9 @@ package api
 
 import (
 	"errors"
-	"github.com/zekrotja/rogu/log"
 	"strings"
+
+	"github.com/zekrotja/rogu/log"
 
 	"github.com/gofiber/fiber/v2"
 	v1 "github.com/ranna-go/ranna/internal/api/v1"
@@ -15,9 +16,9 @@ type RestAPI struct {
 	app         *fiber.App
 }
 
-func NewRestAPI(cfg ConfigProvider, spec SpecProvider, manager SandboxManager) (r *RestAPI, err error) {
+func NewRestAPI(cfg ConfigProvider, spec SpecProvider, manager SandboxManager) (t *RestAPI, err error) {
 
-	r = &RestAPI{
+	t = &RestAPI{
 		bindAddress: cfg.Config().API.BindAddress,
 	}
 
@@ -25,7 +26,7 @@ func NewRestAPI(cfg ConfigProvider, spec SpecProvider, manager SandboxManager) (
 	if tp := cfg.Config().API.TrustedProxies; tp != "" {
 		trustedProxies = strings.Split(tp, " ")
 	}
-	r.app = fiber.New(fiber.Config{
+	t.app = fiber.New(fiber.Config{
 		DisableStartupMessage:   !cfg.Config().Debug,
 		ServerHeader:            "ranna",
 		ErrorHandler:            errorHandler,
@@ -34,14 +35,14 @@ func NewRestAPI(cfg ConfigProvider, spec SpecProvider, manager SandboxManager) (
 		ProxyHeader:             "X-Forwarded-For",
 	})
 
-	new(v1.Router).Setup(r.app.Group("/v1"), cfg, spec, manager)
+	new(v1.Router).Setup(t.app.Group("/v1"), cfg, spec, manager)
 
 	return
 }
 
-func (r *RestAPI) ListenAndServeBlocking() error {
-	log.Info().Field("addr", r.bindAddress).Msg("Starting REST API ...")
-	return r.app.Listen(r.bindAddress)
+func (t *RestAPI) ListenAndServeBlocking() error {
+	log.Info().Field("addr", t.bindAddress).Msg("Starting REST API ...")
+	return t.app.Listen(t.bindAddress)
 }
 
 func errorHandler(ctx *fiber.Ctx, err error) error {
