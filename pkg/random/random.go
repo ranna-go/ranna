@@ -34,7 +34,9 @@ func GetRandByteArray(len int) (data []byte, err error) {
 	}
 
 	data = make([]byte, len)
-	_, err = rand.Read(data)
+	if _, err = rand.Read(data); err != nil {
+		return nil, err
+	}
 
-	return
+	return data, nil
 }

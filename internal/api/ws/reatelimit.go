@@ -50,7 +50,7 @@ func NewRateLimitManager(cfg ConfigProvider) *RateLimitManager {
 	return &RateLimitManager{
 		limits: limits,
 		pool: &sync.Pool{
-			New: func() interface{} {
+			New: func() any {
 				return ratelimit.NewLimiter(0, 0)
 			},
 		},

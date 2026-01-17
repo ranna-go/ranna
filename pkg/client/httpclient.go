@@ -61,33 +61,33 @@ func checkAndDefaultOptions(options *Options) error {
 	return nil
 }
 
-func (c *httpClient) request(method, path string, body interface{}, resData interface{}) (err error) {
-	url := fmt.Sprintf("%s/%s/%s", c.options.Endpoint, c.options.Version, path)
+func (t *httpClient) request(method, path string, body any, resData any) (err error) {
+	url := fmt.Sprintf("%s/%s/%s", t.options.Endpoint, t.options.Version, path)
 
 	var bodyReader io.Reader
 	if body != nil {
 		buff := bytes.NewBuffer([]byte{})
 		if err = json.NewEncoder(buff).Encode(body); err != nil {
-			return
+			return err
 		}
 		bodyReader = buff
 	}
 
 	req, err := http.NewRequest(method, url, bodyReader)
 	if err != nil {
-		return
+		return err
 	}
 
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Accept", "application/json")
-	req.Header.Add("User-Agent", c.options.UserAgent)
-	if c.options.Authorization != "" {
-		req.Header.Add("Authorization", c.options.Authorization)
+	req.Header.Add("User-Agent", t.options.UserAgent)
+	if t.options.Authorization != "" {
+		req.Header.Add("Authorization", t.options.Authorization)
 	}
 
-	res, err := c.client.Do(req)
+	res, err := t.client.Do(req)
 	if err != nil {
-		return
+		return err
 	}
 	defer res.Body.Close()
 
@@ -100,23 +100,21 @@ func (c *httpClient) request(method, path string, body interface{}, resData inte
 		}
 		if res.ContentLength > 0 && strings.HasPrefix(res.Header.Get("Content-Type"), "application/json") {
 			if err = json.NewDecoder(res.Body).Decode(resErr.ErrorModel); err != nil {
-				return
+				return err
 			}
 		}
-		err = resErr
-		return
+		return resErr
 	}
 
-	err = json.NewDecoder(res.Body).Decode(resData)
-	return
+	return json.NewDecoder(res.Body).Decode(resData)
 }
 
-func (c *httpClient) Spec() (spec models.SpecMap, err error) {
-	err = c.request("GET", "spec", nil, &spec)
-	return
+func (t *httpClient) Spec() (spec models.SpecMap, err error) {
+	err = t.request("GET", "spec", nil, &spec)
+	return spec, err
 }
 
-func (c *httpClient) Exec(req models.ExecutionRequest) (res models.ExecutionResponse, err error) {
-	err = c.request("POST", "exec", req, &res)
-	return
+func (t *httpClient) Exec(req models.ExecutionRequest) (res models.ExecutionResponse, err error) {
+	err = t.request("POST", "exec", req, &res)
+	return res, err
 }
