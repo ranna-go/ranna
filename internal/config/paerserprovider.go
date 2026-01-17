@@ -8,6 +8,8 @@ import (
 	"github.com/ranna-go/paerser/file"
 )
 
+const envPrefix = "RANNA_"
+
 const defaultConfigLoc = "./config.yaml"
 
 type Paerser struct {
@@ -37,7 +39,7 @@ func (t *Paerser) Load() (err error) {
 	}
 
 	godotenv.Load()
-	if err = env.Decode(os.Environ(), "RANNA_", &cfg); err != nil {
+	if err = env.Decode(os.Environ(), envPrefix, &cfg); err != nil {
 		return
 	}
 
