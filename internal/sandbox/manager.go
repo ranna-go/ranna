@@ -24,46 +24,7 @@ var (
 // Manager is a higher level abstraction used to create and
 // run sandboxes, prepare the environment for given specs and
 // cleaning up running containers on teardown.
-type Manager interface {
-
-	// RunInSandbox tries to extract the desired spec
-	// to be used defined by the req. Then, a new sandbox
-	// is created with this spec and given runtime variables.
-	// The sandbox is then started and the current go routine is
-	// blocked until the execution is finished or timed out.
-	//
-	// On success returns an execution response.
-	RunInSandbox(
-		req *models.ExecutionRequest,
-		cSpn chan string,
-		cOut chan []byte,
-		cErr chan []byte,
-	) (err error)
-
-	// PrepareEnvironments prepares the sandbox environment for
-	// faster first time creation of sandboxes.
-	//
-	// This pulls required images, for example.
-	//
-	// If force is true, the environment is being prepared even
-	// though it has been already prepared before. This is useful
-	// to perform image updates, for example.
-	PrepareEnvironments(force bool) []error
-
-	// KillAndCleanUp takes a sandbox ID and, if
-	// existing, kills the running sandbox.
-	KillAndCleanUp(id string) (bool, error)
-
-	// Cleanup tries to kill and delete all running sandboxes.
-	Cleanup() []error
-
-	// GetProvider returns the utilized sandbox provider instance.
-	GetProvider() Provider
-}
-
-// ManagerImpl is the standard implementation
-// of Manager.
-type ManagerImpl struct {
+type Manager struct {
 	sandbox Provider
 	spec    SpecProvider
 	file    FileProvider
@@ -101,8 +62,8 @@ func NewManager(
 	file FileProvider,
 	cfg ConfigProvider,
 	ns NamespaceProvider,
-) (t *ManagerImpl, err error) {
-	t = &ManagerImpl{}
+) (t *Manager, err error) {
+	t = &Manager{}
 
 	t.sandbox = sandbox
 	t.spec = spec
@@ -116,7 +77,15 @@ func NewManager(
 	return t, nil
 }
 
-func (t *ManagerImpl) PrepareEnvironments(ctx context.Context, force bool) (errs []error) {
+// PrepareEnvironments prepares the sandbox environment for
+// faster first time creation of sandboxes.
+//
+// This pulls required images, for example.
+//
+// If force is true, the environment is being prepared even
+// though it has been already prepared before. This is useful
+// to perform image updates, for example.
+func (t *Manager) PrepareEnvironments(ctx context.Context, force bool) (errs []error) {
 	errs = []error{}
 
 	for _, spec := range t.spec.Spec().GetSnapshot() {
@@ -132,7 +101,14 @@ func (t *ManagerImpl) PrepareEnvironments(ctx context.Context, force bool) (errs
 	return errs
 }
 
-func (t *ManagerImpl) RunInSandbox(
+// RunInSandbox tries to extract the desired spec
+// to be used defined by the req. Then, a new sandbox
+// is created with this spec and given runtime variables.
+// The sandbox is then started and the current go routine is
+// blocked until the execution is finished or timed out.
+//
+// On success returns an execution response.
+func (t *Manager) RunInSandbox(
 	ctx context.Context,
 	req *models.ExecutionRequest,
 	cSpn chan string,
@@ -248,7 +224,9 @@ func (t *ManagerImpl) RunInSandbox(
 	return err
 }
 
-func (t *ManagerImpl) KillAndCleanUp(ctx context.Context, id string) (ok bool, err error) {
+// KillAndCleanUp takes a sandbox ID and, if
+// existing, kills the running sandbox.
+func (t *Manager) KillAndCleanUp(ctx context.Context, id string) (ok bool, err error) {
 	v, ok := t.runningSandboxes.Load(id)
 	if !ok {
 		return false, nil
@@ -266,7 +244,8 @@ func (t *ManagerImpl) KillAndCleanUp(ctx context.Context, id string) (ok bool, e
 	return true, nil
 }
 
-func (t *ManagerImpl) Cleanup(ctx context.Context) (errs []error) {
+// Cleanup tries to kill and delete all running sandboxes.
+func (t *Manager) Cleanup(ctx context.Context) (errs []error) {
 	errs = []error{}
 
 	t.runningSandboxes.Range(func(key, value any) bool {
@@ -283,11 +262,12 @@ func (t *ManagerImpl) Cleanup(ctx context.Context) (errs []error) {
 	return errs
 }
 
-func (t *ManagerImpl) GetProvider() Provider {
+// GetProvider returns the utilized sandbox provider instance.
+func (t *Manager) GetProvider() Provider {
 	return t.sandbox
 }
 
-func (t *ManagerImpl) killAndCleanUp(ctx context.Context, w *sandboxWrapper) (err error) {
+func (t *Manager) killAndCleanUp(ctx context.Context, w *sandboxWrapper) (err error) {
 	defer func() {
 		if err != nil {
 			t.logger.Error().
